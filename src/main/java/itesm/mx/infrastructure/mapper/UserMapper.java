@@ -10,7 +10,6 @@ public class UserMapper {
         userEntity.firebaseUuid = user.getFirebaseUuid();
         userEntity.name = user.getName();
         userEntity.email = user.getEmail();
-        userEntity.password = user.getPassword();
         userEntity.roleId = user.getRoleId();
         return userEntity;
     }
@@ -21,7 +20,6 @@ public class UserMapper {
             userEntity.firebaseUuid,
             userEntity.name,
             userEntity.email,
-            userEntity.password,
             userEntity.roleId
         );
     }

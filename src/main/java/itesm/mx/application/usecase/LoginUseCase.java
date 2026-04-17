@@ -1,10 +1,14 @@
 package itesm.mx.application.usecase;
+
+import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.domain.models.User;
 import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 
 @ApplicationScoped
 public class LoginUseCase {
@@ -12,27 +16,37 @@ public class LoginUseCase {
     @Inject
     UserRepository userRepository;
 
+    @Inject
+    Instance<FirebaseTokenVerifier> firebaseTokenVerifierInstance;
+
     public LoginResponseDto execute(LoginDto loginDto) {
-        User user = null;
+        if (loginDto.firebaseToken == null || loginDto.firebaseToken.isBlank()) {
+            throw new RuntimeException("Se requiere un token de Firebase válido para iniciar sesión");
+        }
+        String firebaseUuid = verifyFirebaseToken(loginDto.firebaseToken);
+        
+        User user = userRepository.findByFirebaseUuid(firebaseUuid)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado en la base de datos con este UUID de Firebase"));
+        return new LoginResponseDto(user.getName(), user.getEmail());
+    }
 
-        if (loginDto.firebaseToken != null && !loginDto.firebaseToken.isEmpty()) {
-            // TODO: Verify the Firebase token and get the UUID.
-            // String firebaseUuid = firebaseService.verifyToken(loginDto.firebaseToken);
-            String firebaseUuid = "mock-uuid-firebase";
-            
-            user = userRepository.findByFirebaseUuid(firebaseUuid)
-                    .orElseThrow(() -> new RuntimeException("User not found in the database with this Firebase UUID"));
-        } else {
-            user = userRepository.findByEmail(loginDto.email)
-                    .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-
-            if (!user.getPassword().equals(loginDto.password)) {
-                throw new RuntimeException("Invalid credentials");
+    /**
+     * Verifies a Firebase token and extracts the UID.
+     * @param token the Firebase ID token
+     * @return the Firebase UID
+     * @throws RuntimeException if token verification fails
+     */
+    private String verifyFirebaseToken(String token) {
+        if (firebaseTokenVerifierInstance != null && firebaseTokenVerifierInstance.isResolvable()) {
+            try {
+                return firebaseTokenVerifierInstance.get().verifyTokenAndGetUid(token);
+            } catch (FirebaseAuthException e) {
+                throw new RuntimeException("La verificación del token de Firebase falló: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException(e.getMessage());
             }
         }
 
-        String generatedToken = "mock-jwt-token-interno";
-
-        return new LoginResponseDto(generatedToken, user.getName(), user.getEmail());
+        throw new RuntimeException("No hay un verificador de Firebase configurado en el entorno actual");
     }
 }

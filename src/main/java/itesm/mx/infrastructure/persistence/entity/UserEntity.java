@@ -20,9 +20,6 @@ public class UserEntity {
     @Column(name = "correo_electronico", length = 50)
     public String email;
 
-    @Column(length = 100)
-    public String password;
-
     @Column(name = "id_rol")
     public Integer roleId;
 }
