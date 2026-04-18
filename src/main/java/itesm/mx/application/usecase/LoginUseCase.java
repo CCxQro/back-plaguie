@@ -20,13 +20,16 @@ public class LoginUseCase {
     Instance<FirebaseTokenVerifier> firebaseTokenVerifierInstance;
 
     public LoginResponseDto execute(LoginDto loginDto) {
+        if (loginDto == null) {
+            throw new IllegalArgumentException("El cuerpo de la solicitud es requerido");
+        }
         if (loginDto.firebaseToken == null || loginDto.firebaseToken.isBlank()) {
-            throw new RuntimeException("Se requiere un token de Firebase válido para iniciar sesión");
+            throw new IllegalArgumentException("Se requiere un token de Firebase válido para iniciar sesión");
         }
         String firebaseUuid = verifyFirebaseToken(loginDto.firebaseToken);
-        
+
         User user = userRepository.findByFirebaseUuid(firebaseUuid)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado en la base de datos con este UUID de Firebase"));
+                .orElseThrow(() -> new SecurityException("Usuario no encontrado en la base de datos con este UUID de Firebase"));
         return new LoginResponseDto(user.getName(), user.getEmail());
     }
 
@@ -34,19 +37,20 @@ public class LoginUseCase {
      * Verifies a Firebase token and extracts the UID.
      * @param token the Firebase ID token
      * @return the Firebase UID
-     * @throws RuntimeException if token verification fails
+     * @throws IllegalArgumentException if the token is blank/invalid format
+     * @throws SecurityException if token verification fails
      */
     private String verifyFirebaseToken(String token) {
         if (firebaseTokenVerifierInstance != null && firebaseTokenVerifierInstance.isResolvable()) {
             try {
                 return firebaseTokenVerifierInstance.get().verifyTokenAndGetUid(token);
             } catch (FirebaseAuthException e) {
-                throw new RuntimeException("La verificación del token de Firebase falló: " + e.getMessage());
+                throw new SecurityException("La verificación del token de Firebase falló: " + e.getMessage());
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
         }
 
-        throw new RuntimeException("No hay un verificador de Firebase configurado en el entorno actual");
+        throw new SecurityException("No hay un verificador de Firebase configurado en el entorno actual");
     }
 }

@@ -1,13 +1,11 @@
 package itesm.mx.infrastructure.security;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.security.CurrentUser;
 import itesm.mx.domain.models.User;
 import itesm.mx.domain.repository.UserRepository;
-import itesm.mx.infrastructure.firebase.FirebaseConfig;
+import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
@@ -27,6 +25,8 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
     UserRepository userRepository;
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
+    @Inject
+    FirebaseTokenVerifier firebaseTokenVerifier;
 
 
     @Override
@@ -44,8 +44,9 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(authHeader.replace("Bearer ", ""), true);
-            Optional<User> userOptional = userRepository.findByFirebaseUuid(decodedToken.getUid());
+            String token = authHeader.substring(7);
+            String uid = firebaseTokenVerifier.verifyTokenAndGetUid(token);
+            Optional<User> userOptional = userRepository.findByFirebaseUuid(uid);
             if (userOptional.isEmpty()) {
                 requestContext.abortWith(
                         Response.status(401).build()
@@ -57,7 +58,7 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
                     user.getUserId(), user.getFirebaseUuid(), user.getName(), user.getEmail(), user.getRoleId()
             );
             authenticatedUserContext.setCurrentUser(currentUser);
-        } catch (FirebaseAuthException e) {
+        } catch (FirebaseAuthException | IllegalArgumentException e) {
             requestContext.abortWith(
                     Response.status(401).build()
             );
