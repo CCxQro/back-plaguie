@@ -22,13 +22,33 @@ public class AuthResource {
     @POST
     @Path("/login")
     public Response login(LoginDto loginDto) {
+        if (loginDto == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+
         try {
             LoginResponseDto response = loginUseCase.execute(loginDto);
             return Response.ok(response).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (SecurityException e) {
+            return errorResponse(Response.Status.UNAUTHORIZED, e.getMessage());
         } catch (RuntimeException e) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
-                    .build();
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    private Response errorResponse(Response.Status status, String message) {
+        return Response.status(status)
+                .entity(new ErrorResponse(message))
+                .build();
+    }
+
+    public static class ErrorResponse {
+        public String error;
+
+        public ErrorResponse(String error) {
+            this.error = error;
         }
     }
 }

@@ -1,6 +1,5 @@
 package itesm.mx.application.dto;
 
 public class LoginDto {
-    public String email;
-    public String firebaseToken; 
+    public String firebaseToken;
 }
