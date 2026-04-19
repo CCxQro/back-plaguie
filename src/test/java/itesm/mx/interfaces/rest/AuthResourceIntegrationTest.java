@@ -1,5 +1,6 @@
 package itesm.mx.interfaces.rest;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -65,9 +67,11 @@ class AuthResourceIntegrationTest {
     void login_WithInvalidToken_Returns401Unauthorized() throws Exception {
         String invalidToken = "token_basura";
 
-        // Simulamos que el verificador lanza la SecurityException que atrapa el controlador
+        // Simulamos una excepción válida del contrato del verificador para ejercer el wrapping real del login
+        FirebaseAuthException mockAuthException = mock(FirebaseAuthException.class);
+        when(mockAuthException.getMessage()).thenReturn("El token ha expirado o no es válido");
         when(firebaseTokenVerifier.verifyTokenAndGetUid(invalidToken))
-            .thenThrow(new SecurityException("El token ha expirado o no es válido"));
+            .thenThrow(mockAuthException);
 
         LoginDto requestDto = new LoginDto();
         requestDto.firebaseToken = invalidToken;
