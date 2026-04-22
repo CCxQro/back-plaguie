@@ -2,6 +2,7 @@ package itesm.mx.interfaces.rest;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.OPTIONS;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -28,7 +29,10 @@ public class AuthResource {
 
         try {
             LoginResponseDto response = loginUseCase.execute(loginDto);
-            return Response.ok(response).build();
+            return Response.ok(response)
+                    .header("Access-Control-Allow-Origin", "http://localhost:5173")
+                    .header("Access-Control-Allow-Credentials", "true")
+                    .build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (SecurityException e) {
@@ -38,8 +42,21 @@ public class AuthResource {
         }
     }
 
+    @OPTIONS
+    @Path("/login")
+    public Response options() {
+        return Response.ok()
+                .header("Access-Control-Allow-Origin", "http://localhost:5173")
+                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
+                .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .header("Access-Control-Allow-Credentials", "true")
+                .build();
+    }
+
     private Response errorResponse(Response.Status status, String message) {
         return Response.status(status)
+                .header("Access-Control-Allow-Origin", "http://localhost:5173")
+                .header("Access-Control-Allow-Credentials", "true")
                 .entity(new ErrorResponse(message))
                 .build();
     }
