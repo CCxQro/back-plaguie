@@ -43,8 +43,6 @@ public class AuthResource {
         try {
             LoginResponseDto response = loginUseCase.execute(loginDto);
             return Response.ok(response)
-                    .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                    .header("Access-Control-Allow-Credentials", "true")
                     .build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
@@ -74,15 +72,13 @@ public class AuthResource {
             RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
             return Response.status(Response.Status.CREATED)
                     .entity(response)
-                    .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                    .header("Access-Control-Allow-Credentials", "true")
                     .build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (IllegalStateException e) {
             return errorResponse(Response.Status.CONFLICT, e.getMessage());
         } catch (SecurityException e) {
-            return errorResponse(Response.Status.BAD_GATEWAY, e.getMessage());
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
@@ -105,15 +101,13 @@ public class AuthResource {
             RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
             return Response.status(Response.Status.CREATED)
                     .entity(response)
-                    .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                    .header("Access-Control-Allow-Credentials", "true")
                     .build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (IllegalStateException e) {
             return errorResponse(Response.Status.CONFLICT, e.getMessage());
         } catch (SecurityException e) {
-            return errorResponse(Response.Status.BAD_GATEWAY, e.getMessage());
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
@@ -123,10 +117,6 @@ public class AuthResource {
     @Path("/login")
     public Response options() {
         return Response.ok()
-                .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
-                .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-                .header("Access-Control-Allow-Credentials", "true")
                 .build();
     }
 
@@ -134,10 +124,6 @@ public class AuthResource {
     @Path("/register")
     public Response registerOptions() {
         return Response.ok()
-                .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
-                .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-                .header("Access-Control-Allow-Credentials", "true")
                 .build();
     }
 
@@ -145,17 +131,11 @@ public class AuthResource {
     @Path("/signup")
     public Response signupOptions() {
         return Response.ok()
-                .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
-                .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-                .header("Access-Control-Allow-Credentials", "true")
                 .build();
     }
 
     private Response errorResponse(Response.Status status, String message) {
         return Response.status(status)
-                .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                .header("Access-Control-Allow-Credentials", "true")
                 .entity(new ErrorResponse(message))
                 .build();
     }

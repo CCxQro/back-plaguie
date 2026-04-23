@@ -78,6 +78,7 @@ public class RegisterUserUseCase {
         try {
             customToken = firebaseUserManager.generateCustomToken(firebaseUuid);
         } catch (FirebaseAuthException e) {
+            rollbackFirebaseUser(firebaseUuid);
             throw new SecurityException("Error al generar token: " + e.getMessage());
         }
 

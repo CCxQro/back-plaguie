@@ -17,7 +17,7 @@ public class UserEntity {
     @Column(length = 100)
     public String name;
 
-    @Column(name = "email", length = 50)
+    @Column(name = "correo_electronico", length = 50)
     public String email;
 
     @Column(name = "id_rol")
