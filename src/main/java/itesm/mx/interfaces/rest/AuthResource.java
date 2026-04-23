@@ -8,6 +8,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import itesm.mx.domain.models.RoleConstants;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
 import itesm.mx.application.dto.SignupDto;
@@ -21,8 +22,6 @@ import itesm.mx.application.usecase.RegisterUserUseCase;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthResource {
-
-    private static final Integer SELF_SIGNUP_ROLE_ID = 2;
 
     @Inject
     LoginUseCase loginUseCase;
@@ -64,7 +63,7 @@ public class AuthResource {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
         }
 
-        if (!Integer.valueOf(1).equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+        if (!RoleConstants.ADMIN.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
             return errorResponse(Response.Status.FORBIDDEN, "Solo un administrador puede registrar usuarios");
         }
 
@@ -95,7 +94,7 @@ public class AuthResource {
         registerUserDto.name = signupDto.name;
         registerUserDto.email = signupDto.email;
         registerUserDto.password = signupDto.password;
-        registerUserDto.roleId = SELF_SIGNUP_ROLE_ID;
+        registerUserDto.roleId = RoleConstants.SELLER;
 
         try {
             RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
