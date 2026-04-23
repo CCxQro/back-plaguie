@@ -3,12 +3,10 @@ package itesm.mx.infrastructure.firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
-import io.quarkus.arc.profile.UnlessBuildProfile;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
-@UnlessBuildProfile("test")
 public class FirebaseUserManager {
 
     private static final Logger LOG = Logger.getLogger(FirebaseUserManager.class);
