@@ -33,7 +33,7 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String path = requestContext.getUriInfo().getPath();
         String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
-        if ("api/auth/login".equals(normalizedPath)) {
+        if ("api/auth/login".equals(normalizedPath) || "api/auth/signup".equals(normalizedPath)) {
             return;
         }
         String authHeader = requestContext.getHeaders().getFirst("Authorization");
