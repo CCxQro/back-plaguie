@@ -15,13 +15,13 @@ public class UserMapper {
     }
 
     public static User toDomain(UserEntity userEntity) {
-        return new User(
-            userEntity.userId,
-            userEntity.firebaseUuid,
-            userEntity.name,
-            userEntity.email,
-            userEntity.roleId
-        );
+        User user = new User();
+        user.setUserId(userEntity.userId);
+        user.setFirebaseUuid(userEntity.firebaseUuid);
+        user.setName(userEntity.name);
+        user.setEmail(userEntity.email);
+        user.setRoleId(userEntity.roleId);
+        return user;
     }
     
 }

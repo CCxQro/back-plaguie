@@ -21,4 +21,11 @@ public class UserRepositoryImpl implements PanacheRepositoryBase<UserEntity, Lon
     public Optional<User> findByFirebaseUuid(String firebaseUuid) {
         return find("firebaseUuid", firebaseUuid).firstResultOptional().map(UserMapper::toDomain);
     }
+
+    @Override
+    public User save(User user) {
+        UserEntity userEntity = UserMapper.toEntity(user);
+        persistAndFlush(userEntity);
+        return UserMapper.toDomain(userEntity);
+    }
 }
