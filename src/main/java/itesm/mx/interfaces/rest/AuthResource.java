@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
+import itesm.mx.application.dto.SignupDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
@@ -20,6 +21,8 @@ import itesm.mx.application.usecase.RegisterUserUseCase;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthResource {
+
+    private static final Integer SELF_SIGNUP_ROLE_ID = 2;
 
     @Inject
     LoginUseCase loginUseCase;
@@ -85,6 +88,37 @@ public class AuthResource {
         }
     }
 
+    @POST
+    @Path("/signup")
+    public Response signup(SignupDto signupDto) {
+        if (signupDto == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+
+        RegisterUserDto registerUserDto = new RegisterUserDto();
+        registerUserDto.name = signupDto.name;
+        registerUserDto.email = signupDto.email;
+        registerUserDto.password = signupDto.password;
+        registerUserDto.roleId = SELF_SIGNUP_ROLE_ID;
+
+        try {
+            RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
+            return Response.status(Response.Status.CREATED)
+                    .entity(response)
+                    .header("Access-Control-Allow-Origin", "http://localhost:5173")
+                    .header("Access-Control-Allow-Credentials", "true")
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.CONFLICT, e.getMessage());
+        } catch (SecurityException e) {
+            return errorResponse(Response.Status.BAD_GATEWAY, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
     @OPTIONS
     @Path("/login")
     public Response options() {
@@ -99,6 +133,17 @@ public class AuthResource {
     @OPTIONS
     @Path("/register")
     public Response registerOptions() {
+        return Response.ok()
+                .header("Access-Control-Allow-Origin", "http://localhost:5173")
+                .header("Access-Control-Allow-Methods", "POST, OPTIONS")
+                .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                .header("Access-Control-Allow-Credentials", "true")
+                .build();
+    }
+
+    @OPTIONS
+    @Path("/signup")
+    public Response signupOptions() {
         return Response.ok()
                 .header("Access-Control-Allow-Origin", "http://localhost:5173")
                 .header("Access-Control-Allow-Methods", "POST, OPTIONS")
