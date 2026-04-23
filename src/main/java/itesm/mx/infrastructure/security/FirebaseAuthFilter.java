@@ -13,13 +13,11 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
-import io.quarkus.arc.profile.UnlessBuildProfile;
 import java.io.IOException;
 import java.util.Optional;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
-@UnlessBuildProfile("test")
 public class FirebaseAuthFilter implements ContainerRequestFilter {
     @Inject
     UserRepository userRepository;
