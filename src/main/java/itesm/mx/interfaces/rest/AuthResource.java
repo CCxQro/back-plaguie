@@ -2,7 +2,7 @@ package itesm.mx.interfaces.rest;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.OPTIONS;
+
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -113,26 +113,7 @@ public class AuthResource {
         }
     }
 
-    @OPTIONS
-    @Path("/login")
-    public Response options() {
-        return Response.ok()
-                .build();
-    }
 
-    @OPTIONS
-    @Path("/register")
-    public Response registerOptions() {
-        return Response.ok()
-                .build();
-    }
-
-    @OPTIONS
-    @Path("/signup")
-    public Response signupOptions() {
-        return Response.ok()
-                .build();
-    }
 
     private Response errorResponse(Response.Status status, String message) {
         return Response.status(status)
