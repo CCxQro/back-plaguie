@@ -41,6 +41,7 @@ nb-configuration.xml
 
 # Firebase service account credentials (use FIREBASE_SERVICE_ACCOUNT_LOCATION env var instead)
 src/main/resources/*-firebase-adminsdk-*.json
+firebase-dev.json
 
 # Plugin directory
 /.quarkus/cli/plugins/

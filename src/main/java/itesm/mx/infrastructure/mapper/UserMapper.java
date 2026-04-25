@@ -1,7 +1,7 @@
 package itesm.mx.infrastructure.mapper;
 
 import itesm.mx.domain.models.User;
-import itesm.mx.infrastructure.persistence.entity.UserEntity;
+import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 
 public class UserMapper {
     public static UserEntity toEntity(User user) {
