@@ -11,6 +11,7 @@ public class UserMapper {
         userEntity.name = user.getName();
         userEntity.email = user.getEmail();
         userEntity.roleId = user.getRoleId();
+        userEntity.isActive = user.getActive();
         return userEntity;
     }
 
@@ -21,6 +22,7 @@ public class UserMapper {
         user.setName(userEntity.name);
         user.setEmail(userEntity.email);
         user.setRoleId(userEntity.roleId);
+        user.setActive(userEntity.isActive);
         return user;
     }
     
