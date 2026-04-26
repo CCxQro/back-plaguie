@@ -5,7 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import itesm.mx.domain.models.User;
 import itesm.mx.domain.repository.UserRepository;
 import itesm.mx.infrastructure.mapper.UserMapper;
-import itesm.mx.infrastructure.persistence.entity.UserEntity;
+import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 
 import java.util.Optional;
 
