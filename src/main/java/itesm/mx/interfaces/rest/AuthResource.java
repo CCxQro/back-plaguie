@@ -95,7 +95,7 @@ public class AuthResource {
         registerUserDto.name = signupDto.name;
         registerUserDto.email = signupDto.email;
         registerUserDto.password = signupDto.password;
-        registerUserDto.roleId = SELF_SIGNUP_ROLE_ID;
+        registerUserDto.roleId = signupDto.roleId;
 
         try {
             RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);

@@ -17,6 +17,9 @@ public class UserEntity {
     @Column(name = "nombre", length = 100)
     public String name;
 
+    @Column(name = "email", length = 100)
+    public String email;
+
     @Column(name = "id_rol")
     public Integer roleId;
 

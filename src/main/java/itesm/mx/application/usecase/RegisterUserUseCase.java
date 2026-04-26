@@ -37,6 +37,7 @@ public class RegisterUserUseCase {
             throw new IllegalArgumentException("Se requiere el rol del usuario");
         }
 
+        // ya no funciona findy by id, tiene que ser por
         userRepository.findByEmail(registerUserDto.email)
                 .ifPresent(existingUser -> {
                     throw new IllegalStateException("Ya existe un usuario registrado con este correo electrónico");
@@ -60,7 +61,8 @@ public class RegisterUserUseCase {
                 firebaseUuid,
                 registerUserDto.name,
                 registerUserDto.email,
-                registerUserDto.roleId
+                registerUserDto.roleId,
+                true
         );
 
         User createdUser;
