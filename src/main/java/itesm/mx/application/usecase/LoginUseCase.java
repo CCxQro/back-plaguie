@@ -30,7 +30,7 @@ public class LoginUseCase {
 
         User user = userRepository.findByFirebaseUuid(firebaseUuid)
                 .orElseThrow(() -> new SecurityException("Usuario no encontrado en la base de datos con este UUID de Firebase"));
-        return new LoginResponseDto(user.getName(), user.getEmail(), user.getRoleId());
+        return new LoginResponseDto(user.getName(), user.getEmail(), user.getRoleId(), user.getActive());
     }
 
     /**
