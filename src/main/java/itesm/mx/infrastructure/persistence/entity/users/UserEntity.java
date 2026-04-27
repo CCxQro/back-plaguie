@@ -1,9 +1,9 @@
-package itesm.mx.infrastructure.persistence.entity;
+package itesm.mx.infrastructure.persistence.entity.users;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users") 
+@Table(name = "Usuario")
 public class UserEntity {
 
     @Id
@@ -14,12 +14,15 @@ public class UserEntity {
     @Column(name = "uuid_firebase", length = 100)
     public String firebaseUuid;
 
-    @Column(length = 100)
+    @Column(name = "nombre", length = 100)
     public String name;
 
-    @Column(name = "correo_electronico", length = 50)
+    @Column(name = "email", length = 100)
     public String email;
 
     @Column(name = "id_rol")
     public Integer roleId;
+
+    @Column(name = "isActive")
+    public Boolean isActive;
 }

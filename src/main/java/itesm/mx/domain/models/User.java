@@ -6,15 +6,17 @@ public class User {
     private String name;
     private String email;
     private Integer roleId;
+    private Boolean isActive;
 
     public User() {}
 
-    public User(Long userId, String firebaseUuid, String name, String email, Integer roleId) {
+    public User(Long userId, String firebaseUuid, String name, String email, Integer roleId, Boolean isActive) {
         this.userId = userId;
         this.firebaseUuid = firebaseUuid;
         this.name = name;
         this.email = email;
         this.roleId = roleId;
+        this.isActive = isActive;
     }
 
     public Long getUserId() { return userId; }
@@ -26,9 +28,22 @@ public class User {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
     public Integer getRoleId() { return roleId; }
     public void setRoleId(Integer roleId) { this.roleId = roleId; }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
 }
