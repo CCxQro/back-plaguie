@@ -41,6 +41,7 @@ nb-configuration.xml
 
 # Firebase service account credentials (use FIREBASE_SERVICE_ACCOUNT_LOCATION env var instead)
 src/main/resources/*-firebase-adminsdk-*.json
+src/main/resources/firebase-dev.json
 firebase-dev.json
 
 # Plugin directory
