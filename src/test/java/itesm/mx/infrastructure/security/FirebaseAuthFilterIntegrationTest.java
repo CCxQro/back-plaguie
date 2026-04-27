@@ -5,7 +5,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
-import itesm.mx.infrastructure.persistence.entity.UserEntity;
+import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.infrastructure.persistence.repository.UserRepositoryImpl;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;

@@ -1,7 +1,7 @@
 package itesm.mx.infrastructure.mapper;
 
 import itesm.mx.domain.models.User;
-import itesm.mx.infrastructure.persistence.entity.UserEntity;
+import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 
 public class UserMapper {
     public static UserEntity toEntity(User user) {
@@ -11,6 +11,7 @@ public class UserMapper {
         userEntity.name = user.getName();
         userEntity.email = user.getEmail();
         userEntity.roleId = user.getRoleId();
+        userEntity.isActive = user.getActive();
         return userEntity;
     }
 
@@ -21,6 +22,7 @@ public class UserMapper {
         user.setName(userEntity.name);
         user.setEmail(userEntity.email);
         user.setRoleId(userEntity.roleId);
+        user.setActive(userEntity.isActive);
         return user;
     }
     
