@@ -29,8 +29,12 @@ public class UpdateUserUseCase {
             throw new IllegalArgumentException("El roleId debe ser 1 (Administrador), 2 (Agricultor) o 3 (Técnico Vendedor)");
         }
 
-        userRepository.findUserById(userId)
+        User existing = userRepository.findUserById(userId)
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado con id: " + userId));
+
+        if (Integer.valueOf(2).equals(existing.getRoleId()) && updateUserDto.roleId != null && !Integer.valueOf(2).equals(updateUserDto.roleId)) {
+            throw new IllegalArgumentException("No se puede cambiar el rol de un Agricultor");
+        }
 
         User userToUpdate = new User();
         userToUpdate.setUserId(userId);
