@@ -15,8 +15,8 @@ import itesm.mx.application.dto.SignupDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
-import itesm.mx.application.usecase.LoginUseCase;
-import itesm.mx.application.usecase.RegisterUserUseCase;
+import itesm.mx.application.usecase.users.LoginUseCase;
+import itesm.mx.application.usecase.users.RegisterUserUseCase;
 
 @Path("/api/auth")
 @Produces(MediaType.APPLICATION_JSON)
