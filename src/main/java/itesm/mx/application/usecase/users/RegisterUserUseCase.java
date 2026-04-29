@@ -1,4 +1,4 @@
-package itesm.mx.application.usecase;
+package itesm.mx.application.usecase.users;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.enterprise.context.ApplicationScoped;

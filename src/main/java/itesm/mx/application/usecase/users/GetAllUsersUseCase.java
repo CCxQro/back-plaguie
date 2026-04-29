@@ -1,4 +1,4 @@
-package itesm.mx.application.usecase;
+package itesm.mx.application.usecase.users;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
