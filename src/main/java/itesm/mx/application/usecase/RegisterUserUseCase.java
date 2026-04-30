@@ -37,13 +37,11 @@ public class RegisterUserUseCase {
             throw new IllegalArgumentException("Se requiere el rol del usuario");
         }
 
-        // ya no funciona findy by id, tiene que ser por
         userRepository.findByEmail(registerUserDto.email)
                 .ifPresent(existingUser -> {
                     throw new IllegalStateException("Ya existe un usuario registrado con este correo electrónico");
                 });
 
-        // Crear en Firebase primero
         String firebaseUuid;
         try {
             firebaseUuid = firebaseUserManager.createFirebaseUser(
@@ -55,7 +53,6 @@ public class RegisterUserUseCase {
             throw mapFirebaseCreateError(e);
         }
 
-        // Guardar en la BD
         User userToCreate = new User(
                 null,
                 firebaseUuid,
@@ -75,7 +72,6 @@ public class RegisterUserUseCase {
             );
         }
 
-        // Generar custom token
         String customToken;
         try {
             customToken = firebaseUserManager.generateCustomToken(firebaseUuid);
