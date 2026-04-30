@@ -54,7 +54,7 @@ class LoginUseCaseTest {
 
         assertNotNull(response);
         assertEquals("Juan Perez", response.name);
-        assertEquals("juan@correo.com", response.email);
+        assertEquals("Juan@gmail.com", response.email);
         
         verify(firebaseTokenVerifier).verifyTokenAndGetUid("token_valido_de_prueba");
         verify(userRepository).findByFirebaseUuid(expectedUid);
