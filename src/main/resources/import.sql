@@ -3,32 +3,32 @@
 -- ==========================================
 
 -- Estados
-INSERT INTO Estados (id_estado, nombre) VALUES (1, 'Jalisco');
-INSERT INTO Estados (id_estado, nombre) VALUES (2, 'Michoacán');
-INSERT INTO Estados (id_estado, nombre) VALUES (3, 'Sinaloa');
-INSERT INTO Estados (id_estado, nombre) VALUES (4, 'Sonora');
-INSERT INTO Estados (id_estado, nombre) VALUES (5, 'Veracruz');
+INSERT INTO Estados (id_estado, nombre) VALUES (1, 'jalisco');
+INSERT INTO Estados (id_estado, nombre) VALUES (2, 'michoacán');
+INSERT INTO Estados (id_estado, nombre) VALUES (3, 'sinaloa');
+INSERT INTO Estados (id_estado, nombre) VALUES (4, 'sonora');
+INSERT INTO Estados (id_estado, nombre) VALUES (5, 'veracruz');
 
 -- Municipios
-INSERT INTO Municipios (id_municipio, nombre) VALUES (1, 'Zapopan');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (2, 'Uruapan');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (3, 'Culiacán');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'Hermosillo');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'Xalapa');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (1, 'zapopan');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (2, 'uruapan');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (3, 'culiacán');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'hermosillo');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'xalapa');
 
 -- Localidades
-INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'Tesistán');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'San Juan Nuevo');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'El Dorado');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'Bahía Kino');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'Banderilla');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'tesistán');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'san Juan Nuevo');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'el Dorado');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'bahía Kino');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'banderilla');
 
 -- Predios
-INSERT INTO Predios (id_predio, nombre) VALUES (1, 'El Milagro');
-INSERT INTO Predios (id_predio, nombre) VALUES (2, 'La Esperanza');
-INSERT INTO Predios (id_predio, nombre) VALUES (3, 'Los Pinos');
-INSERT INTO Predios (id_predio, nombre) VALUES (4, 'Buenavista');
-INSERT INTO Predios (id_predio, nombre) VALUES (5, 'San José');
+INSERT INTO Predios (id_predio, nombre) VALUES (1, 'el Milagro');
+INSERT INTO Predios (id_predio, nombre) VALUES (2, 'la Esperanza');
+INSERT INTO Predios (id_predio, nombre) VALUES (3, 'los Pinos');
+INSERT INTO Predios (id_predio, nombre) VALUES (4, 'buenavista');
+INSERT INTO Predios (id_predio, nombre) VALUES (5, 'san José');
 
 
 -- ==========================================
