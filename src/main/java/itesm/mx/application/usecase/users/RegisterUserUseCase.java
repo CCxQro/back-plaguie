@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.domain.repository.UserRepository;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 

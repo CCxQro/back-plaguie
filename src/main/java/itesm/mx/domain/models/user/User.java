@@ -1,4 +1,4 @@
-package itesm.mx.domain.models;
+package itesm.mx.domain.models.user;
 
 public class User {
     private Long userId;

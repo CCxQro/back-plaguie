@@ -17,6 +17,8 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
+import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
+
 @Path("/api/locations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -67,20 +69,6 @@ public class LocationResource {
             return errorResponse(Response.Status.CONFLICT, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
-        }
-    }
-
-    private Response errorResponse(Response.Status status, String message) {
-        return Response.status(status)
-                .entity(new ErrorResponse(message))
-                .build();
-    }
-
-    public static class ErrorResponse {
-        public String error;
-
-        public ErrorResponse(String error) {
-            this.error = error;
         }
     }
 }

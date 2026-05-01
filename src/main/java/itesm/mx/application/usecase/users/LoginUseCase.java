@@ -6,7 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.domain.repository.UserRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 

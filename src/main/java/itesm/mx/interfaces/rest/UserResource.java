@@ -14,6 +14,8 @@ import itesm.mx.application.usecase.users.UpdateUserUseCase;
 
 import java.util.List;
 
+import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
+
 @Path("/api/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -123,20 +125,6 @@ public class UserResource {
             return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
-        }
-    }
-
-    private Response errorResponse(Response.Status status, String message) {
-        return Response.status(status)
-                .entity(new ErrorResponse(message))
-                .build();
-    }
-
-    public static class ErrorResponse {
-        public String error;
-
-        public ErrorResponse(String error) {
-            this.error = error;
         }
     }
 }

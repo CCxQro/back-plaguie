@@ -1,6 +1,6 @@
 package itesm.mx.domain.repository;
 
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 
 import java.util.List;
 import java.util.Optional;
