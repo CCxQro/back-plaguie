@@ -3,43 +3,43 @@
 -- ==========================================
 
 -- Estados
-INSERT INTO Estados (id_estado, nombre) VALUES (1, 'Jalisco');
-INSERT INTO Estados (id_estado, nombre) VALUES (2, 'Michoacán');
-INSERT INTO Estados (id_estado, nombre) VALUES (3, 'Sinaloa');
-INSERT INTO Estados (id_estado, nombre) VALUES (4, 'Sonora');
-INSERT INTO Estados (id_estado, nombre) VALUES (5, 'Veracruz');
+INSERT INTO Estados (id_estado, nombre) VALUES (1, 'jalisco');
+INSERT INTO Estados (id_estado, nombre) VALUES (2, 'michoacán');
+INSERT INTO Estados (id_estado, nombre) VALUES (3, 'sinaloa');
+INSERT INTO Estados (id_estado, nombre) VALUES (4, 'sonora');
+INSERT INTO Estados (id_estado, nombre) VALUES (5, 'veracruz');
 
 -- Municipios
-INSERT INTO Municipios (id_municipio, nombre) VALUES (1, 'Zapopan');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (2, 'Uruapan');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (3, 'Culiacán');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'Hermosillo');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'Xalapa');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (1, 'zapopan');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (2, 'uruapan');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (3, 'culiacán');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'hermosillo');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'xalapa');
 
 -- Localidades
-INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'Tesistán');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'San Juan Nuevo');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'El Dorado');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'Bahía Kino');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'Banderilla');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'tesistán');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'san Juan Nuevo');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'el Dorado');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'bahía Kino');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'banderilla');
 
 -- Predios
-INSERT INTO Predios (id_predio, nombre) VALUES (1, 'El Milagro');
-INSERT INTO Predios (id_predio, nombre) VALUES (2, 'La Esperanza');
-INSERT INTO Predios (id_predio, nombre) VALUES (3, 'Los Pinos');
-INSERT INTO Predios (id_predio, nombre) VALUES (4, 'Buenavista');
-INSERT INTO Predios (id_predio, nombre) VALUES (5, 'San José');
+INSERT INTO Predios (id_predio, nombre) VALUES (1, 'el Milagro');
+INSERT INTO Predios (id_predio, nombre) VALUES (2, 'la Esperanza');
+INSERT INTO Predios (id_predio, nombre) VALUES (3, 'los Pinos');
+INSERT INTO Predios (id_predio, nombre) VALUES (4, 'buenavista');
+INSERT INTO Predios (id_predio, nombre) VALUES (5, 'san José');
 
 
 -- ==========================================
 -- 2. UBICACIONES
 -- (Dependen de Estados, Municipios, Localidades y Predios)
 -- ==========================================
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (1, 20.7500, -103.4800, 1, 1, 1, 1);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (2, 19.4138, -102.0558, 2, 2, 2, 2);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, 24.8053, -107.3941, 3, 3, 3, 3);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, 29.0729, -110.9559, 4, 4, 4, 4);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, 19.5437, -96.9101, 5, 5, 5, 5);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (1, ST_GeomFromText('POINT(-103.4800 20.7500)'), 1, 1, 1, 1);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (2, ST_GeomFromText('POINT(-102.0558 19.4138)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, ST_GeomFromText('POINT(-107.3941 24.8053)'), 3, 3, 3, 3);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, ST_GeomFromText('POINT(-110.9559 29.0729)'), 4, 4, 4, 4);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, ST_GeomFromText('POINT(-96.9101 19.5437)'), 5, 5, 5, 5);
 
 
 -- ==========================================

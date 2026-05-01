@@ -7,10 +7,10 @@ import jakarta.ws.rs.core.Response;
 import itesm.mx.application.dto.GetUserResponseDto;
 import itesm.mx.application.dto.UpdateUserDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
-import itesm.mx.application.usecase.DeactivateUserUseCase;
-import itesm.mx.application.usecase.GetAllUsersUseCase;
-import itesm.mx.application.usecase.GetUserByIdUseCase;
-import itesm.mx.application.usecase.UpdateUserUseCase;
+import itesm.mx.application.usecase.users.DeactivateUserUseCase;
+import itesm.mx.application.usecase.users.GetAllUsersUseCase;
+import itesm.mx.application.usecase.users.GetUserByIdUseCase;
+import itesm.mx.application.usecase.users.UpdateUserUseCase;
 
 import java.util.List;
 
