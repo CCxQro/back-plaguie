@@ -8,7 +8,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import itesm.mx.domain.models.RoleConstants;
+import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
 import itesm.mx.application.dto.SignupDto;
@@ -17,6 +17,8 @@ import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.application.usecase.users.LoginUseCase;
 import itesm.mx.application.usecase.users.RegisterUserUseCase;
+
+import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
 @Path("/api/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -109,22 +111,6 @@ public class AuthResource {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
-        }
-    }
-
-
-
-    private Response errorResponse(Response.Status status, String message) {
-        return Response.status(status)
-                .entity(new ErrorResponse(message))
-                .build();
-    }
-
-    public static class ErrorResponse {
-        public String error;
-
-        public ErrorResponse(String error) {
-            this.error = error;
         }
     }
 }

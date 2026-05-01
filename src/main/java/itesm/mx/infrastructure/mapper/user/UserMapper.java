@@ -1,6 +1,6 @@
-package itesm.mx.infrastructure.mapper;
+package itesm.mx.infrastructure.mapper.user;
 
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 
 public class UserMapper {

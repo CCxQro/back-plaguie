@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import itesm.mx.application.dto.GetUserResponseDto;
 import itesm.mx.application.dto.UpdateUserDto;
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.domain.repository.UserRepository;
 
 @ApplicationScoped

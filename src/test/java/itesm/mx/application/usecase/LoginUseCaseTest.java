@@ -4,7 +4,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.application.usecase.users.LoginUseCase;
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.domain.repository.UserRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import jakarta.enterprise.inject.Instance;

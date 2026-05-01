@@ -3,7 +3,7 @@ package itesm.mx.application.usecase.users;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import itesm.mx.application.dto.GetUserResponseDto;
-import itesm.mx.domain.models.User;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.domain.repository.UserRepository;
 
 @ApplicationScoped
