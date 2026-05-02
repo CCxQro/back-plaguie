@@ -48,3 +48,6 @@ firebase-dev.json
 /.quarkus/cli/plugins/
 # TLS Certificates
 .certs/
+
+# Claude Code
+CLAUDE.md

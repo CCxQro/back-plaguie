@@ -32,7 +32,8 @@ public class LocationRepositoryImpl implements PanacheRepositoryBase<LocationEnt
 
     @Override
     public Optional<Location> findByResolvedData(
-            Point coordinates,
+            Double x,
+            Double y,
             Long stateId,
             Long municipalityId,
             Long localityId,
@@ -46,13 +47,15 @@ public class LocationRepositoryImpl implements PanacheRepositoryBase<LocationEnt
                 left join fetch l.municipality
                 left join fetch l.locality
                 left join fetch l.property
-                where l.coordinates = ?1
-                  and l.stateId = ?2
-                  and l.municipalityId = ?3
-                  and l.localityId = ?4
-                  and l.propertyId = ?5
+                where function('ST_X', l.coordinates) = ?1
+                  and function('ST_Y', l.coordinates) = ?2
+                  and l.stateId = ?3
+                  and l.municipalityId = ?4
+                  and l.localityId = ?5
+                  and l.propertyId = ?6
                 """,
-                coordinates,
+                x,
+                y,
                 stateId,
                 municipalityId,
                 localityId,

@@ -17,16 +17,16 @@ INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'hermosillo');
 INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'xalapa');
 
 -- Localidades
-INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'tesistán');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'san Juan Nuevo');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'el Dorado');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'bahía Kino');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'tesistan');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'san juan nuevo');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'el dorado');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'bahía kino');
 INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'banderilla');
 
 -- Predios
-INSERT INTO Predios (id_predio, nombre) VALUES (1, 'el Milagro');
-INSERT INTO Predios (id_predio, nombre) VALUES (2, 'la Esperanza');
-INSERT INTO Predios (id_predio, nombre) VALUES (3, 'los Pinos');
+INSERT INTO Predios (id_predio, nombre) VALUES (1, 'el milagro');
+INSERT INTO Predios (id_predio, nombre) VALUES (2, 'la esperanza');
+INSERT INTO Predios (id_predio, nombre) VALUES (3, 'los pinos');
 INSERT INTO Predios (id_predio, nombre) VALUES (4, 'buenavista');
 INSERT INTO Predios (id_predio, nombre) VALUES (5, 'san José');
 
