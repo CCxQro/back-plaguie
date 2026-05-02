@@ -8,7 +8,18 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import itesm.mx.application.dto.GetLocationResponseDto;
+import itesm.mx.application.mapper.location.LocationDtoMapper;
+import itesm.mx.application.usecase.location.location.RegisterLocationUseCase;
+import itesm.mx.application.usecase.users.RegisterAdministratorUseCase;
+import itesm.mx.application.usecase.users.RegisterFarmerUseCase;
+import itesm.mx.application.usecase.users.RegisterTechnicalSellerUseCase;
+import itesm.mx.domain.models.location.Location;
+import itesm.mx.domain.models.user.Administrator;
+import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
+import itesm.mx.domain.models.user.TechnicalSeller;
+import itesm.mx.domain.models.user.User;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
 import itesm.mx.application.dto.SignupDto;
@@ -30,6 +41,18 @@ public class AuthResource {
 
     @Inject
     RegisterUserUseCase registerUserUseCase;
+
+    @Inject
+    RegisterAdministratorUseCase registerAdministratorUseCase;
+
+    @Inject
+    RegisterFarmerUseCase registerFarmerUseCase;
+
+    @Inject
+    RegisterTechnicalSellerUseCase registerTechnicalSellerUseCase;
+
+    @Inject
+    RegisterLocationUseCase registerLocationUseCase;
 
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
@@ -69,8 +92,31 @@ public class AuthResource {
             return errorResponse(Response.Status.FORBIDDEN, "Solo un administrador puede registrar usuarios");
         }
 
+        if (!RoleConstants.ADMIN.equals(registerUserDto.roleId) && registerUserDto.location == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "Se requiere la ubicación para este rol");
+        }
+
         try {
             RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
+
+            User createdUser = new User(response.userId, response.firebaseUuid, response.name, response.email, response.roleId, true);
+
+            if (RoleConstants.ADMIN.equals(response.roleId)) {
+                registerAdministratorUseCase.execute(new Administrator(null, createdUser, true));
+            } else {
+                GetLocationResponseDto locationResponse = registerLocationUseCase.execute(
+                        LocationDtoMapper.toLocationData(registerUserDto.location)
+                );
+                Location location = new Location();
+                location.setLocationId(locationResponse.locationId);
+
+                if (RoleConstants.SELLER.equals(response.roleId)) {
+                    registerTechnicalSellerUseCase.execute(new TechnicalSeller(null, createdUser, location, true));
+                } else if (RoleConstants.FARMER.equals(response.roleId)) {
+                    registerFarmerUseCase.execute(new Farmer(null, createdUser, location, true));
+                }
+            }
+
             return Response.status(Response.Status.CREATED)
                     .entity(response)
                     .build();

@@ -6,6 +6,6 @@ public final class RoleConstants {
     }
 
     public static final Integer ADMIN = 1;
-    public static final Integer SELLER = 2;
-    public static final Integer FARMER = 3;
+    public static final Integer FARMER = 2;
+    public static final Integer SELLER = 3;
 }

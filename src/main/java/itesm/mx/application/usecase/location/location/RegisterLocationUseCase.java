@@ -59,7 +59,8 @@ public class RegisterLocationUseCase {
         Property property = resolveProperty(locationData.getPropertyName());
 
         return locationRepository.findByResolvedData(
-                        locationData.getCoordinates(),
+                        locationData.getCoordinates().getX(),
+                        locationData.getCoordinates().getY(),
                         state.getStateId(),
                         municipality.getMunicipalityId(),
                         locality.getLocalityId(),
