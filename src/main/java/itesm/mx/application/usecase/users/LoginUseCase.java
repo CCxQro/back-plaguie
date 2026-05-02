@@ -4,10 +4,19 @@ import com.google.firebase.auth.FirebaseAuthException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import itesm.mx.application.dto.GetLocationResponseDto;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
+import itesm.mx.application.mapper.location.LocationDtoMapper;
+import itesm.mx.domain.models.location.Location;
+import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.User;
+import itesm.mx.domain.repository.AdministratorRepository;
+import itesm.mx.domain.repository.FarmerRepository;
+import itesm.mx.domain.repository.TechnicalSellerRepository;
 import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.location.LocationRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 
 @ApplicationScoped
@@ -17,8 +26,21 @@ public class LoginUseCase {
     UserRepository userRepository;
 
     @Inject
+    AdministratorRepository administratorRepository;
+
+    @Inject
+    FarmerRepository farmerRepository;
+
+    @Inject
+    TechnicalSellerRepository technicalSellerRepository;
+
+    @Inject
+    LocationRepository locationRepository;
+
+    @Inject
     Instance<FirebaseTokenVerifier> firebaseTokenVerifierInstance;
 
+    @Transactional
     public LoginResponseDto execute(LoginDto loginDto) {
         if (loginDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es requerido");
@@ -30,16 +52,37 @@ public class LoginUseCase {
 
         User user = userRepository.findByFirebaseUuid(firebaseUuid)
                 .orElseThrow(() -> new SecurityException("Usuario no encontrado en la base de datos con este UUID de Firebase"));
-        return new LoginResponseDto(user.getName(), user.getEmail(), user.getRoleId());
+
+        LoginResponseDto response = new LoginResponseDto(user.getName(), user.getEmail(), user.getRoleId());
+
+        if (RoleConstants.ADMIN.equals(user.getRoleId())) {
+            administratorRepository.findByIdUser(user.getUserId()).ifPresent(admin ->
+                    response.isActive = admin.getActive()
+            );
+        } else if (RoleConstants.SELLER.equals(user.getRoleId())) {
+            technicalSellerRepository.findByIdUser(user.getUserId()).ifPresent(seller -> {
+                response.isActive = seller.getActive();
+                response.location = resolveLocation(seller.getLocation());
+            });
+        } else if (RoleConstants.FARMER.equals(user.getRoleId())) {
+            farmerRepository.findByIdUser(user.getUserId()).ifPresent(farmer -> {
+                response.isActive = farmer.getActive();
+                response.location = resolveLocation(farmer.getLocation());
+            });
+        }
+
+        return response;
     }
 
-    /**
-     * Verifies a Firebase token and extracts the UID.
-     * @param token the Firebase ID token
-     * @return the Firebase UID
-     * @throws IllegalArgumentException if the token is blank/invalid format
-     * @throws SecurityException if token verification fails
-     */
+    private GetLocationResponseDto resolveLocation(Location location) {
+        if (location == null || location.getLocationId() == null) {
+            return null;
+        }
+        return locationRepository.findLocationById(location.getLocationId())
+                .map(LocationDtoMapper::toResponseDto)
+                .orElse(null);
+    }
+
     private String verifyFirebaseToken(String token) {
         if (firebaseTokenVerifierInstance != null && firebaseTokenVerifierInstance.isResolvable()) {
             try {
