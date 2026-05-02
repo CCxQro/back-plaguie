@@ -71,7 +71,23 @@ INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol)
 
 
 -- ==========================================
--- 4. TABLAS DE ROLES ESPECÍFICOS
+-- 4. MARKETPLACE - CATÁLOGOS
+-- ==========================================
+
+-- Colores
+INSERT INTO Colores (id_color, name, hexa) VALUES (1, 'Rojo', '#FF0000');
+INSERT INTO Colores (id_color, name, hexa) VALUES (2, 'Verde', '#008000');
+INSERT INTO Colores (id_color, name, hexa) VALUES (3, 'Azul', '#0000FF');
+INSERT INTO Colores (id_color, name, hexa) VALUES (4, 'Amarillo', '#FFFF00');
+INSERT INTO Colores (id_color, name, hexa) VALUES (5, 'Naranja', '#FFA500');
+
+-- Status
+INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
+INSERT INTO Status (id_status, nombre) VALUES (2, 'Revision');
+INSERT INTO Status (id_status, nombre) VALUES (3, 'Rejected');
+
+-- ==========================================
+-- 5. TABLAS DE ROLES ESPECÍFICOS
 -- ==========================================
 
 -- 4.1 Administradores (vinculados a los usuarios 1 al 5)

@@ -9,6 +9,7 @@ import itesm.mx.application.dto.RegisterUserResponseDto;
 import itesm.mx.domain.models.user.User;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
+import itesm.mx.application.usecase.users.RegisterUserUseCase;
 import itesm.mx.infrastructure.persistence.repository.UserRepositoryImpl;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
