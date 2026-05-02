@@ -73,6 +73,11 @@ public class LocationRepositoryImpl implements PanacheRepositoryBase<LocationEnt
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la ubicacion recien registrada"));
     }
 
+    @Override
+    public Optional<Location> findLocationById(Long locationId) {
+        return findDetailedById(locationId).map(LocationMapper::toDomain);
+    }
+
     private Optional<LocationEntity> findDetailedById(Long locationId) {
         return find(
                 """

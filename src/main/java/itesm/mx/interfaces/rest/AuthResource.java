@@ -103,6 +103,7 @@ public class AuthResource {
 
             if (RoleConstants.ADMIN.equals(response.roleId)) {
                 registerAdministratorUseCase.execute(new Administrator(null, createdUser, true));
+                response.isActive = true;
             } else {
                 GetLocationResponseDto locationResponse = registerLocationUseCase.execute(
                         LocationDtoMapper.toLocationData(registerUserDto.location)
@@ -115,6 +116,9 @@ public class AuthResource {
                 } else if (RoleConstants.FARMER.equals(response.roleId)) {
                     registerFarmerUseCase.execute(new Farmer(null, createdUser, location, true));
                 }
+
+                response.isActive = true;
+                response.location = locationResponse;
             }
 
             return Response.status(Response.Status.CREATED)
