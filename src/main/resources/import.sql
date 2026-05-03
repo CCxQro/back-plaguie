@@ -86,6 +86,16 @@ INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
 INSERT INTO Status (id_status, nombre) VALUES (2, 'Revision');
 INSERT INTO Status (id_status, nombre) VALUES (3, 'Rejected');
 
+-- Categorias (registradas por admins y tecnicos vendedores)
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (1, 1,  'Fertilizantes',   1, 1);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (2, 2,  'Herbicidas',      2, 1);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (3, 11, 'Insecticidas',    3, 2);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (4, 12, 'Fungicidas',      4, 2);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (5, 3,  'Semillas',        5, 1);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (6, 13, 'Herramientas',    1, 3);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (7, 4,  'Equipos de Riego',2, 1);
+INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (8, 14, 'Abonos',          3, 2);
+
 -- ==========================================
 -- 5. TABLAS DE ROLES ESPECÍFICOS
 -- ==========================================
