@@ -120,3 +120,21 @@ INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_us
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_usuario) VALUES (3, 1, 3, 13);
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_usuario) VALUES (4, 1, 4, 14);
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_usuario) VALUES (5, 1, 5, 15);
+
+-- ==========================================
+-- 6. UNIDADES (registradas por admins y técnicos vendedores)
+-- ==========================================
+
+-- Registradas por administradores -> status Accepted (1)
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (1, 1, 'Kilogramo',  1);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (2, 2, 'Litro',      1);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (3, 3, 'Tonelada',   1);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (4, 4, 'Gramo',      1);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (5, 5, 'Mililitro',  1);
+
+-- Registradas por técnicos vendedores -> status Revision (2)
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (6,  11, 'Caja',     2);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (7,  12, 'Bolsa',    2);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (8,  13, 'Paquete',  2);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (9,  14, 'Frasco',   2);
+INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (10, 15, 'Cubeta',   2);
