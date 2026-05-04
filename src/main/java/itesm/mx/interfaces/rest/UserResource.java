@@ -13,12 +13,20 @@ import itesm.mx.application.usecase.users.GetUserByIdUseCase;
 import itesm.mx.application.usecase.users.UpdateUserUseCase;
 
 import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
 @Path("/api/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Users", description = "User administration endpoints")
 public class UserResource {
 
     private static final Integer ADMIN_ROLE_ID = 1;
@@ -39,6 +47,13 @@ public class UserResource {
     AuthenticatedUserContext authenticatedUserContext;
 
     @GET
+    @Operation(summary = "List users", description = "Returns every active or inactive user. Admin-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Users returned", content = @Content(schema = @Schema(implementation = GetUserResponseDto[].class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getAllUsers() {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -57,6 +72,15 @@ public class UserResource {
 
     @GET
     @Path("/{id}")
+    @Operation(summary = "Get user by id", description = "Returns a user when requested by an admin or by the same authenticated user.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "User returned", content = @Content(schema = @Schema(implementation = GetUserResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid user id"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Not allowed to access this user"),
+            @APIResponse(responseCode = "404", description = "User not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getUserById(@PathParam("id") Long id) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -83,6 +107,16 @@ public class UserResource {
 
     @PUT
     @Path("/{id}")
+    @Operation(summary = "Update user", description = "Updates a user record. Admin-only endpoint.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UpdateUserDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "User updated", content = @Content(schema = @Schema(implementation = GetUserResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "404", description = "User not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response updateUser(@PathParam("id") Long id, UpdateUserDto updateUserDto) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -108,6 +142,15 @@ public class UserResource {
 
     @DELETE
     @Path("/{id}")
+    @Operation(summary = "Deactivate user", description = "Soft-deletes a user by marking it inactive. Admin-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "204", description = "User deactivated"),
+            @APIResponse(responseCode = "400", description = "Invalid user id"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "404", description = "User not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response deactivateUser(@PathParam("id") Long id) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
