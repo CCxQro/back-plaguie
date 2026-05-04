@@ -3,7 +3,7 @@ package itesm.mx.application.usecase.users;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import itesm.mx.application.dto.GetUserResponseDto;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

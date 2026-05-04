@@ -12,10 +12,10 @@ import itesm.mx.application.mapper.location.LocationDtoMapper;
 import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.User;
-import itesm.mx.domain.repository.AdministratorRepository;
-import itesm.mx.domain.repository.FarmerRepository;
-import itesm.mx.domain.repository.TechnicalSellerRepository;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.user.AdministratorRepository;
+import itesm.mx.domain.repository.user.FarmerRepository;
+import itesm.mx.domain.repository.user.TechnicalSellerRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 import itesm.mx.domain.repository.location.LocationRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 

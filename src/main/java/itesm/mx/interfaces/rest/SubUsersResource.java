@@ -1,9 +1,9 @@
 package itesm.mx.interfaces.rest;
 
 import itesm.mx.application.security.AuthenticatedUserContext;
-import itesm.mx.application.usecase.users.GetAllAdministratorsUseCase;
-import itesm.mx.application.usecase.users.GetAllFarmersUseCase;
-import itesm.mx.application.usecase.users.GetAllTechnicalSellersUseCase;
+import itesm.mx.application.usecase.users.subUsers.GetAllAdministratorsUseCase;
+import itesm.mx.application.usecase.users.subUsers.GetAllFarmersUseCase;
+import itesm.mx.application.usecase.users.subUsers.GetAllTechnicalSellersUseCase;
 import itesm.mx.domain.models.user.Administrator;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.TechnicalSeller;

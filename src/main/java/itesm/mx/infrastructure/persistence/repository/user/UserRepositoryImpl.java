@@ -1,10 +1,10 @@
-package itesm.mx.infrastructure.persistence.repository;
+package itesm.mx.infrastructure.persistence.repository.user;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import itesm.mx.domain.models.user.User;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 import itesm.mx.infrastructure.mapper.user.UserMapper;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 
