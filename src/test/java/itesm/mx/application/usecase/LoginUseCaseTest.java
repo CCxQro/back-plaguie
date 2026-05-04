@@ -5,7 +5,11 @@ import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.application.usecase.users.LoginUseCase;
 import itesm.mx.domain.models.user.User;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.location.LocationRepository;
+import itesm.mx.domain.repository.user.AdministratorRepository;
+import itesm.mx.domain.repository.user.FarmerRepository;
+import itesm.mx.domain.repository.user.TechnicalSellerRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import jakarta.enterprise.inject.Instance;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,18 @@ class LoginUseCaseTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AdministratorRepository administratorRepository;
+
+    @Mock
+    private FarmerRepository farmerRepository;
+
+    @Mock
+    private TechnicalSellerRepository technicalSellerRepository;
+
+    @Mock
+    private LocationRepository locationRepository;
 
     @Mock
     private Instance<FirebaseTokenVerifier> firebaseTokenVerifierInstance;
@@ -49,6 +65,7 @@ class LoginUseCaseTest {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(anyString())).thenReturn(expectedUid);
         
         when(userRepository.findByFirebaseUuid(expectedUid)).thenReturn(Optional.of(mockUser));
+        when(administratorRepository.findByIdUser(mockUser.getUserId())).thenReturn(Optional.empty());
 
         LoginResponseDto response = loginUseCase.execute(loginDto);
 
