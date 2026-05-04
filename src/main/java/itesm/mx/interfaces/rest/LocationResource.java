@@ -14,6 +14,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
@@ -22,6 +29,7 @@ import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 @Path("/api/locations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Locations", description = "Location catalog and geospatial endpoints")
 public class LocationResource {
 
     @Inject
@@ -34,6 +42,12 @@ public class LocationResource {
     AuthenticatedUserContext authenticatedUserContext;
 
     @GET
+    @Operation(summary = "List locations", description = "Returns all registered locations for authenticated users.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Locations returned", content = @Content(schema = @Schema(implementation = GetLocationResponseDto[].class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getAllLocations() {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticacion");
@@ -48,6 +62,15 @@ public class LocationResource {
     }
 
     @POST
+    @Operation(summary = "Register location", description = "Creates or reuses a location record for authenticated users.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RegisterLocationDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "201", description = "Location created", content = @Content(schema = @Schema(implementation = GetLocationResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "409", description = "Location already exists or business conflict"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response registerLocation(RegisterLocationDto registerLocationDto) {
         if (registerLocationDto == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
