@@ -23,12 +23,20 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
 @Path("/api/vigilancias-fitosanitarias")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Vigilancia Fitosanitaria", description = "Fitosanitary monitoring endpoints")
 public class VigilanciaFitosanitariaResource {
 
     private static final Integer ADMIN_ROLE_ID = 1;
@@ -52,6 +60,12 @@ public class VigilanciaFitosanitariaResource {
     AuthenticatedUserContext authenticatedUserContext;
 
     @GET
+    @Operation(summary = "List vigilancias", description = "Returns every vigilancia fitosanitaria for authenticated users.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Vigilancias returned", content = @Content(schema = @Schema(implementation = GetVigilanciaFitosanitariaResponseDto[].class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getAllVigilanciasFitosanitarias() {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -67,6 +81,14 @@ public class VigilanciaFitosanitariaResource {
 
     @GET
     @Path("/{id}")
+    @Operation(summary = "Get vigilancia by id", description = "Returns a single vigilancia fitosanitaria by identifier.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Vigilancia returned", content = @Content(schema = @Schema(implementation = GetVigilanciaFitosanitariaResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid vigilancia id"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "404", description = "Vigilancia not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response getVigilanciaFitosanitariaById(@PathParam("id") Long id) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -85,6 +107,16 @@ public class VigilanciaFitosanitariaResource {
     }
 
     @POST
+    @Operation(summary = "Create vigilancia", description = "Creates a vigilancia fitosanitaria. Admin-only endpoint.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreateVigilanciaFitosanitariaDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "201", description = "Vigilancia created", content = @Content(schema = @Schema(implementation = GetVigilanciaFitosanitariaResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "409", description = "Vigilancia already exists or business conflict"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response createVigilanciaFitosanitaria(@Valid CreateVigilanciaFitosanitariaDto dto) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -110,6 +142,16 @@ public class VigilanciaFitosanitariaResource {
 
     @PUT
     @Path("/{id}")
+    @Operation(summary = "Update vigilancia", description = "Updates a vigilancia fitosanitaria. Admin-only endpoint.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UpdateVigilanciaFitosanitariaDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Vigilancia updated", content = @Content(schema = @Schema(implementation = GetVigilanciaFitosanitariaResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "404", description = "Vigilancia not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response updateVigilanciaFitosanitaria(@PathParam("id") Long id, @Valid UpdateVigilanciaFitosanitariaDto dto) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
@@ -135,6 +177,15 @@ public class VigilanciaFitosanitariaResource {
 
     @DELETE
     @Path("/{id}")
+    @Operation(summary = "Delete vigilancia", description = "Deletes a vigilancia fitosanitaria. Admin-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "204", description = "Vigilancia deleted"),
+            @APIResponse(responseCode = "400", description = "Invalid vigilancia id"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "404", description = "Vigilancia not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response deleteVigilanciaFitosanitaria(@PathParam("id") Long id) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
