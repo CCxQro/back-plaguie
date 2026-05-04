@@ -1,0 +1,58 @@
+# Cloud Build pipeline:
+#   1. Maven packages the Quarkus app (generates target/quarkus-app).
+#   2. Docker builds a runtime-only image using APP_VERSION.
+#   3. Pushes to Artifact Registry with :<version> and :latest tags.
+#   4. Deploys the selected version to Cloud Run.
+
+substitutions:
+  _REGION: us-central1
+  _REPOSITORY: back-plaguie
+  _IMAGE: back-plaguie-api
+  _SERVICE: back-plaguie-api
+  _PROJECT_ID: plaguie-494022
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+
+steps:
+  - id: package
+    name: maven:3.9-eclipse-temurin-17
+    entrypoint: ./mvnw
+    args: ['-B', '-DskipTests', 'package']
+
+  - id: build-and-push
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        VERSION="$${TAG_NAME:-$${SHORT_SHA:-dev}}"
+        IMAGE_BASE="${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}"
+        echo "Building $$IMAGE_BASE:$$VERSION"
+        docker build \
+          --build-arg APP_VERSION="$$VERSION" \
+          --tag "$$IMAGE_BASE:$$VERSION" \
+          --tag "$$IMAGE_BASE:latest" \
+          --file=Dockerfile \
+          .
+        docker push "$$IMAGE_BASE:$$VERSION"
+        docker push "$$IMAGE_BASE:latest"
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        VERSION="$${TAG_NAME:-$${SHORT_SHA:-dev}}"
+        IMAGE="${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}:$$VERSION"
+        gcloud run deploy ${_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated
+
+timeout: 1800s
