@@ -3,43 +3,43 @@
 -- ==========================================
 
 -- Estados
-INSERT INTO Estados (id_estado, nombre) VALUES (1, 'Jalisco');
-INSERT INTO Estados (id_estado, nombre) VALUES (2, 'Michoacán');
-INSERT INTO Estados (id_estado, nombre) VALUES (3, 'Sinaloa');
-INSERT INTO Estados (id_estado, nombre) VALUES (4, 'Sonora');
-INSERT INTO Estados (id_estado, nombre) VALUES (5, 'Veracruz');
+INSERT INTO Estados (id_estado, nombre) VALUES (1, 'jalisco');
+INSERT INTO Estados (id_estado, nombre) VALUES (2, 'michoacán');
+INSERT INTO Estados (id_estado, nombre) VALUES (3, 'sinaloa');
+INSERT INTO Estados (id_estado, nombre) VALUES (4, 'sonora');
+INSERT INTO Estados (id_estado, nombre) VALUES (5, 'veracruz');
 
 -- Municipios
-INSERT INTO Municipios (id_municipio, nombre) VALUES (1, 'Zapopan');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (2, 'Uruapan');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (3, 'Culiacán');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'Hermosillo');
-INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'Xalapa');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (1, 'zapopan');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (2, 'uruapan');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (3, 'culiacán');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (4, 'hermosillo');
+INSERT INTO Municipios (id_municipio, nombre) VALUES (5, 'xalapa');
 
 -- Localidades
-INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'Tesistán');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'San Juan Nuevo');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'El Dorado');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'Bahía Kino');
-INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'Banderilla');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (1, 'tesistan');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (2, 'san juan nuevo');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (3, 'el dorado');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (4, 'bahía kino');
+INSERT INTO Localidades (id_localidad, nombre) VALUES (5, 'banderilla');
 
 -- Predios
-INSERT INTO Predios (id_predio, nombre) VALUES (1, 'El Milagro');
-INSERT INTO Predios (id_predio, nombre) VALUES (2, 'La Esperanza');
-INSERT INTO Predios (id_predio, nombre) VALUES (3, 'Los Pinos');
-INSERT INTO Predios (id_predio, nombre) VALUES (4, 'Buenavista');
-INSERT INTO Predios (id_predio, nombre) VALUES (5, 'San José');
+INSERT INTO Predios (id_predio, nombre) VALUES (1, 'el milagro');
+INSERT INTO Predios (id_predio, nombre) VALUES (2, 'la esperanza');
+INSERT INTO Predios (id_predio, nombre) VALUES (3, 'los pinos');
+INSERT INTO Predios (id_predio, nombre) VALUES (4, 'buenavista');
+INSERT INTO Predios (id_predio, nombre) VALUES (5, 'san José');
 
 
 -- ==========================================
 -- 2. UBICACIONES
 -- (Dependen de Estados, Municipios, Localidades y Predios)
 -- ==========================================
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (1, 20.7500, -103.4800, 1, 1, 1, 1);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (2, 19.4138, -102.0558, 2, 2, 2, 2);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, 24.8053, -107.3941, 3, 3, 3, 3);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, 29.0729, -110.9559, 4, 4, 4, 4);
-INSERT INTO Ubicacion (id_ubicacion, latitud, longitud, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, 19.5437, -96.9101, 5, 5, 5, 5);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (1, ST_GeomFromText('POINT(-103.4800 20.7500)'), 1, 1, 1, 1);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (2, ST_GeomFromText('POINT(-102.0558 19.4138)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, ST_GeomFromText('POINT(-107.3941 24.8053)'), 3, 3, 3, 3);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, ST_GeomFromText('POINT(-110.9559 29.0729)'), 4, 4, 4, 4);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, ST_GeomFromText('POINT(-96.9101 19.5437)'), 5, 5, 5, 5);
 
 
 -- ==========================================
@@ -94,3 +94,76 @@ INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_us
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_usuario) VALUES (3, 1, 3, 13);
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_usuario) VALUES (4, 1, 4, 14);
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_ubicacion, id_usuario) VALUES (5, 1, 5, 15);
+
+
+-- ==========================================
+-- 5. VIGILANCIA FITOSANITARIA (MOCK DATA)
+-- ==========================================
+
+-- 5.1 Catalogos
+INSERT INTO Sistemas_Monitoreos (id_sistema_monitoreo, nombre) VALUES (1, 'Trampeo semanal');
+INSERT INTO Sistemas_Monitoreos (id_sistema_monitoreo, nombre) VALUES (2, 'Monitoreo visual');
+INSERT INTO Sistemas_Monitoreos (id_sistema_monitoreo, nombre) VALUES (3, 'Muestreo por cuadrantes');
+
+INSERT INTO Claves_Identificacion_plaga (id_cid, nombre) VALUES (1, 'CID-MOSCA-001');
+INSERT INTO Claves_Identificacion_plaga (id_cid, nombre) VALUES (2, 'CID-HONGO-002');
+INSERT INTO Claves_Identificacion_plaga (id_cid, nombre) VALUES (3, 'CID-ACARO-003');
+
+INSERT INTO Plaga (id_plaga, nombre) VALUES (1, 'Mosca de la fruta');
+INSERT INTO Plaga (id_plaga, nombre) VALUES (2, 'Roya asiatica');
+INSERT INTO Plaga (id_plaga, nombre) VALUES (3, 'Araña roja');
+
+INSERT INTO Hospedante (id_hospedante, nombre) VALUES (1, 'Mango');
+INSERT INTO Hospedante (id_hospedante, nombre) VALUES (2, 'Soya');
+INSERT INTO Hospedante (id_hospedante, nombre) VALUES (3, 'Tomate');
+
+INSERT INTO Variedad (id_variedad, nombre) VALUES (1, 'Ataulfo');
+INSERT INTO Variedad (id_variedad, nombre) VALUES (2, 'Huasteca 200');
+INSERT INTO Variedad (id_variedad, nombre) VALUES (3, 'Saladette');
+
+INSERT INTO Especie (id_especie, nombre) VALUES (1, 'Mangifera indica');
+INSERT INTO Especie (id_especie, nombre) VALUES (2, 'Glycine max');
+INSERT INTO Especie (id_especie, nombre) VALUES (3, 'Solanum lycopersicum');
+
+-- 5.2 Registros de vigilancia fitosanitaria
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp
+) VALUES (1, 1, 1, 20.75000000, -103.48000000, 1, 1, 1, 1, 1, 12.50);
+
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp
+) VALUES (2, 2, 2, 19.41380000, -102.05580000, 2, 2, 2, 2, 2, 8.25);
+
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp
+) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00);

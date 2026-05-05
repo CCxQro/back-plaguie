@@ -5,4 +5,5 @@ public class RegisterUserDto {
     public String email;
     public String password;
     public Integer roleId;
+    public RegisterLocationDto location;
 }

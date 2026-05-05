@@ -7,6 +7,8 @@ public class RegisterUserResponseDto {
     public String email;
     public Integer roleId;
     public String firebaseToken;
+    public Boolean isActive;
+    public GetLocationResponseDto location;
 
     public RegisterUserResponseDto(Long userId, String firebaseUuid, String name, String email, Integer roleId, String firebaseToken) {
         this.userId = userId;

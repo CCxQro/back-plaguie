@@ -3,8 +3,9 @@ package itesm.mx.application.usecase;
 import com.google.firebase.auth.FirebaseAuthException;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
-import itesm.mx.domain.models.User;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.application.usecase.users.RegisterUserUseCase;
+import itesm.mx.domain.models.user.User;
+import itesm.mx.domain.repository.user.UserRepository;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,63 +33,114 @@ class RegisterUserUseCaseTest {
     private RegisterUserUseCase registerUserUseCase;
 
     @Test
-    void execute_WhenRegisterUserDtoIsNull_ThrowsIllegalArgumentException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> registerUserUseCase.execute(null));
+    void execute_WhenValidRequest_CreatesUserAndReturnsResponse() throws FirebaseAuthException {
+        RegisterUserDto dto = new RegisterUserDto();
+        dto.name = "Ana Lopez";
+        dto.email = "ana@example.com";
+        dto.password = "Password123!";
+        dto.roleId = 2;
 
-        assertEquals("El cuerpo de la solicitud es requerido", exception.getMessage());
-        verifyNoInteractions(userRepository, firebaseUserManager);
+        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.empty());
+        when(firebaseUserManager.createFirebaseUser(dto.email, dto.password, dto.name)).thenReturn("uid_abc_123");
+
+        User saved = new User(42L, "uid_abc_123", dto.name, dto.email, dto.roleId, true);
+        when(userRepository.save(any(User.class))).thenReturn(saved);
+
+        when(firebaseUserManager.generateCustomToken("uid_abc_123")).thenReturn("custom_token_xyz");
+
+        RegisterUserResponseDto response = registerUserUseCase.execute(dto);
+
+        assertNotNull(response);
+        assertEquals(42L, response.userId);
+        assertEquals("uid_abc_123", response.firebaseUuid);
+        assertEquals(dto.name, response.name);
+        assertEquals(dto.email, response.email);
+        assertEquals(dto.roleId, response.roleId);
+        assertEquals("custom_token_xyz", response.firebaseToken);
+
+        verify(userRepository).findByEmail(dto.email);
+        verify(firebaseUserManager).createFirebaseUser(dto.email, dto.password, dto.name);
+        verify(userRepository).save(any(User.class));
+        verify(firebaseUserManager).generateCustomToken("uid_abc_123");
+    }
+
+    @Test
+    void execute_WhenDtoIsNull_ThrowsIllegalArgumentException() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> registerUserUseCase.execute(null));
+        assertEquals("El cuerpo de la solicitud es requerido", ex.getMessage());
     }
 
     @Test
     void execute_WhenEmailAlreadyExists_ThrowsIllegalStateException() {
-        RegisterUserDto registerUserDto = validRegisterUserDto();
-        User existingUser = new User(99L, "existing-uid", "Existing User", registerUserDto.email, 1, true);
+        RegisterUserDto dto = new RegisterUserDto();
+        dto.name = "X";
+        dto.email = "exist@example.com";
+        dto.password = "p";
+        dto.roleId = 1;
 
-        when(userRepository.findByEmail(registerUserDto.email)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.of(new User()));
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> registerUserUseCase.execute(registerUserDto));
-
-        assertEquals("Ya existe un usuario registrado con este correo electrónico", exception.getMessage());
-        verify(userRepository).findByEmail(registerUserDto.email);
-        verifyNoInteractions(firebaseUserManager);
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> registerUserUseCase.execute(dto));
+        assertEquals("Ya existe un usuario registrado con este correo electrónico", ex.getMessage());
     }
 
     @Test
-    void execute_WhenDataIsValid_ReturnsRegisterUserResponseDto() throws FirebaseAuthException {
-        RegisterUserDto registerUserDto = validRegisterUserDto();
-        String firebaseUuid = "firebase-uid-789";
-        String customToken = "custom-token-abc";
-        User savedUser = new User(22L, firebaseUuid, registerUserDto.name, registerUserDto.email, registerUserDto.roleId, true);
+    void execute_WhenFirebaseCreateThrows_EmailExists_MapsToIllegalStateException() throws FirebaseAuthException {
+        RegisterUserDto dto = new RegisterUserDto();
+        dto.name = "Y";
+        dto.email = "y@example.com";
+        dto.password = "p";
+        dto.roleId = 1;
 
-        when(userRepository.findByEmail(registerUserDto.email)).thenReturn(Optional.empty());
-        when(firebaseUserManager.createFirebaseUser(registerUserDto.email, registerUserDto.password, registerUserDto.name)).thenReturn(firebaseUuid);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(firebaseUserManager.generateCustomToken(firebaseUuid)).thenReturn(customToken);
+        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.empty());
 
-        RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
+        FirebaseAuthException mockEx = mock(FirebaseAuthException.class);
+        when(mockEx.getMessage()).thenReturn("EMAIL_EXISTS");
+        when(firebaseUserManager.createFirebaseUser(anyString(), anyString(), anyString())).thenThrow(mockEx);
 
-        assertNotNull(response);
-        assertEquals(22L, response.userId);
-        assertEquals(firebaseUuid, response.firebaseUuid);
-        assertEquals(registerUserDto.name, response.name);
-        assertEquals(registerUserDto.email, response.email);
-        assertEquals(registerUserDto.roleId, response.roleId);
-        assertEquals(customToken, response.firebaseToken);
-
-        verify(userRepository).findByEmail(registerUserDto.email);
-        verify(firebaseUserManager).createFirebaseUser(registerUserDto.email, registerUserDto.password, registerUserDto.name);
-        verify(userRepository).save(any(User.class));
-        verify(firebaseUserManager).generateCustomToken(firebaseUuid);
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> registerUserUseCase.execute(dto));
+        assertEquals("El correo ya está registrado en Firebase", ex.getMessage());
     }
 
-    private RegisterUserDto validRegisterUserDto() {
-        RegisterUserDto registerUserDto = new RegisterUserDto();
-        registerUserDto.name = "Juan Perez";
-        registerUserDto.email = "juan.perez@example.com";
-        registerUserDto.password = "StrongPassword123!";
-        registerUserDto.roleId = 1;
-        return registerUserDto;
+    @Test
+    void execute_WhenSaveThrows_RollsBackAndThrowsIllegalStateException() throws FirebaseAuthException {
+        RegisterUserDto dto = new RegisterUserDto();
+        dto.name = "Z";
+        dto.email = "z@example.com";
+        dto.password = "p";
+        dto.roleId = 1;
+
+        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.empty());
+        when(firebaseUserManager.createFirebaseUser(anyString(), anyString(), anyString())).thenReturn("uid_to_rollback");
+        when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("DB error"));
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> registerUserUseCase.execute(dto));
+        assertTrue(ex.getMessage().contains("No se pudo guardar el usuario en la base de datos"));
+
+        verify(firebaseUserManager).deleteFirebaseUser("uid_to_rollback");
+    }
+
+    @Test
+    void execute_WhenGenerateTokenFails_RollsBackAndThrowsSecurityException() throws FirebaseAuthException {
+        RegisterUserDto dto = new RegisterUserDto();
+        dto.name = "W";
+        dto.email = "w@example.com";
+        dto.password = "p";
+        dto.roleId = 1;
+
+        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.empty());
+        when(firebaseUserManager.createFirebaseUser(anyString(), anyString(), anyString())).thenReturn("uid_gen_fail");
+
+        User saved = new User(5L, "uid_gen_fail", dto.name, dto.email, dto.roleId, true);
+        when(userRepository.save(any(User.class))).thenReturn(saved);
+
+        FirebaseAuthException mockEx = mock(FirebaseAuthException.class);
+        when(mockEx.getMessage()).thenReturn("some error generating token");
+        when(firebaseUserManager.generateCustomToken("uid_gen_fail")).thenThrow(mockEx);
+
+        SecurityException ex = assertThrows(SecurityException.class, () -> registerUserUseCase.execute(dto));
+        assertTrue(ex.getMessage().contains("Error al generar token"));
+
+        verify(firebaseUserManager).deleteFirebaseUser("uid_gen_fail");
     }
 }
