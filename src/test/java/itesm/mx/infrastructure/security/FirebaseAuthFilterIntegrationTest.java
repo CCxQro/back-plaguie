@@ -3,10 +3,12 @@ package itesm.mx.infrastructure.security;
 import com.google.firebase.auth.FirebaseAuthException;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
-import itesm.mx.infrastructure.persistence.repository.UserRepositoryImpl;
+import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
+import itesm.mx.support.H2TestProfile;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
+@TestProfile(H2TestProfile.class)
 class FirebaseAuthFilterIntegrationTest {
 
     @InjectMock

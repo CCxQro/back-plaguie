@@ -1,6 +1,7 @@
 package itesm.mx.infrastructure.persistence.entity.location;
 
 import jakarta.persistence.*;
+import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "Ubicacion")
@@ -11,11 +12,8 @@ public class LocationEntity {
     @Column(name = "id_ubicacion")
     public Long locationId;
 
-    @Column(name = "latitud")
-    public Double latitude;
-
-    @Column(name = "longitud")
-    public Double longitude;
+    @Column(name = "coordenadas", columnDefinition = "POINT")
+    public Point coordinates;
 
     @Column(name = "id_estado", nullable = false)
     public Long stateId;
