@@ -57,7 +57,7 @@ class LoginUseCaseTest {
         loginDto.firebaseToken = "token_valido_de_prueba";
         String expectedUid = "uid_firebase_123";
         
-        User mockUser = new User(1L, expectedUid, "Juan Perez", "Juan@gmail.com", 1, true);
+        User mockUser = new User(1L, expectedUid, "Juan Perez", "juan@correo.com", 1, true);
 
         when(firebaseTokenVerifierInstance.isResolvable()).thenReturn(true);
         when(firebaseTokenVerifierInstance.get()).thenReturn(firebaseTokenVerifier);
