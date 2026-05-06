@@ -10,7 +10,7 @@ import itesm.mx.domain.models.user.User;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.application.usecase.users.RegisterUserUseCase;
-import itesm.mx.infrastructure.persistence.repository.UserRepositoryImpl;
+import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;

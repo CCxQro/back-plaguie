@@ -1,7 +1,7 @@
-package itesm.mx.application.usecase.users;
+package itesm.mx.application.usecase.users.subUsers;
 
 import itesm.mx.domain.models.user.Farmer;
-import itesm.mx.domain.repository.FarmerRepository;
+import itesm.mx.domain.repository.user.FarmerRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
