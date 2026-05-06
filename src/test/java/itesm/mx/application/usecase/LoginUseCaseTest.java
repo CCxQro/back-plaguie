@@ -5,6 +5,7 @@ import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.application.usecase.users.LoginUseCase;
 import itesm.mx.domain.models.user.User;
+import itesm.mx.domain.repository.location.LocationRepository;
 import itesm.mx.domain.repository.user.AdministratorRepository;
 import itesm.mx.domain.repository.user.FarmerRepository;
 import itesm.mx.domain.repository.user.TechnicalSellerRepository;
@@ -57,7 +58,7 @@ class LoginUseCaseTest {
         loginDto.firebaseToken = "token_valido_de_prueba";
         String expectedUid = "uid_firebase_123";
         
-        User mockUser = new User(1L, expectedUid, "Juan Perez", "Juan@gmail.com", 1, true);
+        User mockUser = new User(1L, expectedUid, "Juan Perez", "juan@correo.com", 1, true);
 
         when(firebaseTokenVerifierInstance.isResolvable()).thenReturn(true);
         when(firebaseTokenVerifierInstance.get()).thenReturn(firebaseTokenVerifier);
@@ -65,12 +66,13 @@ class LoginUseCaseTest {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(anyString())).thenReturn(expectedUid);
         
         when(userRepository.findByFirebaseUuid(expectedUid)).thenReturn(Optional.of(mockUser));
+        when(administratorRepository.findByIdUser(mockUser.getUserId())).thenReturn(Optional.empty());
 
         LoginResponseDto response = loginUseCase.execute(loginDto);
 
         assertNotNull(response);
         assertEquals("Juan Perez", response.name);
-        assertEquals("Juan@gmail.com", response.email);
+        assertEquals("juan@correo.com", response.email);
         
         verify(firebaseTokenVerifier).verifyTokenAndGetUid("token_valido_de_prueba");
         verify(userRepository).findByFirebaseUuid(expectedUid);

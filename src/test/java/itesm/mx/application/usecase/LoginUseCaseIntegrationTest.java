@@ -6,6 +6,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
+import itesm.mx.application.usecase.users.LoginUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.application.usecase.users.LoginUseCase;
