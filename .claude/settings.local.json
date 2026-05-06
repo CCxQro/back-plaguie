@@ -3,7 +3,10 @@
     "allow": [
       "Bash(./mvnw test-compile *)",
       "Bash(./mvnw test *)",
-      "Bash(./mvnw compile *)"
+      "Bash(./mvnw compile *)",
+      "Bash(curl:*)",
+      "Bash(mysql:*)",
+      "Bash(jq:*)"
     ]
   }
 }

@@ -138,3 +138,13 @@ INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (7,  12, 
 INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (8,  13, 'Paquete',  2);
 INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (9,  14, 'Frasco',   2);
 INSERT INTO Unidades (id_unidad, id_usuario, nombre, id_status) VALUES (10, 15, 'Cubeta',   2);
+
+-- ==========================================
+-- 7. PROVEEDORES (registrados por técnicos vendedores)
+-- ==========================================
+
+INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (1, 11, 'AgroSuministros del Norte');
+INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (2, 12, 'Distribuidora Campo Verde');
+INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (3, 13, 'Insumos Agrícolas Sinaloa');
+INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (4, 14, 'Comercializadora del Pacífico');
+INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semillas y Abonos del Golfo');
