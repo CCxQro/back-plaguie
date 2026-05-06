@@ -51,3 +51,4 @@ firebase-dev.json
 
 # Claude Code
 CLAUDE.md
+.claude/settings.local.json
