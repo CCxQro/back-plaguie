@@ -28,12 +28,20 @@ import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.application.usecase.users.LoginUseCase;
 import itesm.mx.application.usecase.users.RegisterUserUseCase;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
 @Path("/api/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Auth", description = "Authentication and user registration endpoints")
 public class AuthResource {
 
     @Inject
@@ -59,6 +67,14 @@ public class AuthResource {
 
     @POST
     @Path("/login")
+    @Operation(summary = "Login with Firebase token", description = "Validates a Firebase ID token and returns the local user profile.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoginDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Login successful", content = @Content(schema = @Schema(implementation = LoginResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Invalid Firebase token"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response login(LoginDto loginDto) {
         if (loginDto == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
@@ -79,6 +95,16 @@ public class AuthResource {
 
     @POST
     @Path("/register")
+    @Operation(summary = "Register a user", description = "Creates a Firebase user and the matching local domain user. Admin-only endpoint.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RegisterUserDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "201", description = "User created", content = @Content(schema = @Schema(implementation = RegisterUserResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "409", description = "User already exists or business conflict"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response register(RegisterUserDto registerUserDto) {
         if (registerUserDto == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
@@ -137,6 +163,14 @@ public class AuthResource {
 
     @POST
     @Path("/signup")
+    @Operation(summary = "Public signup", description = "Registers a seller user without requiring an existing authenticated admin.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SignupDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "201", description = "User created", content = @Content(schema = @Schema(implementation = RegisterUserResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "409", description = "User already exists or business conflict"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
     public Response signup(SignupDto signupDto) {
         if (signupDto == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
