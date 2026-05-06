@@ -4,7 +4,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
 import itesm.mx.domain.models.user.User;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 import itesm.mx.application.usecase.users.RegisterUserUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import org.junit.jupiter.api.Test;

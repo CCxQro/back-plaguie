@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import itesm.mx.application.dto.GetUserResponseDto;
 import itesm.mx.domain.models.user.User;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 
 @ApplicationScoped
 public class GetUserByIdUseCase {

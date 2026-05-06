@@ -3,7 +3,7 @@ package itesm.mx.application.usecase.users;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import itesm.mx.domain.repository.UserRepository;
+import itesm.mx.domain.repository.user.UserRepository;
 
 @ApplicationScoped
 public class DeactivateUserUseCase {

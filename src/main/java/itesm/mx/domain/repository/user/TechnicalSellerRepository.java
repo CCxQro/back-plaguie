@@ -1,4 +1,4 @@
-package itesm.mx.domain.repository;
+package itesm.mx.domain.repository.user;
 
 import itesm.mx.domain.models.user.TechnicalSeller;
 

@@ -9,7 +9,7 @@ import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.application.usecase.users.LoginUseCase;
-import itesm.mx.infrastructure.persistence.repository.UserRepositoryImpl;
+import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,8 +1,8 @@
-package itesm.mx.infrastructure.persistence.repository;
+package itesm.mx.infrastructure.persistence.repository.user;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import itesm.mx.domain.models.user.TechnicalSeller;
-import itesm.mx.domain.repository.TechnicalSellerRepository;
+import itesm.mx.domain.repository.user.TechnicalSellerRepository;
 import itesm.mx.infrastructure.mapper.user.TechnicalSellerMapper;
 import itesm.mx.infrastructure.persistence.entity.users.TechnicalSellerEntity;
 import jakarta.enterprise.context.ApplicationScoped;

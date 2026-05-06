@@ -1,8 +1,8 @@
-package itesm.mx.infrastructure.persistence.repository;
+package itesm.mx.infrastructure.persistence.repository.user;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import itesm.mx.domain.models.user.Administrator;
-import itesm.mx.domain.repository.AdministratorRepository;
+import itesm.mx.domain.repository.user.AdministratorRepository;
 import itesm.mx.infrastructure.mapper.user.AdministratorMapper;
 import itesm.mx.infrastructure.persistence.entity.users.AdministratorEntity;
 import jakarta.enterprise.context.ApplicationScoped;
