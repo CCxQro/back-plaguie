@@ -16,6 +16,7 @@ import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
 import itesm.mx.support.H2TestProfile;
+import itesm.mx.application.dto.UserPageResponseDto;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +26,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -110,12 +110,13 @@ class UserResourceIntegrationTest {
     }
 
     @Test
-    void getUsers_WhenAuthenticatedAsAdmin_Returns200AndList() throws Exception {
+    void getUsers_WhenAuthenticatedAsAdmin_Returns200WithPagedEnvelope() throws Exception {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(ADMIN_TOKEN)).thenReturn("uuid-admin-user");
-        when(getAllUsersUseCase.execute()).thenReturn(List.of(
-                new GetUserResponseDto(adminId, "uuid-admin-user", "Admin User", "admin@itesm.mx", 1, true),
-                new GetUserResponseDto(farmerId, "uuid-farmer-user", "Farmer User", "farmer@itesm.mx", 2, true)
-        ));
+        when(getAllUsersUseCase.execute(anyInt(), anyInt(), any(), any(), any()))
+                .thenReturn(new UserPageResponseDto(List.of(
+                        new GetUserResponseDto(adminId, "uuid-admin-user", "Admin User", "admin@itesm.mx", 1, true),
+                        new GetUserResponseDto(farmerId, "uuid-farmer-user", "Farmer User", "farmer@itesm.mx", 2, true)
+                ), 2L, 0, 10));
 
         given()
             .header("Authorization", "Bearer " + ADMIN_TOKEN)
@@ -123,7 +124,50 @@ class UserResourceIntegrationTest {
             .get("/api/users")
         .then()
             .statusCode(200)
-            .body("size()", equalTo(2));
+            .body("content.size()", equalTo(2))
+            .body("totalElements", equalTo(2))
+            .body("totalPages", equalTo(1))
+            .body("page", equalTo(0))
+            .body("size", equalTo(10));
+    }
+
+    @Test
+    void getUsers_WithQueryParams_ForwardedToUseCase() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(ADMIN_TOKEN)).thenReturn("uuid-admin-user");
+        when(getAllUsersUseCase.execute(eq(1), eq(5), eq("farm"), eq(2), eq(true)))
+                .thenReturn(new UserPageResponseDto(List.of(
+                        new GetUserResponseDto(farmerId, "uuid-farmer-user", "Farmer User", "farmer@itesm.mx", 2, true)
+                ), 1L, 1, 5));
+
+        given()
+            .header("Authorization", "Bearer " + ADMIN_TOKEN)
+            .queryParam("page", 1)
+            .queryParam("size", 5)
+            .queryParam("name", "farm")
+            .queryParam("roleId", 2)
+            .queryParam("isActive", true)
+        .when()
+            .get("/api/users")
+        .then()
+            .statusCode(200)
+            .body("content.size()", equalTo(1))
+            .body("totalElements", equalTo(1));
+    }
+
+    @Test
+    void getUsers_WhenInvalidPageParam_Returns400() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(ADMIN_TOKEN)).thenReturn("uuid-admin-user");
+        when(getAllUsersUseCase.execute(eq(-1), anyInt(), any(), any(), any()))
+                .thenThrow(new IllegalArgumentException("El número de página no puede ser negativo"));
+
+        given()
+            .header("Authorization", "Bearer " + ADMIN_TOKEN)
+            .queryParam("page", -1)
+        .when()
+            .get("/api/users")
+        .then()
+            .statusCode(400)
+            .body("error", equalTo("El número de página no puede ser negativo"));
     }
 
     // --- GET /api/users/{id} ---
