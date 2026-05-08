@@ -52,6 +52,10 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
                 return;
             }
             User user = userOptional.get();
+            if (Boolean.FALSE.equals(user.getActive())) {
+                requestContext.abortWith(Response.status(403).build());
+                return;
+            }
             CurrentUser currentUser = new CurrentUser(
                     user.getUserId(), user.getFirebaseUuid(), user.getName(), user.getEmail(), user.getRoleId()
             );
