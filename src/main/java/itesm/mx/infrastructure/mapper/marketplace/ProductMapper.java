@@ -20,6 +20,7 @@ public class ProductMapper {
         entity.unitId = product.getUnit().getUnitId();
         entity.description = product.getDescription();
         entity.statusId = product.getStatus().getStatusId();
+        entity.firebaseImageId = product.getFirebaseImageId();
         return entity;
     }
 
@@ -35,6 +36,7 @@ public class ProductMapper {
         product.setUnit(mapUnit(entity));
         product.setDescription(entity.description);
         product.setStatus(mapStatus(entity));
+        product.setFirebaseImageId(entity.firebaseImageId);
         return product;
     }
 
