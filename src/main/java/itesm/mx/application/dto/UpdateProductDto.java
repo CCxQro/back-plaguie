@@ -9,4 +9,5 @@ public class UpdateProductDto {
     public Long unitId;
     public String description;
     public Long statusId;
+    public String firebaseImageId;
 }

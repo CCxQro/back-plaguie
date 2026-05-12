@@ -220,3 +220,26 @@ INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (2, 12, 'Distr
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (3, 13, 'Insumos Agrícolas Sinaloa');
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (4, 14, 'Comercializadora del Pacífico');
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semillas y Abonos del Golfo');
+
+-- ==========================================
+-- 8. PRODUCTOS
+-- (id_vendedor referencia id_tecnico_vendedor en Tecnico_Vendedor)
+-- ==========================================
+
+-- Vendedor 1 (tec1 / TRoberto) — proveedor AgroSuministros del Norte
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1001, 1, 'Fertilizante NPK 20-20-20', 'FERT-001', 1, 1, 250.00, 1, 'Fertilizante de liberación controlada, triple 20, presentación granular de 1 kg.', 1, NULL);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1002, 1, 'Herbicida Glifosato 480 SL', 'HERB-001', 2, 1, 180.50, 2, 'Herbicida sistémico de amplio espectro, concentrado soluble 480 g/L.', 1, NULL);
+
+-- Vendedor 2 (tec2 / TAna) — proveedor Distribuidora Campo Verde
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1003, 2, 'Insecticida Clorpirifos 480 EC', 'INSE-001', 3, 2, 320.00, 2, 'Insecticida organofosforado emulsionable, control de plagas masticadoras y chupadores.', 2, NULL);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1004, 2, 'Fungicida Mancozeb 80 WP', 'FUNG-001', 4, 2, 145.00, 1, 'Fungicida de contacto en polvo mojable 80%, control preventivo de enfermedades foliares.', 2, NULL);
+
+-- Vendedor 3 (tec3 / TLuis) — proveedor Insumos Agrícolas Sinaloa
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1005, 3, 'Semilla Maíz Híbrido H-520', 'SEMI-001', 5, 3, 890.00, 6, 'Semilla certificada de maíz blanco híbrido de alto rendimiento, tolerante a sequía.', 1, NULL);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1006, 3, 'Azadón Forjado Mango 150 cm', 'HERR-001', 6, 3, 95.00, 8, 'Azadón de acero forjado con mango de madera de 150 cm, uso general en labranza.', 3, NULL);
+
+-- Vendedor 4 (tec4 / TSofia) — proveedor Comercializadora del Pacífico
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1007, 4, 'Kit Sistema de Goteo 16 mm', 'RIEG-001', 7, 4, 1250.00, 6, 'Kit de riego por goteo para 100 m2, incluye manguera de 16 mm, goteros y conectores.', 1, NULL);
+
+-- Vendedor 5 (tec5 / TJorge) — proveedor Semillas y Abonos del Golfo
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1008, 5, 'Abono Orgánico Composta Plus', 'ABON-001', 8, 5, 75.00, 7, 'Abono orgánico a base de composta madura enriquecida con lombricomposta, bolsa de 20 kg.', 1, NULL);
