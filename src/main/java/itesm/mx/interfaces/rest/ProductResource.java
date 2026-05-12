@@ -190,7 +190,7 @@ public class ProductResource {
         status.setStatusId(dto.statusId);
 
         return new Product(skuSellerId, seller, dto.name, dto.sku,
-                category, provider, dto.unitValue, unit, dto.description, status);
+                category, provider, dto.unitValue, unit, dto.description, status, dto.firebaseImageId);
     }
 
     private Product buildProductFromUpdateDto(UpdateProductDto dto) {
@@ -207,7 +207,7 @@ public class ProductResource {
         status.setStatusId(dto.statusId);
 
         return new Product(null, null, dto.name, dto.sku,
-                category, provider, dto.unitValue, unit, dto.description, status);
+                category, provider, dto.unitValue, unit, dto.description, status, dto.firebaseImageId);
     }
 
     private ProductResponseDto toResponseDto(Product product) {
@@ -247,6 +247,8 @@ public class ProductResource {
             dto.statusId = product.getStatus().getStatusId();
             dto.statusName = product.getStatus().getName();
         }
+
+        dto.firebaseImageId = product.getFirebaseImageId();
 
         return dto;
     }
