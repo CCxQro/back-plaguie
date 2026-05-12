@@ -13,12 +13,13 @@ public class Product {
     private Unit unit;
     private String description;
     private Status status;
+    private String firebaseImageId;
 
     public Product() {}
 
     public Product(Long skuSellerId, TechnicalSeller seller, String name, String sku,
                    Category category, Provider provider, Double unitValue, Unit unit,
-                   String description, Status status) {
+                   String description, Status status, String firebaseImageId) {
         this.skuSellerId = skuSellerId;
         this.seller = seller;
         this.name = name;
@@ -29,6 +30,7 @@ public class Product {
         this.unit = unit;
         this.description = description;
         this.status = status;
+        this.firebaseImageId = firebaseImageId;
     }
 
     public Long getSkuSellerId() { return skuSellerId; }
@@ -60,4 +62,7 @@ public class Product {
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+
+    public String getFirebaseImageId() { return firebaseImageId; }
+    public void setFirebaseImageId(String firebaseImageId) { this.firebaseImageId = firebaseImageId; }
 }

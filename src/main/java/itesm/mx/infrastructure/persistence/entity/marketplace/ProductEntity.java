@@ -38,6 +38,9 @@ public class ProductEntity {
     @Column(name = "id_status", nullable = false)
     public Long statusId;
 
+    @Column(name = "imagen_firebase_id")
+    public String firebaseImageId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_vendedor", referencedColumnName = "id_tecnico_vendedor", insertable = false, updatable = false)
     public TechnicalSellerEntity seller;

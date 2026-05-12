@@ -12,7 +12,7 @@ public class LocationEntity {
     @Column(name = "id_ubicacion")
     public Long locationId;
 
-    @Column(name = "coordenadas", columnDefinition = "POINT")
+    @Column(name = "coordenadas")
     public Point coordinates;
 
     @Column(name = "id_estado", nullable = false)
