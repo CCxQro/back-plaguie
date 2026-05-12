@@ -10,6 +10,7 @@ import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ class GetAllUsersUseCaseIntegrationTest {
     @Inject
     UserRepositoryImpl userRepository;
 
+    @Inject
+    EntityManager em;
+
     @InjectMock
     FirebaseUserManager firebaseUserManager;
 
@@ -35,6 +39,17 @@ class GetAllUsersUseCaseIntegrationTest {
     @BeforeEach
     @Transactional
     void setup() {
+        em.createQuery("delete from OrderDetailEntity").executeUpdate();
+        em.createQuery("delete from OrderEntity").executeUpdate();
+        em.createQuery("delete from OrderStatusEntity").executeUpdate();
+        em.createQuery("delete from ProductEntity").executeUpdate();
+        em.createQuery("delete from CategoryEntity").executeUpdate();
+        em.createQuery("delete from ProviderEntity").executeUpdate();
+        em.createQuery("delete from UnitEntity").executeUpdate();
+        em.createQuery("delete from StatusEntity").executeUpdate();
+        em.createQuery("delete from ColorEntity").executeUpdate();
+        em.createQuery("delete from FarmerEntity").executeUpdate();
+        em.createQuery("delete from TechnicalSellerEntity").executeUpdate();
         userRepository.deleteAll();
 
         UserEntity admin = new UserEntity();
