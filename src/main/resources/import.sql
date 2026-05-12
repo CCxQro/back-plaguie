@@ -222,24 +222,70 @@ INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (4, 14, 'Comer
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semillas y Abonos del Golfo');
 
 -- ==========================================
--- 8. PRODUCTOS
--- (id_vendedor referencia id_tecnico_vendedor en Tecnico_Vendedor)
+-- 8. PRODUCTOS (2 por vendedor, 10 total; id_status=1 Accepted)
 -- ==========================================
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1001, 1, 'Fertilizante NPK 20-20-20',  'PLG-001', 1, 1, 250.0, 1, 'Fertilizante balanceado para cultivos', 1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1002, 1, 'Herbicida Glifosato 36%',    'PLG-002', 2, 1, 180.0, 2, 'Control de malezas de hoja ancha',     1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1003, 2, 'Insecticida Clorpirifos 48E','PLG-003', 3, 2, 320.0, 2, 'Control de plagas del suelo',          1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1004, 2, 'Fungicida Mancozeb 80%',    'PLG-004', 4, 2, 145.0, 1, 'Proteccion contra hongos foliares',    1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1005, 3, 'Semilla Maiz Hibrido H-318','PLG-005', 5, 3, 890.0, 1, 'Semilla certificada alto rendimiento', 1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1006, 3, 'Semilla Sorgo Hibrido H-50','PLG-006', 5, 3, 650.0, 1, 'Semilla sorgo resistente a sequia',    1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1007, 4, 'Bioestimulante Auxinas',    'PLG-007', 1, 4,  95.0, 2, 'Promotor de enraizamiento',            1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1008, 4, 'Sulfato de Magnesio',       'PLG-008', 2, 4,  60.0, 1, 'Corrector de deficiencias de Mg',     1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1009, 5, 'Abono Organico Compostado', 'PLG-009', 8, 5,  45.0, 1, 'Mejora estructura del suelo',          1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1);
 
--- Vendedor 1 (tec1 / TRoberto) — proveedor AgroSuministros del Norte
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1001, 1, 'Fertilizante NPK 20-20-20', 'FERT-001', 1, 1, 250.00, 1, 'Fertilizante de liberación controlada, triple 20, presentación granular de 1 kg.', 1, NULL);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1002, 1, 'Herbicida Glifosato 480 SL', 'HERB-001', 2, 1, 180.50, 2, 'Herbicida sistémico de amplio espectro, concentrado soluble 480 g/L.', 1, NULL);
+-- ==========================================
+-- 9. ESTADOS_PEDIDO
+-- ==========================================
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (1, 'Pendiente');
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (2, 'Confirmado');
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (3, 'En camino');
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (4, 'Entregado');
 
--- Vendedor 2 (tec2 / TAna) — proveedor Distribuidora Campo Verde
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1003, 2, 'Insecticida Clorpirifos 480 EC', 'INSE-001', 3, 2, 320.00, 2, 'Insecticida organofosforado emulsionable, control de plagas masticadoras y chupadores.', 2, NULL);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1004, 2, 'Fungicida Mancozeb 80 WP', 'FUNG-001', 4, 2, 145.00, 1, 'Fungicida de contacto en polvo mojable 80%, control preventivo de enfermedades foliares.', 2, NULL);
+-- ==========================================
+-- 10. PEDIDOS (10 órdenes; id_agricultor 1-5 / id_vendedor 1-5)
+-- ==========================================
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (1,  1, 1, '2025-01-10 10:00:00', 4,  860.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (2,  2, 1, '2025-01-15 11:30:00', 3,  610.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (3,  3, 2, '2025-02-01 09:00:00', 4,  610.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (4,  4, 2, '2025-02-14 14:00:00', 2,  785.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (5,  1, 3, '2025-03-05 08:45:00', 1, 1540.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (6,  5, 3, '2025-03-20 16:00:00', 2, 1780.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (7,  2, 4, '2025-04-02 12:00:00', 4,  405.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (8,  3, 4, '2025-04-10 09:00:00', 3,  370.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (9,  4, 5, '2025-04-18 10:30:00', 2,  315.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (10, 5, 5, '2025-05-01 09:15:00', 1,  240.00);
 
--- Vendedor 3 (tec3 / TLuis) — proveedor Insumos Agrícolas Sinaloa
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1005, 3, 'Semilla Maíz Híbrido H-520', 'SEMI-001', 5, 3, 890.00, 6, 'Semilla certificada de maíz blanco híbrido de alto rendimiento, tolerante a sequía.', 1, NULL);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1006, 3, 'Azadón Forjado Mango 150 cm', 'HERR-001', 6, 3, 95.00, 8, 'Azadón de acero forjado con mango de madera de 150 cm, uso general en labranza.', 3, NULL);
-
--- Vendedor 4 (tec4 / TSofia) — proveedor Comercializadora del Pacífico
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1007, 4, 'Kit Sistema de Goteo 16 mm', 'RIEG-001', 7, 4, 1250.00, 6, 'Kit de riego por goteo para 100 m2, incluye manguera de 16 mm, goteros y conectores.', 1, NULL);
-
--- Vendedor 5 (tec5 / TJorge) — proveedor Semillas y Abonos del Golfo
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1008, 5, 'Abono Orgánico Composta Plus', 'ABON-001', 8, 5, 75.00, 7, 'Abono orgánico a base de composta madura enriquecida con lombricomposta, bolsa de 20 kg.', 1, NULL);
+-- ==========================================
+-- 11. DETALLE_PEDIDO (19 líneas; totales verificados)
+-- ==========================================
+-- Pedido 1: 2x1001(250) + 2x1002(180) = 860
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (1,  1, 1001, 2, 250.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (2,  1, 1002, 2, 180.0);
+-- Pedido 2: 1x1001(250) + 2x1002(180) = 610
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (3,  2, 1001, 1, 250.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (4,  2, 1002, 2, 180.0);
+-- Pedido 3: 1x1003(320) + 2x1004(145) = 610
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (5,  3, 1003, 1, 320.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (6,  3, 1004, 2, 145.0);
+-- Pedido 4: 2x1003(320) + 1x1004(145) = 785
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (7,  4, 1003, 2, 320.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (8,  4, 1004, 1, 145.0);
+-- Pedido 5: 1x1005(890) + 1x1006(650) = 1540
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (9,  5, 1005, 1, 890.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (10, 5, 1006, 1, 650.0);
+-- Pedido 6: 2x1005(890) = 1780
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (11, 6, 1005, 2, 890.0);
+-- Pedido 7: 3x1007(95) + 2x1008(60) = 405
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (12, 7, 1007, 3, 95.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (13, 7, 1008, 2, 60.0);
+-- Pedido 8: 2x1007(95) + 3x1008(60) = 370
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (14, 8, 1007, 2, 95.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (15, 8, 1008, 3, 60.0);
+-- Pedido 9: 5x1009(45) + 3x1010(30) = 315
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (16, 9, 1009, 5, 45.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (17, 9, 1010, 3, 30.0);
+-- Pedido 10: 4x1009(45) + 2x1010(30) = 240
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (18, 10, 1009, 4, 45.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (19, 10, 1010, 2, 30.0);
