@@ -167,3 +167,36 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_especie,
 	ahosp
 ) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00);
+
+-- ==========================================
+-- 8. CATÁLOGOS DE PARCELA
+-- ==========================================
+
+-- Estados de parcela
+INSERT INTO Estados_Parcelas (id_estado_parcela, nombre) VALUES (1, 'Activa');
+INSERT INTO Estados_Parcelas (id_estado_parcela, nombre) VALUES (2, 'Inactiva');
+INSERT INTO Estados_Parcelas (id_estado_parcela, nombre) VALUES (3, 'En preparación');
+
+-- Tipos de cultivo
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (1, 'Maíz',      '2025-05-01', '2025-10-15');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (2, 'Tomate',    '2025-03-01', '2025-07-30');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (3, 'Aguacate',  '2025-01-15', '2025-09-30');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (4, 'Caña',      '2025-06-01', '2026-03-01');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (5, 'Mango',     '2025-02-01', '2025-08-15');
+
+-- Sistemas de riego
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (1, 'Goteo');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (2, 'Aspersión');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (3, 'Gravedad');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (4, 'Microaspersión');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (5, 'Temporal');
+
+-- ==========================================
+-- 9. PARCELAS
+-- (Dependen de Agricultor, Ubicacion, Estados_Parcelas, Tipos_Cultivos y Sistemas_Riego)
+-- ==========================================
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (1, 'Parcela El Milagro',   12.50, '2025-05-01', '2025-10-15', 6.5, 1, 1, 1, 1, 1);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (2, 'Parcela La Esperanza', 8.75,  '2025-03-01', '2025-07-30', 7.0, 2, 2, 1, 2, 2);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (3, 'Parcela Los Pinos',    15.00, '2025-01-15', '2025-09-30', 5.8, 3, 3, 1, 3, 3);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (4, 'Parcela Buenavista',   6.30,  '2025-06-01', '2026-03-01', 6.2, 4, 4, 2, 4, 4);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (5, 'Parcela San José',     20.00, '2025-02-01', '2025-08-15', 6.8, 5, 5, 1, 5, 1);
