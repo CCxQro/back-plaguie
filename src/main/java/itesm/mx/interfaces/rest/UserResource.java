@@ -6,16 +6,17 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import itesm.mx.application.dto.GetUserResponseDto;
 import itesm.mx.application.dto.UpdateUserDto;
+import itesm.mx.application.dto.UserPageResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.users.DeactivateUserUseCase;
 import itesm.mx.application.usecase.users.GetAllUsersUseCase;
 import itesm.mx.application.usecase.users.GetUserByIdUseCase;
 import itesm.mx.application.usecase.users.UpdateUserUseCase;
 
-import java.util.List;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
@@ -47,14 +48,21 @@ public class UserResource {
     AuthenticatedUserContext authenticatedUserContext;
 
     @GET
-    @Operation(summary = "List users", description = "Returns every active or inactive user. Admin-only endpoint.")
+    @Operation(summary = "List users", description = "Returns a paginated, filterable list of users. Admin-only endpoint.")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Users returned", content = @Content(schema = @Schema(implementation = GetUserResponseDto[].class))),
+            @APIResponse(responseCode = "200", description = "Users returned", content = @Content(schema = @Schema(implementation = UserPageResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid pagination parameters"),
             @APIResponse(responseCode = "401", description = "Authentication required"),
             @APIResponse(responseCode = "403", description = "Admin role required"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Response getAllUsers() {
+    public Response getAllUsers(
+            @Parameter(description = "0-based page number") @QueryParam("page") @DefaultValue("0") int page,
+            @Parameter(description = "Page size") @QueryParam("size") @DefaultValue("10") int size,
+            @Parameter(description = "Partial match on name or email (case-insensitive)") @QueryParam("name") String name,
+            @Parameter(description = "Filter by exact role ID (1, 2 or 3)") @QueryParam("roleId") Integer roleId,
+            @Parameter(description = "Filter by active status") @QueryParam("isActive") Boolean isActive
+    ) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
         }
@@ -63,8 +71,10 @@ public class UserResource {
         }
 
         try {
-            List<GetUserResponseDto> users = getAllUsersUseCase.execute();
-            return Response.ok(users).build();
+            UserPageResponseDto page_result = getAllUsersUseCase.execute(page, size, name, roleId, isActive);
+            return Response.ok(page_result).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }

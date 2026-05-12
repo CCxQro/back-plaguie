@@ -10,6 +10,7 @@ import itesm.mx.domain.repository.user.AdministratorRepository;
 import itesm.mx.domain.repository.user.FarmerRepository;
 import itesm.mx.domain.repository.user.TechnicalSellerRepository;
 import itesm.mx.domain.repository.user.UserRepository;
+import itesm.mx.domain.repository.location.LocationRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import jakarta.enterprise.inject.Instance;
 import org.junit.jupiter.api.Test;
