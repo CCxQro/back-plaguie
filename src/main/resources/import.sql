@@ -162,8 +162,11 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_hospedante,
 	id_variedad,
 	id_especie,
-	ahosp
-) VALUES (1, 1, 1, 20.75000000, -103.48000000, 1, 1, 1, 1, 1, 12.50);
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (1, 1, 1, 20.75000000, -103.48000000, 1, 1, 1, 1, 1, 12.50, 2, NULL, NULL);
 
 INSERT INTO vigilancia_fitosanitaria (
 	id_vigilancia_fitosanitaria,
@@ -176,8 +179,11 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_hospedante,
 	id_variedad,
 	id_especie,
-	ahosp
-) VALUES (2, 2, 2, 19.41380000, -102.05580000, 2, 2, 2, 2, 2, 8.25);
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (2, 2, 2, 19.41380000, -102.05580000, 2, 2, 2, 2, 2, 8.25, 2, NULL, NULL);
 
 INSERT INTO vigilancia_fitosanitaria (
 	id_vigilancia_fitosanitaria,
@@ -190,8 +196,11 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_hospedante,
 	id_variedad,
 	id_especie,
-	ahosp
-) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00);
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00, 1, 1, '2026-01-15 10:30:00');
 
 -- ==========================================
 -- 6. UNIDADES (registradas por admins y técnicos vendedores)
@@ -220,3 +229,35 @@ INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (2, 12, 'Distr
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (3, 13, 'Insumos Agrícolas Sinaloa');
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (4, 14, 'Comercializadora del Pacífico');
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semillas y Abonos del Golfo');
+
+-- ==========================================
+-- 8. ALERTAS (MOCK DATA)
+-- ==========================================
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (1, 'Plaga de Langosta Detectada', 'Se detectó una plaga severa de langosta en la zona norte del predio. Se requiere intervención inmediata.', 1, 'Langosta', 50.00, 'critico', 6, '2026-01-10 08:30:00', 2, NULL, NULL);
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (2, 'Gusano Cogollero Activo', 'Presencia de gusano cogollero en cultivos de maíz. Afectación moderada en parcelas centrales.', 2, 'Gusano Cogollero', 35.00, 'critico', 7, '2026-01-12 10:15:00', 2, NULL, NULL);
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (3, 'Infestación de Pulgón', 'Pulgón detectado en hortalizas de invernadero. Nivel de afectación bajo pero creciente.', 3, 'Pulgón', 15.00, 'advertencia', 8, '2026-01-15 14:00:00', 2, NULL, NULL);
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (4, 'Trips en Cultivos Protegidos', 'Trips identificados en cultivos bajo malla sombra. Monitoreo preventivo recomendado.', 4, 'Trips', 12.00, 'advertencia', 9, '2026-01-18 09:45:00', 2, NULL, NULL);
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (5, 'Mosca Blanca en Hortalizas', 'Presencia menor de mosca blanca en jitomate. Sin daño significativo reportado.', 5, 'Mosca Blanca', 8.00, 'informacion', 10, '2026-01-20 16:30:00', 1, 1, '2026-01-21 10:00:00');
+
+-- ==========================================
+-- 9. RECOMENDACIONES (MOCK DATA)
+-- ==========================================
+
+INSERT INTO recomendaciones (id_recomendacion, titulo, descripcion, tipo_plaga, productos_recomendados, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (1, 'Tratamiento para Langosta', 'Aplicación de insecticidas piretroides en etapa de ninfa para mayor efectividad.', 'Langosta', 'Cipermetrina, Deltametrina', 11, '2026-01-11 09:00:00', 2, NULL, NULL);
+
+INSERT INTO recomendaciones (id_recomendacion, titulo, descripcion, tipo_plaga, productos_recomendados, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (2, 'Control de Gusano Cogollero', 'Uso de trampas de feromonas y aplicación dirigida al cogollo.', 'Gusano Cogollero', 'Spinetoram, Clorantraniliprol', 12, '2026-01-13 11:30:00', 2, NULL, NULL);
+
+INSERT INTO recomendaciones (id_recomendacion, titulo, descripcion, tipo_plaga, productos_recomendados, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (3, 'Manejo de Mosca Blanca', 'Instalación de trampas cromáticas amarillas y jabón potásico para ninfas.', 'Mosca Blanca', 'Jabón Potásico, Imidacloprid', 13, '2026-01-21 08:15:00', 1, 1, '2026-01-22 09:00:00');

@@ -70,6 +70,15 @@ public class VigilanciaFitosanitariaRepositoryImpl implements PanacheRepositoryB
         if (vigilanciaFitosanitaria.getAhosp() != null) {
             entity.ahosp = vigilanciaFitosanitaria.getAhosp();
         }
+        if (vigilanciaFitosanitaria.getStatusId() != null) {
+            entity.statusId = vigilanciaFitosanitaria.getStatusId();
+        }
+        if (vigilanciaFitosanitaria.getValidatedByUserId() != null) {
+            entity.validatedByUserId = vigilanciaFitosanitaria.getValidatedByUserId();
+        }
+        if (vigilanciaFitosanitaria.getValidatedAt() != null) {
+            entity.validatedAt = vigilanciaFitosanitaria.getValidatedAt();
+        }
 
         persistAndFlush(entity);
         return findDetailedById(entity.vigilanciaFitosanitariaId)
@@ -101,6 +110,8 @@ public class VigilanciaFitosanitariaRepositoryImpl implements PanacheRepositoryB
                 left join fetch v.hospedante
                 left join fetch v.variedad
                 left join fetch v.especie
+                left join fetch v.status
+                left join fetch v.validatedBy
                 """ + whereClause;
 
         return find(query, parameters);
