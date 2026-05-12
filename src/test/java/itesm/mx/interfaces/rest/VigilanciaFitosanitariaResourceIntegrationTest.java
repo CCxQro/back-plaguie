@@ -8,11 +8,13 @@ import io.restassured.http.ContentType;
 import itesm.mx.application.dto.CreateVigilanciaFitosanitariaDto;
 import itesm.mx.application.dto.GetVigilanciaFitosanitariaResponseDto;
 import itesm.mx.application.dto.UpdateVigilanciaFitosanitariaDto;
+import itesm.mx.application.dto.ValidateVigilanciaDto;
 import itesm.mx.application.usecase.vigilancia.CreateVigilanciaFitosanitariaUseCase;
 import itesm.mx.application.usecase.vigilancia.DeleteVigilanciaFitosanitariaUseCase;
 import itesm.mx.application.usecase.vigilancia.GetAllVigilanciasFitosanitariasUseCase;
 import itesm.mx.application.usecase.vigilancia.GetVigilanciaFitosanitariaByIdUseCase;
 import itesm.mx.application.usecase.vigilancia.UpdateVigilanciaFitosanitariaUseCase;
+import itesm.mx.application.usecase.vigilancia.ValidateVigilanciaFitosanitariaUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
@@ -57,6 +59,9 @@ class VigilanciaFitosanitariaResourceIntegrationTest {
 
     @InjectMock
     DeleteVigilanciaFitosanitariaUseCase deleteVigilanciaFitosanitariaUseCase;
+
+    @InjectMock
+    ValidateVigilanciaFitosanitariaUseCase validateVigilanciaFitosanitariaUseCase;
 
     @Inject
     UserRepositoryImpl userRepository;
@@ -112,7 +117,11 @@ class VigilanciaFitosanitariaResourceIntegrationTest {
                         "variedad",
                         8L,
                         "especie",
-                        new BigDecimal("12.50")
+                        new BigDecimal("12.50"),
+                        2L,
+                        "Revision",
+                        null,
+                        null
                 )
         ));
 
@@ -149,7 +158,11 @@ class VigilanciaFitosanitariaResourceIntegrationTest {
                         "variedad",
                         8L,
                         "especie",
-                        new BigDecimal("12.50")
+                        new BigDecimal("12.50"),
+                        2L,
+                        "Revision",
+                        null,
+                        null
                 )
         );
 
@@ -212,7 +225,11 @@ class VigilanciaFitosanitariaResourceIntegrationTest {
                         "variedad",
                         8L,
                         "especie",
-                        new BigDecimal("12.50")
+                        new BigDecimal("12.50"),
+                        2L,
+                        "Revision",
+                        null,
+                        null
                 )
         );
 
@@ -280,7 +297,11 @@ class VigilanciaFitosanitariaResourceIntegrationTest {
                         "variedad",
                         8L,
                         "especie",
-                        new BigDecimal("18.75")
+                        new BigDecimal("18.75"),
+                        2L,
+                        "Revision",
+                        null,
+                        null
                 )
         );
 
@@ -335,5 +356,99 @@ class VigilanciaFitosanitariaResourceIntegrationTest {
             .post("/api/vigilancias-fitosanitarias")
         .then()
             .statusCode(401);
+    }
+
+    // --- Validate (PATCH) tests ---
+
+    @Test
+    void validate_WhenNoAuth_Returns401() {
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"statusId\": 1}")
+        .when()
+            .patch("/api/vigilancias-fitosanitarias/1/validate")
+        .then()
+            .statusCode(401);
+    }
+
+    @Test
+    void validate_WhenNonAdmin_Returns403() throws Exception {
+        String token = "vigilancia-seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn("vigilancia-seller-uuid");
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body("{\"statusId\": 1}")
+        .when()
+            .patch("/api/vigilancias-fitosanitarias/1/validate")
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("Solo un administrador puede validar vigilancias fitosanitarias"));
+    }
+
+    @Test
+    void validate_WhenAdminAndValid_Returns200() throws Exception {
+        String token = "vigilancia-admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn("vigilancia-admin-uuid");
+
+        when(validateVigilanciaFitosanitariaUseCase.execute(anyLong(), anyLong(), anyLong())).thenReturn(
+                new GetVigilanciaFitosanitariaResponseDto(
+                        1L, 2L, "monitoreo", 3L, "cid",
+                        new BigDecimal("20.67000000"), new BigDecimal("-103.35000000"),
+                        4L, 5L, "plaga", 6L, "hospedante",
+                        7L, "variedad", 8L, "especie",
+                        new BigDecimal("12.50"),
+                        1L, "Accepted", 1L, "2026-01-15T10:30:00"
+                )
+        );
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body("{\"statusId\": 1}")
+        .when()
+            .patch("/api/vigilancias-fitosanitarias/1/validate")
+        .then()
+            .statusCode(200)
+            .body("statusId", equalTo(1))
+            .body("statusName", equalTo("Accepted"))
+            .body("validatedByUserId", equalTo(1));
+    }
+
+    @Test
+    void validate_WhenInvalidStatusId_Returns400() throws Exception {
+        String token = "vigilancia-admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn("vigilancia-admin-uuid");
+        when(validateVigilanciaFitosanitariaUseCase.execute(anyLong(), anyLong(), anyLong()))
+                .thenThrow(new IllegalArgumentException("El statusId debe ser 1 (Accepted) o 3 (Rejected)"));
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body("{\"statusId\": 2}")
+        .when()
+            .patch("/api/vigilancias-fitosanitarias/1/validate")
+        .then()
+            .statusCode(400)
+            .body("error", equalTo("El statusId debe ser 1 (Accepted) o 3 (Rejected)"));
+    }
+
+    @Test
+    void validate_WhenNotFound_Returns404() throws Exception {
+        String token = "vigilancia-admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn("vigilancia-admin-uuid");
+        when(validateVigilanciaFitosanitariaUseCase.execute(anyLong(), anyLong(), anyLong()))
+                .thenThrow(new IllegalStateException("Vigilancia fitosanitaria no encontrada con id: 999"));
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body("{\"statusId\": 1}")
+        .when()
+            .patch("/api/vigilancias-fitosanitarias/999/validate")
+        .then()
+            .statusCode(404)
+            .body("error", equalTo("Vigilancia fitosanitaria no encontrada con id: 999"));
     }
 }
