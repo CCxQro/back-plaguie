@@ -10,4 +10,5 @@ public class RegisterProductDto {
     public Long unitId;
     public String description;
     public Long statusId;
+    public String firebaseImageId;
 }
