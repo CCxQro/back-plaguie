@@ -16,4 +16,5 @@ public class ProductResponseDto {
     public String description;
     public Long statusId;
     public String statusName;
+    public String firebaseImageId;
 }
