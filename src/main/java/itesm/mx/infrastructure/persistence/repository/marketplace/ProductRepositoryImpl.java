@@ -37,6 +37,7 @@ public class ProductRepositoryImpl implements PanacheRepositoryBase<ProductEntit
         entity.unitId = product.getUnit().getUnitId();
         entity.description = product.getDescription();
         entity.statusId = product.getStatus().getStatusId();
+        entity.firebaseImageId = product.getFirebaseImageId();
         flush();
         return ProductMapper.toDomain(entity);
     }
