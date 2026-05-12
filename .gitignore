@@ -51,3 +51,7 @@ firebase-dev.json
 
 # Claude Code
 CLAUDE.md
+.claude/
+.agents/
+skills-lock.json
+frontend_claude.md

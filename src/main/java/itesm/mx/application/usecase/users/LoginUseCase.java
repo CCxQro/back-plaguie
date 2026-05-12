@@ -53,6 +53,10 @@ public class LoginUseCase {
         User user = userRepository.findByFirebaseUuid(firebaseUuid)
                 .orElseThrow(() -> new SecurityException("Usuario no encontrado en la base de datos con este UUID de Firebase"));
 
+        if (Boolean.FALSE.equals(user.getActive())) {
+            throw new SecurityException("La cuenta de usuario está desactivada");
+        }
+
         LoginResponseDto response = new LoginResponseDto(user.getName(), user.getEmail(), user.getRoleId());
 
         if (RoleConstants.ADMIN.equals(user.getRoleId())) {
