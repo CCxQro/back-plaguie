@@ -57,7 +57,7 @@ public class LoginUseCase {
             throw new SecurityException("La cuenta de usuario está desactivada");
         }
 
-        LoginResponseDto response = new LoginResponseDto(user.getName(), user.getEmail(), user.getRoleId());
+        LoginResponseDto response = new LoginResponseDto(user.getUserId(), user.getName(), user.getEmail(), user.getRoleId());
 
         if (RoleConstants.ADMIN.equals(user.getRoleId())) {
             administratorRepository.findByIdUser(user.getUserId()).ifPresent(admin ->
