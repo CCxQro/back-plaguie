@@ -3,7 +3,7 @@ package itesm.mx.application.dto;
 public class ParcelaResponseDto {
 
     public Long parcelaId;
-    public String nombreParcela;
+    public String nombre;
     public Double tamanoHectareas;
     public String tipoCultivo;
     public String estadoParcela;
@@ -11,10 +11,10 @@ public class ParcelaResponseDto {
     public ParcelaResponseDto() {
     }
 
-    public ParcelaResponseDto(Long parcelaId, String nombreParcela, Double tamanoHectareas,
+    public ParcelaResponseDto(Long parcelaId, String nombre, Double tamanoHectareas,
                                String tipoCultivo, String estadoParcela) {
         this.parcelaId = parcelaId;
-        this.nombreParcela = nombreParcela;
+        this.nombre = nombre;
         this.tamanoHectareas = tamanoHectareas;
         this.tipoCultivo = tipoCultivo;
         this.estadoParcela = estadoParcela;

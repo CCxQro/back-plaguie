@@ -25,7 +25,7 @@ public final class ParcelaAppMapper {
 
         return new ParcelaResponseDto(
                 parcela.getParcelaId(),
-                parcela.getNombreParcela(),
+                parcela.getNombreParcela(), // mapped to 'nombre' field in DTO
                 parcela.getTamanoHectareas(),
                 tipoCultivoNombre,
                 estadoParcelaNombre

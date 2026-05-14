@@ -3,6 +3,8 @@ package itesm.mx.interfaces.rest;
 import itesm.mx.application.dto.ParcelaResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.parcela.GetParcelasByFarmerUseCase;
+import itesm.mx.domain.models.user.Farmer;
+import itesm.mx.domain.repository.user.FarmerRepository;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -20,6 +22,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
+import java.util.Optional;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
@@ -33,23 +36,36 @@ public class ParcelaResource {
     GetParcelasByFarmerUseCase getParcelasByFarmerUseCase;
 
     @Inject
+    FarmerRepository farmerRepository;
+
+    @Inject
     AuthenticatedUserContext authenticatedUserContext;
 
     @GET
-    @Path("/farmer/{farmerId}")
-    @Operation(summary = "Get parcelas by farmer", description = "Returns all parcelas for a given farmer. Requires authentication.")
+    @Path("/farmer/{userId}")
+    @Operation(
+            summary = "Get parcelas by user",
+            description = "Returns all parcelas for the farmer associated with the given user id. Requires authentication.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Parcelas returned",
                     content = @Content(schema = @Schema(implementation = ParcelaResponseDto[].class))),
             @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "404", description = "Farmer not found for user"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Response getParcelasByFarmer(
-            @Parameter(description = "Farmer id") @PathParam("farmerId") Long farmerId) {
+    public Response getParcelasByUser(
+            @Parameter(description = "User id (id_usuario)") @PathParam("userId") Long userId) {
+
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
         }
+
         try {
+            Optional<Farmer> farmerOpt = farmerRepository.findByIdUser(userId);
+            if (farmerOpt.isEmpty()) {
+                return errorResponse(Response.Status.NOT_FOUND, "Agricultor no encontrado para el usuario indicado");
+            }
+            Long farmerId = farmerOpt.get().getFarmerId();
             List<ParcelaResponseDto> parcelas = getParcelasByFarmerUseCase.execute(farmerId);
             return Response.ok(parcelas).build();
         } catch (IllegalArgumentException e) {
