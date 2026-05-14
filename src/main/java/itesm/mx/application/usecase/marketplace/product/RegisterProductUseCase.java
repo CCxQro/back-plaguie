@@ -3,13 +3,22 @@ package itesm.mx.application.usecase.marketplace.product;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import itesm.mx.application.usecase.marketplace.inventory.RegisterInventoryUseCase;
+import itesm.mx.domain.models.marketplace.Inventory;
+import itesm.mx.domain.models.marketplace.InventoryAction;
+import itesm.mx.domain.models.marketplace.InventoryActionConstants;
+import itesm.mx.domain.models.marketplace.Price;
 import itesm.mx.domain.models.marketplace.Product;
 import itesm.mx.domain.repository.marketplace.CategoryRepository;
+import itesm.mx.domain.repository.marketplace.PriceRepository;
 import itesm.mx.domain.repository.marketplace.ProductRepository;
 import itesm.mx.domain.repository.marketplace.ProviderRepository;
 import itesm.mx.domain.repository.marketplace.StatusRepository;
 import itesm.mx.domain.repository.marketplace.UnitRepository;
 import itesm.mx.domain.repository.user.TechnicalSellerRepository;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @ApplicationScoped
 public class RegisterProductUseCase {
@@ -20,6 +29,8 @@ public class RegisterProductUseCase {
     @Inject ProviderRepository providerRepository;
     @Inject UnitRepository unitRepository;
     @Inject StatusRepository statusRepository;
+    @Inject PriceRepository priceRepository;
+    @Inject RegisterInventoryUseCase registerInventoryUseCase;
 
     @Transactional
     public Product execute(Product product) {
@@ -50,6 +61,12 @@ public class RegisterProductUseCase {
         if (product.getStatus() == null || product.getStatus().getStatusId() == null) {
             throw new IllegalArgumentException("status is required");
         }
+        if (product.getLatestPrice() == null || product.getLatestPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("price must be greater than 0");
+        }
+        if (product.getStock() == null || product.getStock() < 0) {
+            throw new IllegalArgumentException("stock must be greater than or equal to 0");
+        }
 
         technicalSellerRepository.findByTechnicalSellerId(product.getSeller().getTechnicalSellerId())
                 .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
@@ -62,6 +79,25 @@ public class RegisterProductUseCase {
         statusRepository.findByStatusId(product.getStatus().getStatusId())
                 .orElseThrow(() -> new IllegalArgumentException("Status not found"));
 
-        return productRepository.save(product);
+        Product saved = productRepository.save(product);
+
+        Price priceRow = new Price();
+        priceRow.setProduct(saved);
+        priceRow.setPrice(product.getLatestPrice());
+        priceRow.setPriceDate(LocalDateTime.now());
+        Price persistedPrice = priceRepository.save(priceRow);
+
+        saved.setLatestPrice(persistedPrice.getPrice());
+        saved.setLatestPriceDate(persistedPrice.getPriceDate());
+
+        Integer initialStock = product.getStock();
+        if (initialStock != null && initialStock > 0) {
+            InventoryAction addAction = new InventoryAction();
+            addAction.setInventoryActionId(InventoryActionConstants.ADD);
+            Inventory inventoryRow = new Inventory(null, saved, initialStock, addAction);
+            registerInventoryUseCase.execute(inventoryRow);
+        }
+        saved.setStock(initialStock == null ? 0 : initialStock);
+        return saved;
     }
 }

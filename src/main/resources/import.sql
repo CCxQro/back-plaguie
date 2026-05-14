@@ -86,6 +86,10 @@ INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
 INSERT INTO Status (id_status, nombre) VALUES (2, 'Revision');
 INSERT INTO Status (id_status, nombre) VALUES (3, 'Rejected');
 
+-- Acciones de Inventario (catalogo estatico: 1=add, 2=subtract)
+INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (1, 'add');
+INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (2, 'subtract');
+
 -- Categorias (registradas por admins y tecnicos vendedores)
 INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (1, 1,  'Fertilizantes',   1, 1);
 INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (2, 2,  'Herbicidas',      2, 1);
@@ -379,4 +383,199 @@ INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (3, 13, 'Insum
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (4, 14, 'Comercializadora del Pacífico');
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semillas y Abonos del Golfo');
 
+-- ==========================================
+-- 8. PRODUCTOS (2 por vendedor, 10 total; id_status=1 Accepted)
+-- ==========================================
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1001, 1, 'Fertilizante NPK 20-20-20',  'PLG-001', 1, 1, 250.0, 1, 'Fertilizante balanceado para cultivos', 1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1002, 1, 'Herbicida Glifosato 36%',    'PLG-002', 2, 1, 180.0, 2, 'Control de malezas de hoja ancha',     1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1003, 2, 'Insecticida Clorpirifos 48E','PLG-003', 3, 2, 320.0, 2, 'Control de plagas del suelo',          1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1004, 2, 'Fungicida Mancozeb 80%',    'PLG-004', 4, 2, 145.0, 1, 'Proteccion contra hongos foliares',    1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1005, 3, 'Semilla Maiz Hibrido H-318','PLG-005', 5, 3, 890.0, 1, 'Semilla certificada alto rendimiento', 1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1006, 3, 'Semilla Sorgo Hibrido H-50','PLG-006', 5, 3, 650.0, 1, 'Semilla sorgo resistente a sequia',    1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1007, 4, 'Bioestimulante Auxinas',    'PLG-007', 1, 4,  95.0, 2, 'Promotor de enraizamiento',            1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1008, 4, 'Sulfato de Magnesio',       'PLG-008', 2, 4,  60.0, 1, 'Corrector de deficiencias de Mg',     1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1009, 5, 'Abono Organico Compostado', 'PLG-009', 8, 5,  45.0, 1, 'Mejora estructura del suelo',          1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1);
 
+-- ==========================================
+-- 8.B PRECIOS (historico por producto; el mas reciente = valor_unidad del producto)
+-- ==========================================
+-- Producto 1001 (Fertilizante NPK 20-20-20, valor_unidad=250)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (1,  1001, 220.00000, '2025-01-12 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (2,  1001, 240.00000, '2025-03-08 11:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (3,  1001, 250.00000, '2025-05-02 14:00:00');
+
+-- Producto 1002 (Herbicida Glifosato 36%, valor_unidad=180)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (4,  1002, 160.00000, '2025-02-05 10:15:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (5,  1002, 180.00000, '2025-04-20 09:45:00');
+
+-- Producto 1003 (Insecticida Clorpirifos 48E, valor_unidad=320)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (6,  1003, 300.00000, '2025-01-30 08:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (7,  1003, 320.00000, '2025-04-12 13:00:00');
+
+-- Producto 1004 (Fungicida Mancozeb 80%, valor_unidad=145)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (8,  1004, 145.00000, '2025-03-15 12:00:00');
+
+-- Producto 1005 (Semilla Maiz Hibrido H-318, valor_unidad=890)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (9,  1005, 850.00000, '2025-02-18 09:20:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (10, 1005, 890.00000, '2025-04-25 16:00:00');
+
+-- Producto 1006 (Semilla Sorgo Hibrido H-50, valor_unidad=650)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (11, 1006, 620.00000, '2025-01-22 10:45:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (12, 1006, 650.00000, '2025-03-29 11:15:00');
+
+-- Producto 1007 (Bioestimulante Auxinas, valor_unidad=95)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (13, 1007,  90.00000, '2025-02-10 08:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (14, 1007,  95.00000, '2025-04-08 09:30:00');
+
+-- Producto 1008 (Sulfato de Magnesio, valor_unidad=60)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (15, 1008,  60.00000, '2025-03-03 10:00:00');
+
+-- Producto 1009 (Abono Organico Compostado, valor_unidad=45)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (16, 1009,  40.00000, '2025-01-18 14:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (17, 1009,  45.00000, '2025-04-06 15:00:00');
+
+-- Producto 1010 (Cal Agricola 90%, valor_unidad=30)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (18, 1010,  28.00000, '2025-02-22 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (19, 1010,  30.00000, '2025-05-10 12:30:00');
+
+-- ==========================================
+-- 8.C INVENTARIO (historial por producto, cronologico por id_inventario ascendente)
+-- id_accion_inventario: 1 = add, 2 = subtract
+-- Cada producto mantiene running total >= 0 en cada paso. Stock final entre () al lado del producto.
+-- ==========================================
+
+-- Producto 1001 (final stock = 140)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (1,  1001, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (2,  1001,  50, 1); -- 150
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (3,  1001,  30, 2); -- 120
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (4,  1001,  20, 1); -- 140
+
+-- Producto 1002 (final stock = 75)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (5,  1002,  80, 1); -- 80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (6,  1002,  20, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (7,  1002,  25, 2); --  75
+
+-- Producto 1003 (final stock = 120)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (8,  1003, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (9,  1003,  40, 2); --  60
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (10, 1003,  60, 1); -- 120
+
+-- Producto 1004 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (11, 1004,  50, 1); --  50
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (12, 1004,  50, 1); -- 100
+
+-- Producto 1005 (final stock = 150)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (13, 1005, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (14, 1005,  20, 2); --  80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (15, 1005,  30, 2); --  50
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (16, 1005, 100, 1); -- 150
+
+-- Producto 1006 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (17, 1006,  60, 1); --  60
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (18, 1006,  40, 1); -- 100
+
+-- Producto 1007 (final stock = 75)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (19, 1007,  90, 1); --  90
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (20, 1007,  15, 2); --  75
+
+-- Producto 1008 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (21, 1008, 100, 1); -- 100
+
+-- Producto 1009 (final stock = 50)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (22, 1009,  70, 1); --  70
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (23, 1009,  30, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (24, 1009,  50, 2); --  50
+
+-- Producto 1010 (final stock = 120)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (25, 1010, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (26, 1010,  20, 2); --  80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (27, 1010,  40, 1); -- 120
+
+-- ==========================================
+-- 9. ESTADOS_PEDIDO
+-- ==========================================
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (1, 'Pendiente');
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (2, 'Confirmado');
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (3, 'En camino');
+INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (4, 'Entregado');
+
+-- ==========================================
+-- 10. PEDIDOS (10 órdenes; id_agricultor 1-5 / id_vendedor 1-5)
+-- ==========================================
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (1,  1, 1, '2025-01-10 10:00:00', 4,  860.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (2,  2, 1, '2025-01-15 11:30:00', 3,  610.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (3,  3, 2, '2025-02-01 09:00:00', 4,  610.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (4,  4, 2, '2025-02-14 14:00:00', 2,  785.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (5,  1, 3, '2025-03-05 08:45:00', 1, 1540.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (6,  5, 3, '2025-03-20 16:00:00', 2, 1780.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (7,  2, 4, '2025-04-02 12:00:00', 4,  405.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (8,  3, 4, '2025-04-10 09:00:00', 3,  370.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (9,  4, 5, '2025-04-18 10:30:00', 2,  315.00);
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (10, 5, 5, '2025-05-01 09:15:00', 1,  240.00);
+
+-- ==========================================
+-- 11. DETALLE_PEDIDO (19 líneas; totales verificados)
+-- ==========================================
+-- Pedido 1: 2x1001(250) + 2x1002(180) = 860
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (1,  1, 1001, 2, 250.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (2,  1, 1002, 2, 180.0);
+-- Pedido 2: 1x1001(250) + 2x1002(180) = 610
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (3,  2, 1001, 1, 250.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (4,  2, 1002, 2, 180.0);
+-- Pedido 3: 1x1003(320) + 2x1004(145) = 610
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (5,  3, 1003, 1, 320.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (6,  3, 1004, 2, 145.0);
+-- Pedido 4: 2x1003(320) + 1x1004(145) = 785
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (7,  4, 1003, 2, 320.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (8,  4, 1004, 1, 145.0);
+-- Pedido 5: 1x1005(890) + 1x1006(650) = 1540
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (9,  5, 1005, 1, 890.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (10, 5, 1006, 1, 650.0);
+-- Pedido 6: 2x1005(890) = 1780
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (11, 6, 1005, 2, 890.0);
+-- Pedido 7: 3x1007(95) + 2x1008(60) = 405
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (12, 7, 1007, 3, 95.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (13, 7, 1008, 2, 60.0);
+-- Pedido 8: 2x1007(95) + 3x1008(60) = 370
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (14, 8, 1007, 2, 95.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (15, 8, 1008, 3, 60.0);
+-- Pedido 9: 5x1009(45) + 3x1010(30) = 315
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (16, 9, 1009, 5, 45.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (17, 9, 1010, 3, 30.0);
+-- Pedido 10: 4x1009(45) + 2x1010(30) = 240
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (18, 10, 1009, 4, 45.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (19, 10, 1010, 2, 30.0);
+
+-- ==========================================
+-- 12. CATÁLOGOS DE PARCELA
+-- ==========================================
+
+-- Estados de parcela
+INSERT INTO Estados_Parcelas (id_estado_parcela, nombre) VALUES (1, 'Activa');
+INSERT INTO Estados_Parcelas (id_estado_parcela, nombre) VALUES (2, 'Inactiva');
+INSERT INTO Estados_Parcelas (id_estado_parcela, nombre) VALUES (3, 'En preparación');
+
+-- Tipos de cultivo
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (1, 'Maíz',      '2025-05-01', '2025-10-15');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (2, 'Tomate',    '2025-03-01', '2025-07-30');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (3, 'Aguacate',  '2025-01-15', '2025-09-30');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (4, 'Caña',      '2025-06-01', '2026-03-01');
+INSERT INTO Tipos_Cultivos (id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha) VALUES (5, 'Mango',     '2025-02-01', '2025-08-15');
+
+-- Sistemas de riego
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (1, 'Goteo');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (2, 'Aspersión');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (3, 'Gravedad');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (4, 'Microaspersión');
+INSERT INTO Sistemas_Riego (id_sistema_riego, nombre) VALUES (5, 'Temporal');
+
+-- ==========================================
+-- 13. PARCELAS
+-- (Dependen de Agricultor, Ubicacion, Estados_Parcelas, Tipos_Cultivos y Sistemas_Riego)
+-- ==========================================
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (1, 'Parcela El Milagro',   12.50, '2025-05-01', '2025-10-15', 6.5, 1, 1, 1, 1, 1);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (2, 'Parcela La Esperanza', 8.75,  '2025-03-01', '2025-07-30', 7.0, 2, 2, 1, 2, 2);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (3, 'Parcela Los Pinos',    15.00, '2025-01-15', '2025-09-30', 5.8, 3, 3, 1, 3, 3);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (4, 'Parcela Buenavista',   6.30,  '2025-06-01', '2026-03-01', 6.2, 4, 4, 2, 4, 4);
+INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (5, 'Parcela San José',     20.00, '2025-02-01', '2025-08-15', 6.8, 5, 5, 1, 5, 1);
