@@ -235,6 +235,48 @@ INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, 
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1);
 
 -- ==========================================
+-- 8.B PRECIOS (historico por producto; el mas reciente = valor_unidad del producto)
+-- ==========================================
+-- Producto 1001 (Fertilizante NPK 20-20-20, valor_unidad=250)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (1,  1001, 220.00000, '2025-01-12 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (2,  1001, 240.00000, '2025-03-08 11:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (3,  1001, 250.00000, '2025-05-02 14:00:00');
+
+-- Producto 1002 (Herbicida Glifosato 36%, valor_unidad=180)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (4,  1002, 160.00000, '2025-02-05 10:15:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (5,  1002, 180.00000, '2025-04-20 09:45:00');
+
+-- Producto 1003 (Insecticida Clorpirifos 48E, valor_unidad=320)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (6,  1003, 300.00000, '2025-01-30 08:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (7,  1003, 320.00000, '2025-04-12 13:00:00');
+
+-- Producto 1004 (Fungicida Mancozeb 80%, valor_unidad=145)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (8,  1004, 145.00000, '2025-03-15 12:00:00');
+
+-- Producto 1005 (Semilla Maiz Hibrido H-318, valor_unidad=890)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (9,  1005, 850.00000, '2025-02-18 09:20:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (10, 1005, 890.00000, '2025-04-25 16:00:00');
+
+-- Producto 1006 (Semilla Sorgo Hibrido H-50, valor_unidad=650)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (11, 1006, 620.00000, '2025-01-22 10:45:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (12, 1006, 650.00000, '2025-03-29 11:15:00');
+
+-- Producto 1007 (Bioestimulante Auxinas, valor_unidad=95)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (13, 1007,  90.00000, '2025-02-10 08:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (14, 1007,  95.00000, '2025-04-08 09:30:00');
+
+-- Producto 1008 (Sulfato de Magnesio, valor_unidad=60)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (15, 1008,  60.00000, '2025-03-03 10:00:00');
+
+-- Producto 1009 (Abono Organico Compostado, valor_unidad=45)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (16, 1009,  40.00000, '2025-01-18 14:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (17, 1009,  45.00000, '2025-04-06 15:00:00');
+
+-- Producto 1010 (Cal Agricola 90%, valor_unidad=30)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (18, 1010,  28.00000, '2025-02-22 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (19, 1010,  30.00000, '2025-05-10 12:30:00');
+
+-- ==========================================
 -- 9. ESTADOS_PEDIDO
 -- ==========================================
 INSERT INTO Estados_Pedido (id_estado_pedido, estado) VALUES (1, 'Pendiente');

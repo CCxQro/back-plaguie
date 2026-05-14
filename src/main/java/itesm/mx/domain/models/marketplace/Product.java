@@ -2,6 +2,9 @@ package itesm.mx.domain.models.marketplace;
 
 import itesm.mx.domain.models.user.TechnicalSeller;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 public class Product {
     private Long skuSellerId;
     private TechnicalSeller seller;
@@ -14,6 +17,8 @@ public class Product {
     private String description;
     private Status status;
     private String firebaseImageId;
+    private BigDecimal latestPrice;
+    private LocalDateTime latestPriceDate;
 
     public Product() {}
 
@@ -65,4 +70,10 @@ public class Product {
 
     public String getFirebaseImageId() { return firebaseImageId; }
     public void setFirebaseImageId(String firebaseImageId) { this.firebaseImageId = firebaseImageId; }
+
+    public BigDecimal getLatestPrice() { return latestPrice; }
+    public void setLatestPrice(BigDecimal latestPrice) { this.latestPrice = latestPrice; }
+
+    public LocalDateTime getLatestPriceDate() { return latestPriceDate; }
+    public void setLatestPriceDate(LocalDateTime latestPriceDate) { this.latestPriceDate = latestPriceDate; }
 }
