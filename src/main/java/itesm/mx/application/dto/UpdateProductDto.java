@@ -13,4 +13,5 @@ public class UpdateProductDto {
     public Long statusId;
     public String firebaseImageId;
     public BigDecimal price;
+    public Integer stock;
 }
