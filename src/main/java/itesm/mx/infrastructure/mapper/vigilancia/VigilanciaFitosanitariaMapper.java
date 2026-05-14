@@ -4,6 +4,8 @@ import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.vigilancia.*;
 import itesm.mx.infrastructure.mapper.location.LocationMapper;
 import itesm.mx.infrastructure.persistence.entity.location.LocationEntity;
+import itesm.mx.infrastructure.persistence.entity.marketplace.StatusEntity;
+import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import itesm.mx.infrastructure.persistence.entity.vigilancia.*;
 
 public final class VigilanciaFitosanitariaMapper {
@@ -24,6 +26,9 @@ public final class VigilanciaFitosanitariaMapper {
         entity.variedadId = getVariedadId(vigilanciaFitosanitaria.getVariedad());
         entity.especieId = getEspecieId(vigilanciaFitosanitaria.getEspecie());
         entity.ahosp = vigilanciaFitosanitaria.getAhosp();
+        entity.statusId = vigilanciaFitosanitaria.getStatusId();
+        entity.validatedByUserId = vigilanciaFitosanitaria.getValidatedByUserId();
+        entity.validatedAt = vigilanciaFitosanitaria.getValidatedAt();
         return entity;
     }
 
@@ -40,7 +45,16 @@ public final class VigilanciaFitosanitariaMapper {
         vigilanciaFitosanitaria.setVariedad(mapVariedad(entity));
         vigilanciaFitosanitaria.setEspecie(mapEspecie(entity));
         vigilanciaFitosanitaria.setAhosp(entity.ahosp);
+        vigilanciaFitosanitaria.setStatusId(entity.statusId);
+        vigilanciaFitosanitaria.setStatusName(mapStatusName(entity));
+        vigilanciaFitosanitaria.setValidatedByUserId(entity.validatedByUserId);
+        vigilanciaFitosanitaria.setValidatedAt(entity.validatedAt);
         return vigilanciaFitosanitaria;
+    }
+
+    private static String mapStatusName(VigilanciaFitosanitariaEntity entity) {
+        StatusEntity statusEntity = entity.status;
+        return statusEntity != null ? statusEntity.name : null;
     }
 
     private static SistemaMonitoreo mapSistemaMonitoreo(VigilanciaFitosanitariaEntity entity) {

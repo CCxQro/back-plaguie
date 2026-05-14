@@ -20,6 +20,10 @@ public class GetVigilanciaFitosanitariaResponseDto {
     public Long speciesId;
     public String speciesName;
     public BigDecimal ahosp;
+    public Long statusId;
+    public String statusName;
+    public Long validatedByUserId;
+    public String validatedAt;
 
     public GetVigilanciaFitosanitariaResponseDto() {
     }
@@ -41,7 +45,11 @@ public class GetVigilanciaFitosanitariaResponseDto {
             String varietyName,
             Long speciesId,
             String speciesName,
-            BigDecimal ahosp
+            BigDecimal ahosp,
+            Long statusId,
+            String statusName,
+            Long validatedByUserId,
+            String validatedAt
     ) {
         this.vigilanciaFitosanitariaId = vigilanciaFitosanitariaId;
         this.systemMonitoringId = systemMonitoringId;
@@ -60,5 +68,9 @@ public class GetVigilanciaFitosanitariaResponseDto {
         this.speciesId = speciesId;
         this.speciesName = speciesName;
         this.ahosp = ahosp;
+        this.statusId = statusId;
+        this.statusName = statusName;
+        this.validatedByUserId = validatedByUserId;
+        this.validatedAt = validatedAt;
     }
 }

@@ -1,6 +1,8 @@
 package itesm.mx.infrastructure.persistence.entity.vigilancia;
 
 import itesm.mx.infrastructure.persistence.entity.location.LocationEntity;
+import itesm.mx.infrastructure.persistence.entity.marketplace.StatusEntity;
+import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -13,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "vigilancia_fitosanitaria")
@@ -52,6 +55,15 @@ public class VigilanciaFitosanitariaEntity {
 
     @Column(name = "ahosp", precision = 5, scale = 2)
     public BigDecimal ahosp;
+
+    @Column(name = "id_status")
+    public Long statusId;
+
+    @Column(name = "id_validated_by")
+    public Long validatedByUserId;
+
+    @Column(name = "validated_at")
+    public LocalDateTime validatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(
@@ -122,4 +134,24 @@ public class VigilanciaFitosanitariaEntity {
             foreignKey = @jakarta.persistence.ForeignKey(ConstraintMode.NO_CONSTRAINT)
         )
     public EspecieEntity especie;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(
+            name = "id_status",
+            referencedColumnName = "id_status",
+            insertable = false,
+            updatable = false,
+            foreignKey = @jakarta.persistence.ForeignKey(ConstraintMode.NO_CONSTRAINT)
+        )
+    public StatusEntity status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(
+            name = "id_validated_by",
+            referencedColumnName = "id_usuario",
+            insertable = false,
+            updatable = false,
+            foreignKey = @jakarta.persistence.ForeignKey(ConstraintMode.NO_CONSTRAINT)
+        )
+    public UserEntity validatedBy;
 }
