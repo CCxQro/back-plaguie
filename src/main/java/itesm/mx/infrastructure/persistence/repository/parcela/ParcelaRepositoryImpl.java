@@ -1,21 +1,17 @@
 package itesm.mx.infrastructure.persistence.repository.parcela;
 
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 import itesm.mx.domain.models.parcela.Parcela;
 import itesm.mx.domain.repository.parcela.ParcelaRepository;
 import itesm.mx.infrastructure.mapper.parcela.ParcelaMapper;
 import itesm.mx.infrastructure.persistence.entity.parcela.ParcelaEntity;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 
 import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-public class ParcelaRepositoryImpl implements ParcelaRepository {
-
-    @Inject
-    EntityManager entityManager;
+public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntity, Long>, ParcelaRepository {
 
     private static final String FETCH_QUERY = """
             select p
@@ -50,9 +46,9 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
 
     @Override
     public List<Parcela> findByFarmerId(Long farmerId) {
-        return entityManager.createQuery(FETCH_QUERY + " where p.farmerId = :farmerId", ParcelaEntity.class)
-                .setParameter("farmerId", farmerId)
-                .getResultStream()
+        return find(FETCH_QUERY + " where p.farmerId = ?1", farmerId)
+                .list()
+                .stream()
                 .map(ParcelaMapper::toDomain)
                 .toList();
     }
@@ -67,7 +63,7 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
 
     @Override
     public Parcela update(Parcela parcela) {
-        ParcelaEntity entity = entityManager.find(ParcelaEntity.class, parcela.getParcelaId());
+        ParcelaEntity entity = getEntityManager().find(ParcelaEntity.class, parcela.getParcelaId());
         if (entity == null) {
             throw new IllegalArgumentException("Parcela no encontrada: " + parcela.getParcelaId());
         }
@@ -88,9 +84,6 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
 
     @Override
     public void delete(Long parcelaId) {
-        ParcelaEntity entity = entityManager.find(ParcelaEntity.class, parcelaId);
-        if (entity != null) {
-            entityManager.remove(entity);
-        }
+        deleteById(parcelaId);
     }
 }
