@@ -3,6 +3,7 @@ package itesm.mx.domain.models.vigilancia;
 import itesm.mx.domain.models.location.Location;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class VigilanciaFitosanitaria {
     private Long vigilanciaFitosanitariaId;
@@ -16,6 +17,10 @@ public class VigilanciaFitosanitaria {
     private Variedad variedad;
     private Especie especie;
     private BigDecimal ahosp;
+    private Long statusId;
+    private String statusName;
+    private Long validatedByUserId;
+    private LocalDateTime validatedAt;
 
     public VigilanciaFitosanitaria() {
     }
@@ -132,5 +137,37 @@ public class VigilanciaFitosanitaria {
 
     public void setAhosp(BigDecimal ahosp) {
         this.ahosp = ahosp;
+    }
+
+    public Long getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public Long getValidatedByUserId() {
+        return validatedByUserId;
+    }
+
+    public void setValidatedByUserId(Long validatedByUserId) {
+        this.validatedByUserId = validatedByUserId;
+    }
+
+    public LocalDateTime getValidatedAt() {
+        return validatedAt;
+    }
+
+    public void setValidatedAt(LocalDateTime validatedAt) {
+        this.validatedAt = validatedAt;
     }
 }

@@ -6,7 +6,16 @@
       "Bash(./mvnw compile *)",
       "Bash(curl:*)",
       "Bash(mysql:*)",
-      "Bash(jq:*)"
+      "Bash(jq:*)",
+      "Bash(chmod +x /tmp/run_explains.sh)",
+      "Bash(bash /tmp/run_explains.sh)",
+      "Bash(tee /tmp/explain_report.txt)",
+      "Bash(python3 -c \"import openpyxl; print\\(openpyxl.__version__\\)\")",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"import mysql.connector; print\\('ok'\\)\")",
+      "Bash(python3 /tmp/build_xlsx.py)",
+      "Bash(pkill -f \"quarkus:dev\")",
+      "Bash(./mvnw verify *)"
     ]
   }
 }

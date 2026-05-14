@@ -7,6 +7,7 @@ import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.vigilancia.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public final class VigilanciaFitosanitariaDtoMapper {
 
@@ -14,7 +15,7 @@ public final class VigilanciaFitosanitariaDtoMapper {
     }
 
     public static VigilanciaFitosanitaria toDomain(CreateVigilanciaFitosanitariaDto dto) {
-        return new VigilanciaFitosanitaria(
+        VigilanciaFitosanitaria v = new VigilanciaFitosanitaria(
                 null,
                 toSistemaMonitoreo(dto.systemMonitoringId),
                 toClaveIdentificacionPlaga(dto.identificationKeyId),
@@ -27,6 +28,8 @@ public final class VigilanciaFitosanitariaDtoMapper {
                 toEspecie(dto.speciesId),
                 dto.ahosp != null ? dto.ahosp : BigDecimal.ZERO
         );
+        v.setStatusId(2L); // Default: Revision (pending validation)
+        return v;
     }
 
     public static VigilanciaFitosanitaria toDomain(UpdateVigilanciaFitosanitariaDto dto) {
@@ -45,6 +48,7 @@ public final class VigilanciaFitosanitariaDtoMapper {
     }
 
     public static GetVigilanciaFitosanitariaResponseDto toResponseDto(VigilanciaFitosanitaria vigilanciaFitosanitaria) {
+        LocalDateTime validatedAt = vigilanciaFitosanitaria.getValidatedAt();
         return new GetVigilanciaFitosanitariaResponseDto(
                 vigilanciaFitosanitaria.getVigilanciaFitosanitariaId(),
                 getSistemaMonitoreoId(vigilanciaFitosanitaria.getSistemaMonitoreo()),
@@ -62,7 +66,11 @@ public final class VigilanciaFitosanitariaDtoMapper {
                 getVariedadName(vigilanciaFitosanitaria.getVariedad()),
                 getEspecieId(vigilanciaFitosanitaria.getEspecie()),
                 getEspecieName(vigilanciaFitosanitaria.getEspecie()),
-                vigilanciaFitosanitaria.getAhosp()
+                vigilanciaFitosanitaria.getAhosp(),
+                vigilanciaFitosanitaria.getStatusId(),
+                vigilanciaFitosanitaria.getStatusName(),
+                vigilanciaFitosanitaria.getValidatedByUserId(),
+                validatedAt != null ? validatedAt.toString() : null
         );
     }
 

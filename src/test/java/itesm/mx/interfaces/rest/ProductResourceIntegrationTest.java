@@ -20,13 +20,18 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -120,6 +125,13 @@ class ProductResourceIntegrationTest {
 
         return new Product(skuSellerId, seller, "Fertilizante NPK", "FERT-001",
                 category, provider, 250.0, unit, "Descripción de prueba.", status, null);
+    }
+
+    private Product buildProductWithPrice(Long skuSellerId, Long sellerUserId, BigDecimal price, LocalDateTime priceDate) {
+        Product product = buildProduct(skuSellerId, sellerUserId);
+        product.setLatestPrice(price);
+        product.setLatestPriceDate(priceDate);
+        return product;
     }
 
     // -------------------------------------------------------------------------
@@ -497,5 +509,318 @@ class ProductResourceIntegrationTest {
         .then()
             .statusCode(404)
             .body("error", equalTo("Producto no encontrado"));
+    }
+
+    // -------------------------------------------------------------------------
+    // Price-aware product flows (latestPrice on responses, register with price,
+    // update with/without price)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getAllProducts_includesLatestPriceInResponse_returns200() throws Exception {
+        String token = "seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(SELLER_UID);
+
+        Long userId = sellerUserId();
+        LocalDateTime when = LocalDateTime.of(2025, 5, 2, 14, 0, 0);
+        List<Product> products = List.of(
+                buildProductWithPrice(1001L, userId, new BigDecimal("250.00000"), when),
+                buildProductWithPrice(1002L, userId, new BigDecimal("180.00000"), when));
+        when(getAllProductsUseCase.execute()).thenReturn(products);
+
+        given()
+            .header("Authorization", "Bearer " + token)
+        .when()
+            .get("/api/products")
+        .then()
+            .statusCode(200)
+            .body("[0].skuSellerId", equalTo(1001))
+            .body("[0].latestPrice", notNullValue())
+            .body("[0].latestPriceDate", notNullValue())
+            .body("[1].skuSellerId", equalTo(1002))
+            .body("[1].latestPrice", notNullValue())
+            .body("[1].latestPriceDate", notNullValue());
+    }
+
+    @Test
+    void getProductsBySeller_includesLatestPriceInResponse_returns200() throws Exception {
+        String token = "seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(SELLER_UID);
+
+        Long userId = sellerUserId();
+        LocalDateTime when = LocalDateTime.of(2025, 5, 2, 14, 0, 0);
+        List<Product> products = List.of(
+                buildProductWithPrice(1001L, userId, new BigDecimal("250.00000"), when));
+        when(getProductsBySellerUseCase.execute(1L)).thenReturn(products);
+
+        given()
+            .header("Authorization", "Bearer " + token)
+        .when()
+            .get("/api/products?sellerId=1")
+        .then()
+            .statusCode(200)
+            .body("[0].skuSellerId", equalTo(1001))
+            .body("[0].sellerId", equalTo(1))
+            .body("[0].latestPrice", notNullValue())
+            .body("[0].latestPriceDate", notNullValue());
+    }
+
+    @Test
+    void registerProduct_withPrice_returnsLatestPriceInResponse_201() throws Exception {
+        String token = "seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(SELLER_UID);
+
+        Long userId = sellerUserId();
+        LocalDateTime now = LocalDateTime.now();
+        Product created = buildProductWithPrice(777L, userId, new BigDecimal("175.50000"), now);
+        when(registerProductUseCase.execute(any(Product.class))).thenReturn(created);
+
+        RegisterProductDto dto = new RegisterProductDto();
+        dto.sellerId = 1L;
+        dto.name = "Fertilizante NPK";
+        dto.sku = "FERT-001";
+        dto.categoryId = 1L;
+        dto.providerId = 1L;
+        dto.unitValue = 100.0;
+        dto.unitId = 1L;
+        dto.description = "Producto con precio inicial.";
+        dto.statusId = 1L;
+        dto.price = new BigDecimal("175.50000");
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .post("/api/products")
+        .then()
+            .statusCode(201)
+            .body("skuSellerId", equalTo(777))
+            .body("latestPrice", notNullValue())
+            .body("latestPriceDate", notNullValue());
+    }
+
+    @Test
+    void updateProduct_withNewPrice_returnsUpdatedLatestPrice_200() throws Exception {
+        String token = "admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(ADMIN_UID);
+
+        Long sellerId = sellerUserId();
+        Product existing = buildProductWithPrice(1001L, sellerId,
+                new BigDecimal("175.50000"), LocalDateTime.now().minusDays(1));
+        when(getProductByIdUseCase.execute(1001L)).thenReturn(existing);
+
+        Product updated = buildProductWithPrice(1001L, sellerId,
+                new BigDecimal("200.00000"), LocalDateTime.now());
+        when(updateProductUseCase.execute(eq(1001L), any(Product.class))).thenReturn(updated);
+
+        UpdateProductDto dto = new UpdateProductDto();
+        dto.name = "Fertilizante NPK";
+        dto.sku = "FERT-001";
+        dto.categoryId = 1L;
+        dto.providerId = 1L;
+        dto.unitValue = 100.0;
+        dto.unitId = 1L;
+        dto.description = "Update con nuevo precio.";
+        dto.statusId = 1L;
+        dto.price = new BigDecimal("200.00000");
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .put("/api/products/1001")
+        .then()
+            .statusCode(200)
+            .body("skuSellerId", equalTo(1001))
+            .body("latestPrice", notNullValue())
+            .body("latestPriceDate", notNullValue());
+
+        verify(updateProductUseCase).execute(eq(1001L), any(Product.class));
+    }
+
+    @Test
+    void updateProduct_withoutPrice_returns200() throws Exception {
+        String token = "admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(ADMIN_UID);
+
+        Long sellerId = sellerUserId();
+        Product existing = buildProductWithPrice(1001L, sellerId,
+                new BigDecimal("200.00000"), LocalDateTime.now().minusHours(1));
+        when(getProductByIdUseCase.execute(1001L)).thenReturn(existing);
+
+        Product updated = buildProductWithPrice(1001L, sellerId,
+                new BigDecimal("200.00000"), existing.getLatestPriceDate());
+        when(updateProductUseCase.execute(eq(1001L), any(Product.class))).thenReturn(updated);
+
+        UpdateProductDto dto = new UpdateProductDto();
+        dto.name = "Fertilizante NPK";
+        dto.sku = "FERT-001";
+        dto.categoryId = 1L;
+        dto.providerId = 1L;
+        dto.unitValue = 100.0;
+        dto.unitId = 1L;
+        dto.description = "Update sin tocar precio.";
+        dto.statusId = 1L;
+        // dto.price intentionally omitted (null)
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .put("/api/products/1001")
+        .then()
+            .statusCode(200)
+            .body("skuSellerId", equalTo(1001))
+            .body("latestPrice", notNullValue());
+
+        // Resource must still hand the request off to the use case even when price is null;
+        // the no-op rule lives inside UpdateProductUseCase, not the resource.
+        verify(updateProductUseCase).execute(eq(1001L), any(Product.class));
+        verify(registerProductUseCase, never()).execute(any(Product.class));
+    }
+
+    // -------------------------------------------------------------------------
+    // Stock-aware product flows (latestStock on responses, register with stock,
+    // update with/without stock)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void getAllProducts_includesStockInResponse_returns200() throws Exception {
+        String token = "seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(SELLER_UID);
+
+        Long userId = sellerUserId();
+        Product p1 = buildProduct(1001L, userId);
+        p1.setStock(140);
+        Product p2 = buildProduct(1002L, userId);
+        p2.setStock(75);
+        when(getAllProductsUseCase.execute()).thenReturn(List.of(p1, p2));
+
+        given()
+            .header("Authorization", "Bearer " + token)
+        .when()
+            .get("/api/products")
+        .then()
+            .statusCode(200)
+            .body("[0].skuSellerId", equalTo(1001))
+            .body("[0].stock", equalTo(140))
+            .body("[1].skuSellerId", equalTo(1002))
+            .body("[1].stock", equalTo(75));
+    }
+
+    @Test
+    void registerProduct_withStock_returnsStockInResponse_201() throws Exception {
+        String token = "seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(SELLER_UID);
+
+        Long userId = sellerUserId();
+        Product created = buildProduct(778L, userId);
+        created.setStock(25);
+        when(registerProductUseCase.execute(any(Product.class))).thenReturn(created);
+
+        RegisterProductDto dto = new RegisterProductDto();
+        dto.sellerId = 1L;
+        dto.name = "Producto con stock";
+        dto.sku = "STOCK-001";
+        dto.categoryId = 1L;
+        dto.providerId = 1L;
+        dto.unitValue = 100.0;
+        dto.unitId = 1L;
+        dto.description = "Inicial 25 unidades.";
+        dto.statusId = 1L;
+        dto.price = new BigDecimal("99.00000");
+        dto.stock = 25;
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .post("/api/products")
+        .then()
+            .statusCode(201)
+            .body("skuSellerId", equalTo(778))
+            .body("stock", equalTo(25));
+    }
+
+    @Test
+    void updateProduct_withNewStock_returnsUpdatedStock_200() throws Exception {
+        String token = "admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(ADMIN_UID);
+
+        Long sellerId = sellerUserId();
+        Product existing = buildProduct(1001L, sellerId);
+        existing.setStock(50);
+        when(getProductByIdUseCase.execute(1001L)).thenReturn(existing);
+
+        Product updated = buildProduct(1001L, sellerId);
+        updated.setStock(80);
+        when(updateProductUseCase.execute(eq(1001L), any(Product.class))).thenReturn(updated);
+
+        UpdateProductDto dto = new UpdateProductDto();
+        dto.name = "Fertilizante NPK";
+        dto.sku = "FERT-001";
+        dto.categoryId = 1L;
+        dto.providerId = 1L;
+        dto.unitValue = 100.0;
+        dto.unitId = 1L;
+        dto.description = "Update con nuevo stock.";
+        dto.statusId = 1L;
+        dto.stock = 80;
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .put("/api/products/1001")
+        .then()
+            .statusCode(200)
+            .body("stock", equalTo(80));
+
+        verify(updateProductUseCase).execute(eq(1001L), any(Product.class));
+    }
+
+    @Test
+    void updateProduct_withoutStock_returns200() throws Exception {
+        String token = "admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(ADMIN_UID);
+
+        Long sellerId = sellerUserId();
+        Product existing = buildProduct(1001L, sellerId);
+        existing.setStock(50);
+        when(getProductByIdUseCase.execute(1001L)).thenReturn(existing);
+
+        // The use case is mocked, so we return a product whose stock is unchanged.
+        Product updated = buildProduct(1001L, sellerId);
+        updated.setStock(50);
+        when(updateProductUseCase.execute(eq(1001L), any(Product.class))).thenReturn(updated);
+
+        UpdateProductDto dto = new UpdateProductDto();
+        dto.name = "Fertilizante NPK";
+        dto.sku = "FERT-001";
+        dto.categoryId = 1L;
+        dto.providerId = 1L;
+        dto.unitValue = 100.0;
+        dto.unitId = 1L;
+        dto.description = "Update sin tocar stock.";
+        dto.statusId = 1L;
+        // dto.stock intentionally omitted (null)
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .put("/api/products/1001")
+        .then()
+            .statusCode(200)
+            .body("stock", equalTo(50));
+
+        // Resource still hands off to the use case; the no-op rule is inside the use case.
+        verify(updateProductUseCase).execute(eq(1001L), any(Product.class));
     }
 }

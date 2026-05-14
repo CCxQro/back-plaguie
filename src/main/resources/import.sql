@@ -46,28 +46,28 @@ INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id
 -- 3. USUARIOS GLOBALES (Tabla `Usuario`)
 -- ==========================================
 
--- 3.1 Respetando los datos existentes (IDs 1 y 2, asumiendo id_rol 1 para ellos por el volcado)
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (1, 'ex1@gmail.com', 'gty6qkgWEWdpVYYRJRkHVfyZpPA3', 1, 'Ex1', 1);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (2, 'Dav@gmail.com', 'GcmYUnDKyzNUf4lzJI3BTBBgrfY2', 1, 'Davicho', 1);
+-- 3.1 Administradores base usados para pruebas de validación
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (1, 'admin.operaciones@plaguie.test', 'gty6qkgWEWdpVYYRJRkHVfyZpPA3', 1, 'Ana Operaciones', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (2, 'admin.campo@plaguie.test', 'GcmYUnDKyzNUf4lzJI3BTBBgrfY2', 1, 'David Campo', 1);
 
 -- 3.2 Nuevos Administradores (id_rol = 1) -> Total de 5 administradores
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (3, 'admin3@gmail.com', 'pVtLnT4RIjfYL0LtuvaHIZnA6mx2', 1, 'Admin3', 1);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (4, 'admin4@gmail.com', 'Wou1NFGdTaOFAf4ICaNrd6x2F9i2', 1, 'Admin4', 1);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (5, 'admin5@gmail.com', '2LTqkEM8P1bZCPbT1ySl5fWymCG3', 1, 'Admin5', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (3, 'admin.validacion@plaguie.test', 'pVtLnT4RIjfYL0LtuvaHIZnA6mx2', 1, 'Mariana Validación', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (4, 'admin.inventario@plaguie.test', 'Wou1NFGdTaOFAf4ICaNrd6x2F9i2', 1, 'Roberto Inventario', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (5, 'admin.reportes@plaguie.test', '2LTqkEM8P1bZCPbT1ySl5fWymCG3', 1, 'Lucía Reportes', 1);
 
 -- 3.3 Nuevos Agricultores (id_rol = 2) -> Total de 5 agricultores
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (6, 'agri1@gmail.com', 'i1TbB18EtlbX8lMT9hGECRXGEUF3', 1, 'AJuan', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (7, 'agri2@gmail.com', 'c2hc3CW2VUT57pc13NpeJWqo24B2', 1, 'AMaria', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (8, 'agri3@gmail.com', 'sltP9g6CzWdPT3MGoztz314i8S42', 1, 'APedro', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (9, 'agri4@gmail.com', 'FJ9QfhyZG1cn4FRUoRccMNjSIFq1', 1, 'ALucia', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (10, 'agri5@gmail.com', 'J8X7wk5XJSXDwJsYIZ26KFtAGbv2', 1, 'ACarlos', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (6, 'juan.mango@plaguie.test', 'i1TbB18EtlbX8lMT9hGECRXGEUF3', 1, 'Juan Hernández', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (7, 'maria.soya@plaguie.test', 'c2hc3CW2VUT57pc13NpeJWqo24B2', 1, 'María González', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (8, 'pedro.tomate@plaguie.test', 'sltP9g6CzWdPT3MGoztz314i8S42', 1, 'Pedro Ramírez', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (9, 'lucia.citrico@plaguie.test', 'FJ9QfhyZG1cn4FRUoRccMNjSIFq1', 1, 'Lucía Torres', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (10, 'carlos.campo@plaguie.test', 'J8X7wk5XJSXDwJsYIZ26KFtAGbv2', 1, 'Carlos Medina', 2);
 
 -- 3.4 Nuevos Técnicos Vendedores (id_rol = 3) -> Total de 5 técnicos
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (11, 'tec1@gmail.com', 'WyhDU9gb1Mb4CbXxuQFWkDZWVwC3', 1, 'TRoberto', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (12, 'tec2@gmail.com', '3Q3KxUwqJkYmS1tMYdJRr3tvRB03', 1, 'TAna', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (13, 'tec3@gmail.com', 'a5IqtyPATEgwRqxeUjvHsPsubSB3', 1, 'TLuis', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (14, 'tec4@gmail.com', 'eGmuWI2en2ZDI4iGNz0apt812Co2', 1, 'TSofia', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (15, 'tec5@gmail.com', 'b4zklFnLY0YhVQsOF0Ht0LcLasw2', 1, 'TJorge', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (11, 'roberto.tecnico@plaguie.test', 'WyhDU9gb1Mb4CbXxuQFWkDZWVwC3', 1, 'Roberto Salas', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (12, 'ana.tecnica@plaguie.test', '3Q3KxUwqJkYmS1tMYdJRr3tvRB03', 1, 'Ana Beltrán', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (13, 'luis.tecnico@plaguie.test', 'a5IqtyPATEgwRqxeUjvHsPsubSB3', 1, 'Luis Paredes', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (14, 'sofia.tecnica@plaguie.test', 'eGmuWI2en2ZDI4iGNz0apt812Co2', 1, 'Sofía Duarte', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (15, 'jorge.tecnico@plaguie.test', 'b4zklFnLY0YhVQsOF0Ht0LcLasw2', 1, 'Jorge Castillo', 3);
 
 
 -- ==========================================
@@ -85,6 +85,10 @@ INSERT INTO Colores (id_color, name, hexa) VALUES (5, 'Naranja', '#FFA500');
 INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
 INSERT INTO Status (id_status, nombre) VALUES (2, 'Revision');
 INSERT INTO Status (id_status, nombre) VALUES (3, 'Rejected');
+
+-- Acciones de Inventario (catalogo estatico: 1=add, 2=subtract)
+INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (1, 'add');
+INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (2, 'subtract');
 
 -- Categorias (registradas por admins y tecnicos vendedores)
 INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (1, 1,  'Fertilizantes',   1, 1);
@@ -162,8 +166,11 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_hospedante,
 	id_variedad,
 	id_especie,
-	ahosp
-) VALUES (1, 1, 1, 20.75000000, -103.48000000, 1, 1, 1, 1, 1, 12.50);
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (1, 1, 1, 20.75000000, -103.48000000, 1, 1, 1, 1, 1, 12.50, 2, NULL, NULL);
 
 INSERT INTO vigilancia_fitosanitaria (
 	id_vigilancia_fitosanitaria,
@@ -176,8 +183,11 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_hospedante,
 	id_variedad,
 	id_especie,
-	ahosp
-) VALUES (2, 2, 2, 19.41380000, -102.05580000, 2, 2, 2, 2, 2, 8.25);
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (2, 2, 2, 19.41380000, -102.05580000, 2, 2, 2, 2, 2, 8.25, 2, NULL, NULL);
 
 INSERT INTO vigilancia_fitosanitaria (
 	id_vigilancia_fitosanitaria,
@@ -190,8 +200,161 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_hospedante,
 	id_variedad,
 	id_especie,
-	ahosp
-) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00);
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00, 1, 1, '2026-05-10 10:30:00');
+
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (4, 2, 1, 29.07290000, -110.95590000, 4, 1, 1, 1, 1, 5.75, 1, 2, '2026-05-11 12:45:00');
+
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (5, 1, 2, 19.54370000, -96.91010000, 5, 2, 2, 2, 2, 18.40, 3, 3, '2026-05-12 09:20:00');
+
+-- ==========================================
+-- 6. ALERTAS Y RECOMENDACIONES PARA VALIDACIÓN
+-- ==========================================
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (1, 'Brote de mosca de la fruta en mango', 'Capturas elevadas en trampas perimetrales del predio El Milagro.', 1, 'Mosca de la fruta', 12.50, 'critico', 6, '2026-05-10 08:15:00', 2, NULL, NULL);
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (2, 'Riesgo de roya por humedad persistente', 'Se observaron condiciones favorables para roya asiática en el lote de soya.', 2, 'Roya asiatica', 8.25, 'advertencia', 7, '2026-05-10 11:00:00', 2, NULL, NULL);
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (3, 'Araña roja confirmada en tomate', 'Daño visible en hojas medias, requiere seguimiento de control biológico.', 3, 'Araña roja', 15.00, 'informacion', 8, '2026-05-09 15:30:00', 1, 1, '2026-05-10 09:10:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (4, 'Reporte duplicado de mosca de la fruta', 'El reporte repite la misma evidencia de la alerta 1 y debe corregirse.', 4, 'Mosca de la fruta', 5.75, 'advertencia', 9, '2026-05-09 17:45:00', 3, 2, '2026-05-11 13:20:00');
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (1, 'Control preventivo para mosca de la fruta', 'Instalar trampas McPhail y reforzar monitoreo semanal en bordes del cultivo.', 'Mosca de la fruta', 'Spinosad, trampas McPhail', 11, '2026-05-10 09:40:00', 2, NULL, NULL);
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (2, 'Manejo inicial de roya asiática', 'Aplicar fungicida sistémico si la humedad relativa se mantiene por encima del umbral.', 'Roya asiatica', 'Triazol, estrobilurina', 12, '2026-05-10 13:10:00', 2, NULL, NULL);
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (3, 'Liberación de control biológico', 'Liberar ácaros depredadores y reducir aplicaciones de amplio espectro.', 'Araña roja', 'Phytoseiulus persimilis, aceite agrícola', 13, '2026-05-09 10:25:00', 1, 1, '2026-05-10 16:05:00');
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (4, 'Dosis incompleta para roya', 'La recomendación no incluye intervalo de reentrada ni compatibilidad del producto.', 'Roya asiatica', 'Fungicida sin ficha técnica', 14, '2026-05-09 18:05:00', 3, 3, '2026-05-11 08:30:00');
 
 -- 6. UNIDADES (registradas por admins y técnicos vendedores)
 -- ==========================================
@@ -241,6 +404,101 @@ INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, 
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1008, 4, 'Sulfato de Magnesio',       'PLG-008', 2, 4,  60.0, 1, 'Corrector de deficiencias de Mg',     1);
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1009, 5, 'Abono Organico Compostado', 'PLG-009', 8, 5,  45.0, 1, 'Mejora estructura del suelo',          1);
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1);
+
+-- ==========================================
+-- 8.B PRECIOS (historico por producto; el mas reciente = valor_unidad del producto)
+-- ==========================================
+-- Producto 1001 (Fertilizante NPK 20-20-20, valor_unidad=250)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (1,  1001, 220.00000, '2025-01-12 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (2,  1001, 240.00000, '2025-03-08 11:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (3,  1001, 250.00000, '2025-05-02 14:00:00');
+
+-- Producto 1002 (Herbicida Glifosato 36%, valor_unidad=180)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (4,  1002, 160.00000, '2025-02-05 10:15:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (5,  1002, 180.00000, '2025-04-20 09:45:00');
+
+-- Producto 1003 (Insecticida Clorpirifos 48E, valor_unidad=320)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (6,  1003, 300.00000, '2025-01-30 08:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (7,  1003, 320.00000, '2025-04-12 13:00:00');
+
+-- Producto 1004 (Fungicida Mancozeb 80%, valor_unidad=145)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (8,  1004, 145.00000, '2025-03-15 12:00:00');
+
+-- Producto 1005 (Semilla Maiz Hibrido H-318, valor_unidad=890)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (9,  1005, 850.00000, '2025-02-18 09:20:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (10, 1005, 890.00000, '2025-04-25 16:00:00');
+
+-- Producto 1006 (Semilla Sorgo Hibrido H-50, valor_unidad=650)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (11, 1006, 620.00000, '2025-01-22 10:45:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (12, 1006, 650.00000, '2025-03-29 11:15:00');
+
+-- Producto 1007 (Bioestimulante Auxinas, valor_unidad=95)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (13, 1007,  90.00000, '2025-02-10 08:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (14, 1007,  95.00000, '2025-04-08 09:30:00');
+
+-- Producto 1008 (Sulfato de Magnesio, valor_unidad=60)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (15, 1008,  60.00000, '2025-03-03 10:00:00');
+
+-- Producto 1009 (Abono Organico Compostado, valor_unidad=45)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (16, 1009,  40.00000, '2025-01-18 14:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (17, 1009,  45.00000, '2025-04-06 15:00:00');
+
+-- Producto 1010 (Cal Agricola 90%, valor_unidad=30)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (18, 1010,  28.00000, '2025-02-22 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (19, 1010,  30.00000, '2025-05-10 12:30:00');
+
+-- ==========================================
+-- 8.C INVENTARIO (historial por producto, cronologico por id_inventario ascendente)
+-- id_accion_inventario: 1 = add, 2 = subtract
+-- Cada producto mantiene running total >= 0 en cada paso. Stock final entre () al lado del producto.
+-- ==========================================
+
+-- Producto 1001 (final stock = 140)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (1,  1001, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (2,  1001,  50, 1); -- 150
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (3,  1001,  30, 2); -- 120
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (4,  1001,  20, 1); -- 140
+
+-- Producto 1002 (final stock = 75)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (5,  1002,  80, 1); -- 80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (6,  1002,  20, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (7,  1002,  25, 2); --  75
+
+-- Producto 1003 (final stock = 120)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (8,  1003, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (9,  1003,  40, 2); --  60
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (10, 1003,  60, 1); -- 120
+
+-- Producto 1004 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (11, 1004,  50, 1); --  50
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (12, 1004,  50, 1); -- 100
+
+-- Producto 1005 (final stock = 150)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (13, 1005, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (14, 1005,  20, 2); --  80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (15, 1005,  30, 2); --  50
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (16, 1005, 100, 1); -- 150
+
+-- Producto 1006 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (17, 1006,  60, 1); --  60
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (18, 1006,  40, 1); -- 100
+
+-- Producto 1007 (final stock = 75)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (19, 1007,  90, 1); --  90
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (20, 1007,  15, 2); --  75
+
+-- Producto 1008 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (21, 1008, 100, 1); -- 100
+
+-- Producto 1009 (final stock = 50)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (22, 1009,  70, 1); --  70
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (23, 1009,  30, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (24, 1009,  50, 2); --  50
+
+-- Producto 1010 (final stock = 120)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (25, 1010, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (26, 1010,  20, 2); --  80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (27, 1010,  40, 1); -- 120
 
 -- ==========================================
 -- 9. ESTADOS_PEDIDO
