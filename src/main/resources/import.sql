@@ -46,28 +46,28 @@ INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id
 -- 3. USUARIOS GLOBALES (Tabla `Usuario`)
 -- ==========================================
 
--- 3.1 Respetando los datos existentes (IDs 1 y 2, asumiendo id_rol 1 para ellos por el volcado)
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (1, 'ex1@gmail.com', 'gty6qkgWEWdpVYYRJRkHVfyZpPA3', 1, 'Ex1', 1);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (2, 'Dav@gmail.com', 'GcmYUnDKyzNUf4lzJI3BTBBgrfY2', 1, 'Davicho', 1);
+-- 3.1 Administradores base usados para pruebas de validación
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (1, 'admin.operaciones@plaguie.test', 'gty6qkgWEWdpVYYRJRkHVfyZpPA3', 1, 'Ana Operaciones', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (2, 'admin.campo@plaguie.test', 'GcmYUnDKyzNUf4lzJI3BTBBgrfY2', 1, 'David Campo', 1);
 
 -- 3.2 Nuevos Administradores (id_rol = 1) -> Total de 5 administradores
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (3, 'admin3@gmail.com', 'pVtLnT4RIjfYL0LtuvaHIZnA6mx2', 1, 'Admin3', 1);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (4, 'admin4@gmail.com', 'Wou1NFGdTaOFAf4ICaNrd6x2F9i2', 1, 'Admin4', 1);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (5, 'admin5@gmail.com', '2LTqkEM8P1bZCPbT1ySl5fWymCG3', 1, 'Admin5', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (3, 'admin.validacion@plaguie.test', 'pVtLnT4RIjfYL0LtuvaHIZnA6mx2', 1, 'Mariana Validación', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (4, 'admin.inventario@plaguie.test', 'Wou1NFGdTaOFAf4ICaNrd6x2F9i2', 1, 'Roberto Inventario', 1);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (5, 'admin.reportes@plaguie.test', '2LTqkEM8P1bZCPbT1ySl5fWymCG3', 1, 'Lucía Reportes', 1);
 
 -- 3.3 Nuevos Agricultores (id_rol = 2) -> Total de 5 agricultores
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (6, 'agri1@gmail.com', 'i1TbB18EtlbX8lMT9hGECRXGEUF3', 1, 'AJuan', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (7, 'agri2@gmail.com', 'c2hc3CW2VUT57pc13NpeJWqo24B2', 1, 'AMaria', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (8, 'agri3@gmail.com', 'sltP9g6CzWdPT3MGoztz314i8S42', 1, 'APedro', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (9, 'agri4@gmail.com', 'FJ9QfhyZG1cn4FRUoRccMNjSIFq1', 1, 'ALucia', 2);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (10, 'agri5@gmail.com', 'J8X7wk5XJSXDwJsYIZ26KFtAGbv2', 1, 'ACarlos', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (6, 'juan.mango@plaguie.test', 'i1TbB18EtlbX8lMT9hGECRXGEUF3', 1, 'Juan Hernández', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (7, 'maria.soya@plaguie.test', 'c2hc3CW2VUT57pc13NpeJWqo24B2', 1, 'María González', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (8, 'pedro.tomate@plaguie.test', 'sltP9g6CzWdPT3MGoztz314i8S42', 1, 'Pedro Ramírez', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (9, 'lucia.citrico@plaguie.test', 'FJ9QfhyZG1cn4FRUoRccMNjSIFq1', 1, 'Lucía Torres', 2);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (10, 'carlos.campo@plaguie.test', 'J8X7wk5XJSXDwJsYIZ26KFtAGbv2', 1, 'Carlos Medina', 2);
 
 -- 3.4 Nuevos Técnicos Vendedores (id_rol = 3) -> Total de 5 técnicos
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (11, 'tec1@gmail.com', 'WyhDU9gb1Mb4CbXxuQFWkDZWVwC3', 1, 'TRoberto', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (12, 'tec2@gmail.com', '3Q3KxUwqJkYmS1tMYdJRr3tvRB03', 1, 'TAna', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (13, 'tec3@gmail.com', 'a5IqtyPATEgwRqxeUjvHsPsubSB3', 1, 'TLuis', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (14, 'tec4@gmail.com', 'eGmuWI2en2ZDI4iGNz0apt812Co2', 1, 'TSofia', 3);
-INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (15, 'tec5@gmail.com', 'b4zklFnLY0YhVQsOF0Ht0LcLasw2', 1, 'TJorge', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (11, 'roberto.tecnico@plaguie.test', 'WyhDU9gb1Mb4CbXxuQFWkDZWVwC3', 1, 'Roberto Salas', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (12, 'ana.tecnica@plaguie.test', '3Q3KxUwqJkYmS1tMYdJRr3tvRB03', 1, 'Ana Beltrán', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (13, 'luis.tecnico@plaguie.test', 'a5IqtyPATEgwRqxeUjvHsPsubSB3', 1, 'Luis Paredes', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (14, 'sofia.tecnica@plaguie.test', 'eGmuWI2en2ZDI4iGNz0apt812Co2', 1, 'Sofía Duarte', 3);
+INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol) VALUES (15, 'jorge.tecnico@plaguie.test', 'b4zklFnLY0YhVQsOF0Ht0LcLasw2', 1, 'Jorge Castillo', 3);
 
 
 -- ==========================================
@@ -200,7 +200,157 @@ INSERT INTO vigilancia_fitosanitaria (
 	id_status,
 	id_validated_by,
 	validated_at
-) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00, 1, 1, '2026-01-15 10:30:00');
+) VALUES (3, 3, 3, 24.80530000, -107.39410000, 3, 3, 3, 3, 3, 15.00, 1, 1, '2026-05-10 10:30:00');
+
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (4, 2, 1, 29.07290000, -110.95590000, 4, 1, 1, 1, 1, 5.75, 1, 2, '2026-05-11 12:45:00');
+
+INSERT INTO vigilancia_fitosanitaria (
+	id_vigilancia_fitosanitaria,
+	id_sistema_monitoreo,
+	id_cid,
+	lat,
+	`long`,
+	id_ubicacion,
+	id_plaga,
+	id_hospedante,
+	id_variedad,
+	id_especie,
+	ahosp,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (5, 1, 2, 19.54370000, -96.91010000, 5, 2, 2, 2, 2, 18.40, 3, 3, '2026-05-12 09:20:00');
+
+-- ==========================================
+-- 6. ALERTAS Y RECOMENDACIONES PARA VALIDACIÓN
+-- ==========================================
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (1, 'Brote de mosca de la fruta en mango', 'Capturas elevadas en trampas perimetrales del predio El Milagro.', 1, 'Mosca de la fruta', 12.50, 'critico', 6, '2026-05-10 08:15:00', 2, NULL, NULL);
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (2, 'Riesgo de roya por humedad persistente', 'Se observaron condiciones favorables para roya asiática en el lote de soya.', 2, 'Roya asiatica', 8.25, 'advertencia', 7, '2026-05-10 11:00:00', 2, NULL, NULL);
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (3, 'Araña roja confirmada en tomate', 'Daño visible en hojas medias, requiere seguimiento de control biológico.', 3, 'Araña roja', 15.00, 'informacion', 8, '2026-05-09 15:30:00', 1, 1, '2026-05-10 09:10:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (4, 'Reporte duplicado de mosca de la fruta', 'El reporte repite la misma evidencia de la alerta 1 y debe corregirse.', 4, 'Mosca de la fruta', 5.75, 'advertencia', 9, '2026-05-09 17:45:00', 3, 2, '2026-05-11 13:20:00');
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (1, 'Control preventivo para mosca de la fruta', 'Instalar trampas McPhail y reforzar monitoreo semanal en bordes del cultivo.', 'Mosca de la fruta', 'Spinosad, trampas McPhail', 11, '2026-05-10 09:40:00', 2, NULL, NULL);
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (2, 'Manejo inicial de roya asiática', 'Aplicar fungicida sistémico si la humedad relativa se mantiene por encima del umbral.', 'Roya asiatica', 'Triazol, estrobilurina', 12, '2026-05-10 13:10:00', 2, NULL, NULL);
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (3, 'Liberación de control biológico', 'Liberar ácaros depredadores y reducir aplicaciones de amplio espectro.', 'Araña roja', 'Phytoseiulus persimilis, aceite agrícola', 13, '2026-05-09 10:25:00', 1, 1, '2026-05-10 16:05:00');
+
+INSERT INTO recomendaciones (
+	id_recomendacion,
+	titulo,
+	descripcion,
+	tipo_plaga,
+	productos_recomendados,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (4, 'Dosis incompleta para roya', 'La recomendación no incluye intervalo de reentrada ni compatibilidad del producto.', 'Roya asiatica', 'Fungicida sin ficha técnica', 14, '2026-05-09 18:05:00', 3, 3, '2026-05-11 08:30:00');
 
 -- 6. UNIDADES (registradas por admins y técnicos vendedores)
 -- ==========================================

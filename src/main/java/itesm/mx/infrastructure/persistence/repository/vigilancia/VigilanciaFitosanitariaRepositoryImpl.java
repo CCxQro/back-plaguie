@@ -80,7 +80,8 @@ public class VigilanciaFitosanitariaRepositoryImpl implements PanacheRepositoryB
             entity.validatedAt = vigilanciaFitosanitaria.getValidatedAt();
         }
 
-        persistAndFlush(entity);
+        flush();
+        getEntityManager().clear();
         return findDetailedById(entity.vigilanciaFitosanitariaId)
                 .map(VigilanciaFitosanitariaMapper::toDomain)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la vigilancia fitosanitaria actualizada"));
