@@ -3,9 +3,14 @@ package itesm.mx.application.usecase.marketplace.product;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import itesm.mx.application.usecase.marketplace.inventory.RegisterInventoryUseCase;
+import itesm.mx.domain.models.marketplace.Inventory;
+import itesm.mx.domain.models.marketplace.InventoryAction;
+import itesm.mx.domain.models.marketplace.InventoryActionConstants;
 import itesm.mx.domain.models.marketplace.Price;
 import itesm.mx.domain.models.marketplace.Product;
 import itesm.mx.domain.repository.marketplace.CategoryRepository;
+import itesm.mx.domain.repository.marketplace.InventoryRepository;
 import itesm.mx.domain.repository.marketplace.PriceRepository;
 import itesm.mx.domain.repository.marketplace.ProductRepository;
 import itesm.mx.domain.repository.marketplace.ProviderRepository;
@@ -25,6 +30,8 @@ public class UpdateProductUseCase {
     @Inject UnitRepository unitRepository;
     @Inject StatusRepository statusRepository;
     @Inject PriceRepository priceRepository;
+    @Inject InventoryRepository inventoryRepository;
+    @Inject RegisterInventoryUseCase registerInventoryUseCase;
 
     @Transactional
     public Product execute(Long skuSellerId, Product product) {
@@ -91,6 +98,28 @@ public class UpdateProductUseCase {
             updated.setLatestPrice(p.getPrice());
             updated.setLatestPriceDate(p.getPriceDate());
         });
+
+        Integer suppliedStock = product.getStock();
+        if (suppliedStock != null) {
+            if (suppliedStock < 0) {
+                throw new IllegalArgumentException("stock must be greater than or equal to 0");
+            }
+            int currentStock = inventoryRepository.currentStock(skuSellerId);
+            if (currentStock > 0) {
+                appendInventoryRow(updated, currentStock, InventoryActionConstants.SUBTRACT);
+            }
+            if (suppliedStock > 0) {
+                appendInventoryRow(updated, suppliedStock, InventoryActionConstants.ADD);
+            }
+        }
+        updated.setStock(inventoryRepository.currentStock(skuSellerId));
         return updated;
+    }
+
+    private void appendInventoryRow(Product product, int cantidad, Long actionId) {
+        InventoryAction action = new InventoryAction();
+        action.setInventoryActionId(actionId);
+        Inventory row = new Inventory(null, product, cantidad, action);
+        registerInventoryUseCase.execute(row);
     }
 }
