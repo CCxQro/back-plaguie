@@ -2,6 +2,8 @@ package itesm.mx.infrastructure.persistence.repository.parcela;
 
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import itesm.mx.domain.models.parcela.Parcela;
 import itesm.mx.domain.repository.parcela.ParcelaRepository;
 import itesm.mx.infrastructure.mapper.parcela.ParcelaMapper;
@@ -12,6 +14,9 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntity, Long>, ParcelaRepository {
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     private static final String FETCH_QUERY = """
             select p
