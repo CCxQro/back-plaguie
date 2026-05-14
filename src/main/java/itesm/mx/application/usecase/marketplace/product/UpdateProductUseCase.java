@@ -3,12 +3,23 @@ package itesm.mx.application.usecase.marketplace.product;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import itesm.mx.application.usecase.marketplace.inventory.RegisterInventoryUseCase;
+import itesm.mx.domain.models.marketplace.Inventory;
+import itesm.mx.domain.models.marketplace.InventoryAction;
+import itesm.mx.domain.models.marketplace.InventoryActionConstants;
+import itesm.mx.domain.models.marketplace.Price;
 import itesm.mx.domain.models.marketplace.Product;
 import itesm.mx.domain.repository.marketplace.CategoryRepository;
+import itesm.mx.domain.repository.marketplace.InventoryRepository;
+import itesm.mx.domain.repository.marketplace.PriceRepository;
 import itesm.mx.domain.repository.marketplace.ProductRepository;
 import itesm.mx.domain.repository.marketplace.ProviderRepository;
 import itesm.mx.domain.repository.marketplace.StatusRepository;
 import itesm.mx.domain.repository.marketplace.UnitRepository;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @ApplicationScoped
 public class UpdateProductUseCase {
@@ -18,6 +29,9 @@ public class UpdateProductUseCase {
     @Inject ProviderRepository providerRepository;
     @Inject UnitRepository unitRepository;
     @Inject StatusRepository statusRepository;
+    @Inject PriceRepository priceRepository;
+    @Inject InventoryRepository inventoryRepository;
+    @Inject RegisterInventoryUseCase registerInventoryUseCase;
 
     @Transactional
     public Product execute(Long skuSellerId, Product product) {
@@ -59,6 +73,53 @@ public class UpdateProductUseCase {
         statusRepository.findByStatusId(product.getStatus().getStatusId())
                 .orElseThrow(() -> new IllegalArgumentException("Status not found"));
 
-        return productRepository.update(skuSellerId, product);
+        BigDecimal suppliedPrice = product.getLatestPrice();
+        if (suppliedPrice != null && suppliedPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("price must be greater than 0");
+        }
+
+        Product updated = productRepository.update(skuSellerId, product);
+
+        if (suppliedPrice != null) {
+            Optional<Price> latest = priceRepository.findLatestBySkuSellerId(skuSellerId);
+            boolean isNewPrice = latest.isEmpty()
+                    || latest.get().getPrice().compareTo(suppliedPrice) != 0;
+            if (isNewPrice) {
+                Price priceRow = new Price();
+                priceRow.setProduct(updated);
+                priceRow.setPrice(suppliedPrice);
+                priceRow.setPriceDate(LocalDateTime.now());
+                priceRepository.save(priceRow);
+            }
+        }
+
+        Optional<Price> currentLatest = priceRepository.findLatestBySkuSellerId(skuSellerId);
+        currentLatest.ifPresent(p -> {
+            updated.setLatestPrice(p.getPrice());
+            updated.setLatestPriceDate(p.getPriceDate());
+        });
+
+        Integer suppliedStock = product.getStock();
+        if (suppliedStock != null) {
+            if (suppliedStock < 0) {
+                throw new IllegalArgumentException("stock must be greater than or equal to 0");
+            }
+            int currentStock = inventoryRepository.currentStock(skuSellerId);
+            if (currentStock > 0) {
+                appendInventoryRow(updated, currentStock, InventoryActionConstants.SUBTRACT);
+            }
+            if (suppliedStock > 0) {
+                appendInventoryRow(updated, suppliedStock, InventoryActionConstants.ADD);
+            }
+        }
+        updated.setStock(inventoryRepository.currentStock(skuSellerId));
+        return updated;
+    }
+
+    private void appendInventoryRow(Product product, int cantidad, Long actionId) {
+        InventoryAction action = new InventoryAction();
+        action.setInventoryActionId(actionId);
+        Inventory row = new Inventory(null, product, cantidad, action);
+        registerInventoryUseCase.execute(row);
     }
 }

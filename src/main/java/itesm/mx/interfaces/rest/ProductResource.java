@@ -189,8 +189,11 @@ public class ProductResource {
         Status status = new Status();
         status.setStatusId(dto.statusId);
 
-        return new Product(skuSellerId, seller, dto.name, dto.sku,
+        Product product = new Product(skuSellerId, seller, dto.name, dto.sku,
                 category, provider, dto.unitValue, unit, dto.description, status, dto.firebaseImageId);
+        product.setLatestPrice(dto.price);
+        product.setStock(dto.stock);
+        return product;
     }
 
     private Product buildProductFromUpdateDto(UpdateProductDto dto) {
@@ -206,8 +209,11 @@ public class ProductResource {
         Status status = new Status();
         status.setStatusId(dto.statusId);
 
-        return new Product(null, null, dto.name, dto.sku,
+        Product product = new Product(null, null, dto.name, dto.sku,
                 category, provider, dto.unitValue, unit, dto.description, status, dto.firebaseImageId);
+        product.setLatestPrice(dto.price);
+        product.setStock(dto.stock);
+        return product;
     }
 
     private ProductResponseDto toResponseDto(Product product) {
@@ -249,6 +255,9 @@ public class ProductResource {
         }
 
         dto.firebaseImageId = product.getFirebaseImageId();
+        dto.latestPrice = product.getLatestPrice();
+        dto.latestPriceDate = product.getLatestPriceDate();
+        dto.stock = product.getStock();
 
         return dto;
     }

@@ -71,6 +71,7 @@ class LoginUseCaseTest {
         LoginResponseDto response = loginUseCase.execute(loginDto);
 
         assertNotNull(response);
+        assertEquals(1L, response.userId);
         assertEquals("Juan Perez", response.name);
         assertEquals("juan@correo.com", response.email);
         
