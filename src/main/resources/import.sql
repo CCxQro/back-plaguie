@@ -385,8 +385,16 @@ INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (4, 14, 'Comer
 INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semillas y Abonos del Golfo');
 
 -- ==========================================
--- 8. PRODUCTOS (2 por vendedor, 10 total; id_status=1 Accepted)
+-- 8. PRODUCTOS
 -- ==========================================
+-- Productos 1-5: coinciden con los IDs del mock de la app mobile (SCRUM-207)
+-- Agricultor 1 (id_usuario=6) tiene un pedido entregado con estos productos (ver sección 10/11)
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1, 1, 'Insecticida Ultra',   'PLG-M01', 3, 1,  80.0, 2, 'Insecticida de amplio espectro',      1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (2, 1, 'Fungicida Mancozeb',  'PLG-M02', 4, 1, 120.0, 1, 'Fungicida protector preventivo',      1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (3, 1, 'Fertilizante Bio',    'PLG-M03', 1, 1,  50.0, 1, 'Fertilizante organico enriquecido',   1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (4, 1, 'Plaguicida Pro',      'PLG-M04', 3, 1, 150.0, 2, 'Plaguicida de alto rendimiento',      1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (5, 1, 'Herbicida 2,4-D',     'PLG-M05', 2, 1,  90.0, 2, 'Herbicida sistemico selectivo',       1);
+-- Productos 1001-1010: catálogo del marketplace web (2 por vendedor)
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1001, 1, 'Fertilizante NPK 20-20-20',  'PLG-001', 1, 1, 250.0, 1, 'Fertilizante balanceado para cultivos', 1);
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1002, 1, 'Herbicida Glifosato 36%',    'PLG-002', 2, 1, 180.0, 2, 'Control de malezas de hoja ancha',     1);
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1003, 2, 'Insecticida Clorpirifos 48E','PLG-003', 3, 2, 320.0, 2, 'Control de plagas del suelo',          1);
@@ -514,6 +522,8 @@ INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_esta
 INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (8,  3, 4, '2025-04-10 09:00:00', 3,  370.00);
 INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (9,  4, 5, '2025-04-18 10:30:00', 2,  315.00);
 INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (10, 5, 5, '2025-05-01 09:15:00', 1,  240.00);
+-- Pedido 11: agricultor 1 (id_usuario=6), entregado, contiene productos 1-5 del mock mobile
+INSERT INTO Pedido (id_pedido, id_agricultor, id_vendedor, fecha_pedido, id_estado_pedido, monto_total) VALUES (11, 1, 1, '2025-04-01 09:00:00', 4, 7500.00);
 
 -- ==========================================
 -- 11. DETALLE_PEDIDO (19 líneas; totales verificados)
@@ -547,6 +557,12 @@ INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio
 -- Pedido 10: 4x1009(45) + 2x1010(30) = 240
 INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (18, 10, 1009, 4, 45.0);
 INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (19, 10, 1010, 2, 30.0);
+-- Pedido 11: 15x1 + 10x2 + 60x3 + 5x4 + 15x5 = 1200+1200+3000+750+1350 = 7500
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (20, 11, 1, 15,  80.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (21, 11, 2, 10, 120.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (22, 11, 3, 60,  50.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (23, 11, 4,  5, 150.0);
+INSERT INTO Detalle_Pedido (id_detalle, id_pedido, id_producto, cantidad, precio_unitario) VALUES (24, 11, 5, 15,  90.0);
 
 -- ==========================================
 -- 12. CATÁLOGOS DE PARCELA
@@ -580,3 +596,16 @@ INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra
 INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (3, 'Parcela Los Pinos',    15.00, '2025-01-15', '2025-09-30', 5.8, 3, 3, 1, 3, 3);
 INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (4, 'Parcela Buenavista',   6.30,  '2025-06-01', '2026-03-01', 6.2, 4, 4, 2, 4, 4);
 INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (5, 'Parcela San José',     20.00, '2025-02-01', '2025-08-15', 6.8, 5, 5, 1, 5, 1);
+
+-- ==========================================
+-- 14. APLICACIONES DE INSUMOS
+-- Agricultor 1 (id_usuario=6): stocks post-aplicación
+--   Producto 1 (Insecticida Ultra):  entregados=15, aplicados=2.0  → disponible=13.0
+--   Producto 2 (Fungicida Mancozeb): entregados=10, aplicados=1.5  → disponible=8.5
+--   Producto 3 (Fertilizante Bio):   entregados=60, aplicados=10.0 → disponible=50.0
+--   Producto 4 (Plaguicida Pro):     entregados=5,  aplicados=0    → disponible=5.0
+--   Producto 5 (Herbicida 2,4-D):    entregados=15, aplicados=0    → disponible=15.0
+-- ==========================================
+INSERT INTO Aplicacion_Insumo (id_aplicacion, id_agricultor, sku_id_vendedor, cantidad, fecha, id_parcela) VALUES (1, 1, 1, 2.0,  '2025-05-20', 1);
+INSERT INTO Aplicacion_Insumo (id_aplicacion, id_agricultor, sku_id_vendedor, cantidad, fecha, id_parcela) VALUES (2, 1, 2, 1.5,  '2025-05-15', 1);
+INSERT INTO Aplicacion_Insumo (id_aplicacion, id_agricultor, sku_id_vendedor, cantidad, fecha, id_parcela) VALUES (3, 1, 3, 10.0, '2025-04-28', 1);
