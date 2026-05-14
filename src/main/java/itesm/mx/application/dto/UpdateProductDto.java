@@ -1,5 +1,7 @@
 package itesm.mx.application.dto;
 
+import java.math.BigDecimal;
+
 public class UpdateProductDto {
     public String name;
     public String sku;
@@ -10,4 +12,5 @@ public class UpdateProductDto {
     public String description;
     public Long statusId;
     public String firebaseImageId;
+    public BigDecimal price;
 }
