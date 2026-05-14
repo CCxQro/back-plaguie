@@ -1,5 +1,7 @@
 package itesm.mx.application.dto;
 
+import java.math.BigDecimal;
+
 public class RegisterProductDto {
     public Long sellerId;
     public String name;
@@ -11,4 +13,6 @@ public class RegisterProductDto {
     public String description;
     public Long statusId;
     public String firebaseImageId;
+    public BigDecimal price;
+    public Integer stock;
 }

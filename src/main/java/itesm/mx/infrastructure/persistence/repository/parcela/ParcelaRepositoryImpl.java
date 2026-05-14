@@ -33,20 +33,18 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
             """;
 
     @Override
-    public List<Parcela> findAll() {
-        return entityManager.createQuery(FETCH_QUERY, ParcelaEntity.class)
-                .getResultStream()
+    public List<Parcela> findAllParcelas() {
+        return find(FETCH_QUERY)
+                .list()
+                .stream()
                 .map(ParcelaMapper::toDomain)
                 .toList();
     }
 
     @Override
-    public Optional<Parcela> findById(Long parcelaId) {
-        return entityManager.createQuery(FETCH_QUERY + " where p.parcelaId = :parcelaId", ParcelaEntity.class)
-                .setParameter("parcelaId", parcelaId)
-                .setMaxResults(1)
-                .getResultStream()
-                .findFirst()
+    public Optional<Parcela> findParcelaById(Long parcelaId) {
+        return find(FETCH_QUERY + " where p.parcelaId = ?1", parcelaId)
+                .firstResultOptional()
                 .map(ParcelaMapper::toDomain);
     }
 
@@ -62,9 +60,8 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
     @Override
     public Parcela save(Parcela parcela) {
         ParcelaEntity entity = ParcelaMapper.toEntity(parcela);
-        entityManager.persist(entity);
-        entityManager.flush();
-        return findById(entity.parcelaId)
+        persistAndFlush(entity);
+        return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela recién registrada"));
     }
 
@@ -84,8 +81,8 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
         entity.estadoParcelaId = parcela.getEstadoParcela().getEstadoParcelaId();
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
-        entityManager.flush();
-        return findById(entity.parcelaId)
+        persistAndFlush(entity);
+        return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela actualizada"));
     }
 
