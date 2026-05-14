@@ -9,11 +9,11 @@ import itesm.mx.application.dto.AplicacionInsumoResponseDto;
 import itesm.mx.application.dto.RegisterAplicacionInsumoDto;
 import itesm.mx.application.usecase.insumo.GetAplicacionesByFarmerUseCase;
 import itesm.mx.application.usecase.insumo.RegisterAplicacionInsumoUseCase;
+import itesm.mx.domain.models.user.Farmer;
+import itesm.mx.domain.repository.user.FarmerRepository;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
-import itesm.mx.infrastructure.persistence.entity.users.FarmerEntity;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
-import itesm.mx.infrastructure.persistence.repository.user.FarmerRepositoryImpl;
 import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
 import itesm.mx.support.H2TestProfile;
 import jakarta.inject.Inject;
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -46,16 +47,15 @@ class AplicacionInsumoResourceIntegrationTest {
     @InjectMock
     GetAplicacionesByFarmerUseCase getAplicacionesByFarmerUseCase;
 
-    @Inject
-    UserRepositoryImpl userRepository;
+    @InjectMock
+    FarmerRepository farmerRepository;
 
     @Inject
-    FarmerRepositoryImpl farmerRepository;
+    UserRepositoryImpl userRepository;
 
     @BeforeEach
     @Transactional
     void setup() {
-        farmerRepository.deleteAll();
         userRepository.deleteAll();
 
         UserEntity farmerUser = new UserEntity();
@@ -65,18 +65,16 @@ class AplicacionInsumoResourceIntegrationTest {
         farmerUser.roleId = 2;
         userRepository.persist(farmerUser);
 
-        FarmerEntity farmerEntity = new FarmerEntity();
-        farmerEntity.userId = farmerUser.userId;
-        farmerEntity.locationId = 1L;
-        farmerEntity.isActive = true;
-        farmerRepository.persist(farmerEntity);
-
         UserEntity adminUser = new UserEntity();
         adminUser.firebaseUuid = "insumo-admin-uuid";
         adminUser.name = "Insumo Admin";
         adminUser.email = "admin@insumo.test";
         adminUser.roleId = 1;
         userRepository.persist(adminUser);
+
+        Farmer stubFarmer = new Farmer();
+        stubFarmer.setFarmerId(1L);
+        when(farmerRepository.findByIdUser(anyLong())).thenReturn(Optional.of(stubFarmer));
     }
 
     @Test
