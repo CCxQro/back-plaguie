@@ -68,7 +68,8 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
             entity.validatedAt = alerta.getValidatedAt();
         }
 
-        persistAndFlush(entity);
+        flush();
+        getEntityManager().clear();
         return findDetailedById(entity.alertaId)
                 .map(AlertaMapper::toDomain)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la alerta actualizada"));

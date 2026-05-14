@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import org.jboss.logging.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -37,6 +38,7 @@ import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Recomendaciones", description = "Pest treatment recommendation endpoints")
 public class RecomendacionResource {
+    private static final Logger LOG = Logger.getLogger(RecomendacionResource.class);
 
     private static final Integer ADMIN_ROLE_ID = 1;
 
@@ -195,6 +197,7 @@ public class RecomendacionResource {
         } catch (IllegalStateException e) {
             return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
+            LOG.errorf(e, "Error validating recomendacion id=%s", id);
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
     }

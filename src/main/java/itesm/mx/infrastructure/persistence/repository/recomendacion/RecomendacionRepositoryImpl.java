@@ -62,7 +62,8 @@ public class RecomendacionRepositoryImpl implements PanacheRepositoryBase<Recome
             entity.validatedAt = recomendacion.getValidatedAt();
         }
 
-        persistAndFlush(entity);
+        flush();
+        getEntityManager().clear();
         return findDetailedById(entity.recomendacionId)
                 .map(RecomendacionMapper::toDomain)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la recomendación actualizada"));

@@ -1,17 +1,21 @@
 package itesm.mx.infrastructure.persistence.repository.parcela;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
-import jakarta.enterprise.context.ApplicationScoped;
 import itesm.mx.domain.models.parcela.Parcela;
 import itesm.mx.domain.repository.parcela.ParcelaRepository;
 import itesm.mx.infrastructure.mapper.parcela.ParcelaMapper;
 import itesm.mx.infrastructure.persistence.entity.parcela.ParcelaEntity;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntity, Long>, ParcelaRepository {
+public class ParcelaRepositoryImpl implements ParcelaRepository {
+
+    @Inject
+    EntityManager entityManager;
 
     private static final String FETCH_QUERY = """
             select p
@@ -30,25 +34,27 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
 
     @Override
     public List<Parcela> findAll() {
-        return find(FETCH_QUERY)
-                .list()
-                .stream()
+        return entityManager.createQuery(FETCH_QUERY, ParcelaEntity.class)
+                .getResultStream()
                 .map(ParcelaMapper::toDomain)
                 .toList();
     }
 
     @Override
     public Optional<Parcela> findById(Long parcelaId) {
-        return find(FETCH_QUERY + " where p.parcelaId = ?1", parcelaId)
-                .firstResultOptional()
+        return entityManager.createQuery(FETCH_QUERY + " where p.parcelaId = :parcelaId", ParcelaEntity.class)
+                .setParameter("parcelaId", parcelaId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
                 .map(ParcelaMapper::toDomain);
     }
 
     @Override
     public List<Parcela> findByFarmerId(Long farmerId) {
-        return find(FETCH_QUERY + " where p.farmerId = ?1", farmerId)
-                .list()
-                .stream()
+        return entityManager.createQuery(FETCH_QUERY + " where p.farmerId = :farmerId", ParcelaEntity.class)
+                .setParameter("farmerId", farmerId)
+                .getResultStream()
                 .map(ParcelaMapper::toDomain)
                 .toList();
     }
@@ -56,14 +62,15 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
     @Override
     public Parcela save(Parcela parcela) {
         ParcelaEntity entity = ParcelaMapper.toEntity(parcela);
-        persistAndFlush(entity);
+        entityManager.persist(entity);
+        entityManager.flush();
         return findById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela recién registrada"));
     }
 
     @Override
     public Parcela update(Parcela parcela) {
-        ParcelaEntity entity = getEntityManager().find(ParcelaEntity.class, parcela.getParcelaId());
+        ParcelaEntity entity = entityManager.find(ParcelaEntity.class, parcela.getParcelaId());
         if (entity == null) {
             throw new IllegalArgumentException("Parcela no encontrada: " + parcela.getParcelaId());
         }
@@ -77,13 +84,16 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
         entity.estadoParcelaId = parcela.getEstadoParcela().getEstadoParcelaId();
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
-        persistAndFlush(entity);
+        entityManager.flush();
         return findById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela actualizada"));
     }
 
     @Override
     public void delete(Long parcelaId) {
-        deleteById(parcelaId);
+        ParcelaEntity entity = entityManager.find(ParcelaEntity.class, parcelaId);
+        if (entity != null) {
+            entityManager.remove(entity);
+        }
     }
 }

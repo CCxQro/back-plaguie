@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Provider
+//@Provider
 public class CorsFilter implements ContainerResponseFilter {
 
     @Inject
