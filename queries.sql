@@ -18,3 +18,63 @@ SELECT *
 FROM Precios
 WHERE sku_id_vendedor = ?
 ORDER BY fecha_precio DESC;
+
+
+-- =====================================================================
+-- InventoryActionRepositoryImpl
+-- =====================================================================
+
+-- findByInventoryActionId(Long)
+SELECT *
+FROM Acciones_Inventario
+WHERE id_accion_inventario = ?;
+
+-- findAllActions()
+SELECT *
+FROM Acciones_Inventario;
+
+
+-- =====================================================================
+-- InventoryRepositoryImpl
+-- =====================================================================
+
+-- save(Inventory)
+INSERT INTO Inventario (sku_id_vendedor, cantidad, id_accion_inventario)
+VALUES (?, ?, ?);
+
+-- updateCantidad(Long inventoryId, Integer cantidad)
+UPDATE Inventario
+SET cantidad = ?
+WHERE id_inventario = ?;
+
+-- delete(Long inventoryId)
+DELETE FROM Inventario
+WHERE id_inventario = ?;
+
+-- findByInventoryId(Long)
+SELECT *
+FROM Inventario
+WHERE id_inventario = ?;
+
+-- findAllBySkuSellerId(Long skuSellerId) -- newest first by id (audit order)
+SELECT *
+FROM Inventario
+WHERE sku_id_vendedor = ?
+ORDER BY id_inventario DESC;
+
+-- sumByActionAndSkuSellerId(Long actionId, Long skuSellerId)
+SELECT COALESCE(SUM(cantidad), 0)
+FROM Inventario
+WHERE id_accion_inventario = ?
+  AND sku_id_vendedor = ?;
+
+-- currentStock(Long skuSellerId)  -- two queries, subtracted in Java
+SELECT COALESCE(SUM(cantidad), 0) AS added
+FROM Inventario
+WHERE id_accion_inventario = 1
+  AND sku_id_vendedor = ?;
+
+SELECT COALESCE(SUM(cantidad), 0) AS subtracted
+FROM Inventario
+WHERE id_accion_inventario = 2
+  AND sku_id_vendedor = ?;

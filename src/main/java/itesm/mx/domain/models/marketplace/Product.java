@@ -19,6 +19,7 @@ public class Product {
     private String firebaseImageId;
     private BigDecimal latestPrice;
     private LocalDateTime latestPriceDate;
+    private Integer stock;
 
     public Product() {}
 
@@ -76,4 +77,7 @@ public class Product {
 
     public LocalDateTime getLatestPriceDate() { return latestPriceDate; }
     public void setLatestPriceDate(LocalDateTime latestPriceDate) { this.latestPriceDate = latestPriceDate; }
+
+    public Integer getStock() { return stock; }
+    public void setStock(Integer stock) { this.stock = stock; }
 }

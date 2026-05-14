@@ -86,6 +86,10 @@ INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
 INSERT INTO Status (id_status, nombre) VALUES (2, 'Revision');
 INSERT INTO Status (id_status, nombre) VALUES (3, 'Rejected');
 
+-- Acciones de Inventario (catalogo estatico: 1=add, 2=subtract)
+INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (1, 'add');
+INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (2, 'subtract');
+
 -- Categorias (registradas por admins y tecnicos vendedores)
 INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (1, 1,  'Fertilizantes',   1, 1);
 INSERT INTO Categorias (id_categoria, id_usuario, nombre, id_color, id_status) VALUES (2, 2,  'Herbicidas',      2, 1);
@@ -275,6 +279,59 @@ INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (1
 -- Producto 1010 (Cal Agricola 90%, valor_unidad=30)
 INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (18, 1010,  28.00000, '2025-02-22 09:00:00');
 INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (19, 1010,  30.00000, '2025-05-10 12:30:00');
+
+-- ==========================================
+-- 8.C INVENTARIO (historial por producto, cronologico por id_inventario ascendente)
+-- id_accion_inventario: 1 = add, 2 = subtract
+-- Cada producto mantiene running total >= 0 en cada paso. Stock final entre () al lado del producto.
+-- ==========================================
+
+-- Producto 1001 (final stock = 140)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (1,  1001, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (2,  1001,  50, 1); -- 150
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (3,  1001,  30, 2); -- 120
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (4,  1001,  20, 1); -- 140
+
+-- Producto 1002 (final stock = 75)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (5,  1002,  80, 1); -- 80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (6,  1002,  20, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (7,  1002,  25, 2); --  75
+
+-- Producto 1003 (final stock = 120)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (8,  1003, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (9,  1003,  40, 2); --  60
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (10, 1003,  60, 1); -- 120
+
+-- Producto 1004 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (11, 1004,  50, 1); --  50
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (12, 1004,  50, 1); -- 100
+
+-- Producto 1005 (final stock = 150)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (13, 1005, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (14, 1005,  20, 2); --  80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (15, 1005,  30, 2); --  50
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (16, 1005, 100, 1); -- 150
+
+-- Producto 1006 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (17, 1006,  60, 1); --  60
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (18, 1006,  40, 1); -- 100
+
+-- Producto 1007 (final stock = 75)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (19, 1007,  90, 1); --  90
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (20, 1007,  15, 2); --  75
+
+-- Producto 1008 (final stock = 100)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (21, 1008, 100, 1); -- 100
+
+-- Producto 1009 (final stock = 50)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (22, 1009,  70, 1); --  70
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (23, 1009,  30, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (24, 1009,  50, 2); --  50
+
+-- Producto 1010 (final stock = 120)
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (25, 1010, 100, 1); -- 100
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (26, 1010,  20, 2); --  80
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (27, 1010,  40, 1); -- 120
 
 -- ==========================================
 -- 9. ESTADOS_PEDIDO

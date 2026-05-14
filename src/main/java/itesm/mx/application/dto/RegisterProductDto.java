@@ -14,4 +14,5 @@ public class RegisterProductDto {
     public Long statusId;
     public String firebaseImageId;
     public BigDecimal price;
+    public Integer stock;
 }
