@@ -34,8 +34,8 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
 
     @Override
     public List<Parcela> findAllParcelas() {
-        return find(FETCH_QUERY)
-                .list()
+        return entityManager.createQuery(FETCH_QUERY, ParcelaEntity.class)
+            .getResultList()
                 .stream()
                 .map(ParcelaMapper::toDomain)
                 .toList();
@@ -43,8 +43,10 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
 
     @Override
     public Optional<Parcela> findParcelaById(Long parcelaId) {
-        return find(FETCH_QUERY + " where p.parcelaId = ?1", parcelaId)
-                .firstResultOptional()
+        return entityManager.createQuery(FETCH_QUERY + " where p.parcelaId = :parcelaId", ParcelaEntity.class)
+            .setParameter("parcelaId", parcelaId)
+            .getResultStream()
+            .findFirst()
                 .map(ParcelaMapper::toDomain);
     }
 
@@ -60,7 +62,8 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
     @Override
     public Parcela save(Parcela parcela) {
         ParcelaEntity entity = ParcelaMapper.toEntity(parcela);
-        persistAndFlush(entity);
+        entityManager.persist(entity);
+        entityManager.flush();
         return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela recién registrada"));
     }
@@ -81,7 +84,7 @@ public class ParcelaRepositoryImpl implements ParcelaRepository {
         entity.estadoParcelaId = parcela.getEstadoParcela().getEstadoParcelaId();
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
-        persistAndFlush(entity);
+        entityManager.flush();
         return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela actualizada"));
     }
