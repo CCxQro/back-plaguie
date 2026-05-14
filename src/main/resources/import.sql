@@ -321,3 +321,9 @@ INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra
 INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (3, 'Parcela Los Pinos',    15.00, '2025-01-15', '2025-09-30', 5.8, 3, 3, 1, 3, 3);
 INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (4, 'Parcela Buenavista',   6.30,  '2025-06-01', '2026-03-01', 6.2, 4, 4, 2, 4, 4);
 INSERT INTO Parcela (id_parcela, nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cosecha, ph_suelo, id_agricultor, id_ubicacion, id_estado_parcela, id_tipo_cultivo, id_sistema_riego) VALUES (5, 'Parcela San José',     20.00, '2025-02-01', '2025-08-15', 6.8, 5, 5, 1, 5, 1);
+
+-- ==========================================
+-- 14. APLICACIONES DE INSUMOS
+-- ==========================================
+INSERT INTO Aplicacion_Insumo (id_aplicacion, id_agricultor, sku_id_vendedor, cantidad, fecha, id_parcela) VALUES (1, 1, 1001, 1.0, '2025-05-15', 1);
+INSERT INTO Aplicacion_Insumo (id_aplicacion, id_agricultor, sku_id_vendedor, cantidad, fecha, id_parcela) VALUES (2, 1, 1002, 1.0, '2025-05-20', 1);
