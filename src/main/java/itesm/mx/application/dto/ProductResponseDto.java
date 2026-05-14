@@ -22,4 +22,5 @@ public class ProductResponseDto {
     public String firebaseImageId;
     public BigDecimal latestPrice;
     public LocalDateTime latestPriceDate;
+    public Integer stock;
 }
