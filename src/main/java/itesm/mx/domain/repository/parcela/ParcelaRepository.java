@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ParcelaRepository {
-    List<Parcela> findAll();
-    Optional<Parcela> findById(Long parcelaId);
+    List<Parcela> findAllParcelas();
+    Optional<Parcela> findParcelaById(Long parcelaId);
     List<Parcela> findByFarmerId(Long farmerId);
     Parcela save(Parcela parcela);
     Parcela update(Parcela parcela);

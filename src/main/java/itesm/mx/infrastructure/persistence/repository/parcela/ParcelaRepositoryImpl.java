@@ -29,7 +29,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
             """;
 
     @Override
-    public List<Parcela> findAll() {
+    public List<Parcela> findAllParcelas() {
         return find(FETCH_QUERY)
                 .list()
                 .stream()
@@ -38,7 +38,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
     }
 
     @Override
-    public Optional<Parcela> findById(Long parcelaId) {
+    public Optional<Parcela> findParcelaById(Long parcelaId) {
         return find(FETCH_QUERY + " where p.parcelaId = ?1", parcelaId)
                 .firstResultOptional()
                 .map(ParcelaMapper::toDomain);
@@ -57,7 +57,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
     public Parcela save(Parcela parcela) {
         ParcelaEntity entity = ParcelaMapper.toEntity(parcela);
         persistAndFlush(entity);
-        return findById(entity.parcelaId)
+        return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela recién registrada"));
     }
 
@@ -78,7 +78,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
         persistAndFlush(entity);
-        return findById(entity.parcelaId)
+        return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela actualizada"));
     }
 
