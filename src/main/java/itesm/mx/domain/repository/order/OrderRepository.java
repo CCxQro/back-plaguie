@@ -11,5 +11,6 @@ public interface OrderRepository {
     Optional<Order> findByIdWithDetails(Long orderId);
     List<Order> findAllBySellerId(Long sellerId);
     List<Order> findAllBySellerIdWithFarmerLocation(Long sellerId);
+    List<Order> findAllBySellerIdAndFarmerId(Long sellerId, Long farmerId);
     Order updateStatus(Long orderId, Long orderStatusId);
 }
