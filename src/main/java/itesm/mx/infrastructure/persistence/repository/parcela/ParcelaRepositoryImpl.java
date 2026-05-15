@@ -30,7 +30,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
 
     @Override
     public List<Parcela> findAllParcelas() {
-        return entityManager.createQuery(FETCH_QUERY, ParcelaEntity.class)
+        return getEntityManager().createQuery(FETCH_QUERY, ParcelaEntity.class)
             .getResultList()
                 .stream()
                 .map(ParcelaMapper::toDomain)
@@ -39,7 +39,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
 
     @Override
     public Optional<Parcela> findParcelaById(Long parcelaId) {
-        return entityManager.createQuery(FETCH_QUERY + " where p.parcelaId = :parcelaId", ParcelaEntity.class)
+        return getEntityManager().createQuery(FETCH_QUERY + " where p.parcelaId = :parcelaId", ParcelaEntity.class)
             .setParameter("parcelaId", parcelaId)
             .getResultStream()
             .findFirst()
@@ -58,8 +58,8 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
     @Override
     public Parcela save(Parcela parcela) {
         ParcelaEntity entity = ParcelaMapper.toEntity(parcela);
-        entityManager.persist(entity);
-        entityManager.flush();
+        getEntityManager().persist(entity);
+        getEntityManager().flush();
         return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela recién registrada"));
     }
@@ -80,7 +80,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
         entity.estadoParcelaId = parcela.getEstadoParcela().getEstadoParcelaId();
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
-        entityManager.flush();
+        getEntityManager().flush();
         return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela actualizada"));
     }
