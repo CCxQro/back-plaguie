@@ -36,7 +36,7 @@ public class GeminiPlagaPredictionProvider implements PrediccionPlagaProvider {
     @ConfigProperty(name = "gemini.api.key", defaultValue = "")
     String apiKey;
 
-    @ConfigProperty(name = "gemini.api.model", defaultValue = "gemini-2.0-flash")
+    @ConfigProperty(name = "gemini.api.model", defaultValue = "gemini-2.0-flash-lite")
     String model;
 
     @ConfigProperty(name = "gemini.api.timeout-seconds", defaultValue = "30")

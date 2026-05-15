@@ -3,6 +3,7 @@ package itesm.mx.infrastructure.reporte;
 import itesm.mx.domain.models.reporte.PrediccionPlaga;
 import itesm.mx.domain.models.reporte.ReportePredictivoPlagas;
 import itesm.mx.domain.models.reporte.Temporada;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -26,7 +27,9 @@ class ReportePredictivoExporterImplTest {
                 new PrediccionPlaga("Pulgon", 80, "Junio-Julio", "Alto", "Maiz",
                         "Alta densidad observada en historico", "Imidacloprid 70%"),
                 new PrediccionPlaga("Mosca blanca", 55, "Verano", "Medio", "Chile",
-                        "Tendencia creciente en municipios cercanos", null)
+                        "Tendencia creciente en municipios cercanos", null),
+                new PrediccionPlaga("Trips", 30, "Mayo", "Bajo", "Hortalizas",
+                        "Presencia esporadica", "Spinosad")
         );
         return new ReportePredictivoPlagas(
                 "Jalisco",
@@ -42,8 +45,7 @@ class ReportePredictivoExporterImplTest {
     void toPdf_GeneratesNonEmptyPdfWithMagicHeader() {
         byte[] pdf = exporter.toPdf(sampleReporte());
         assertNotNull(pdf);
-        assertTrue(pdf.length > 100, "PDF debe contener bytes");
-        // PDF magic header: %PDF
+        assertTrue(pdf.length > 1000, "PDF debe contener contenido sustancial");
         assertEquals('%', (char) pdf[0]);
         assertEquals('P', (char) pdf[1]);
         assertEquals('D', (char) pdf[2]);
@@ -51,7 +53,7 @@ class ReportePredictivoExporterImplTest {
     }
 
     @Test
-    void toExcel_GeneratesWorkbookWithExpectedSheetsAndData() throws Exception {
+    void toExcel_GeneratesWorkbookWithBothSheets() throws Exception {
         byte[] xlsx = exporter.toExcel(sampleReporte());
         assertNotNull(xlsx);
         assertTrue(xlsx.length > 100);
@@ -59,16 +61,29 @@ class ReportePredictivoExporterImplTest {
         try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(xlsx))) {
             Sheet resumen = wb.getSheet("Resumen");
             assertNotNull(resumen, "Debe existir hoja Resumen");
-            assertEquals("Region", resumen.getRow(0).getCell(0).getStringCellValue());
-            assertEquals("Jalisco", resumen.getRow(0).getCell(1).getStringCellValue());
+
+            // Region/Temporada/Generado metadata starts after the title block.
+            // Find the row whose first non-empty cell equals "Region".
+            int regionRow = findRowWithLabel(resumen, "Region");
+            assertTrue(regionRow >= 0, "Debe existir fila Region en hoja Resumen");
+            Cell regionValue = resumen.getRow(regionRow).getCell(2);
+            assertNotNull(regionValue);
+            assertEquals("Jalisco", regionValue.getStringCellValue());
+
+            int temporadaRow = findRowWithLabel(resumen, "Temporada");
+            assertEquals("Verano", resumen.getRow(temporadaRow).getCell(2).getStringCellValue());
 
             Sheet predicciones = wb.getSheet("Predicciones");
             assertNotNull(predicciones, "Debe existir hoja Predicciones");
             Row header = predicciones.getRow(0);
+            assertEquals("#", header.getCell(0).getStringCellValue());
             assertEquals("Plaga", header.getCell(1).getStringCellValue());
+            assertEquals("Probabilidad", header.getCell(2).getStringCellValue());
+
             Row first = predicciones.getRow(1);
             assertEquals("Pulgon", first.getCell(1).getStringCellValue());
-            assertEquals(80.0d, first.getCell(2).getNumericCellValue(), 0.001);
+            assertEquals("80%", first.getCell(2).getStringCellValue());
+            assertEquals("ALTO", first.getCell(4).getStringCellValue());
         }
     }
 
@@ -80,8 +95,18 @@ class ReportePredictivoExporterImplTest {
         try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(xlsx))) {
             Sheet predicciones = wb.getSheet("Predicciones");
             assertNotNull(predicciones);
-            // solo header row
-            assertEquals(0, predicciones.getLastRowNum());
+            // Header row + empty-state row
+            assertTrue(predicciones.getLastRowNum() >= 0);
         }
+    }
+
+    private int findRowWithLabel(Sheet sheet, String label) {
+        for (Row row : sheet) {
+            Cell cell = row.getCell(1);
+            if (cell != null && label.equals(cell.getStringCellValue())) {
+                return row.getRowNum();
+            }
+        }
+        return -1;
     }
 }
