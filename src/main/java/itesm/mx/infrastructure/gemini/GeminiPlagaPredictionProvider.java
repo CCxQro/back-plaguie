@@ -36,7 +36,7 @@ public class GeminiPlagaPredictionProvider implements PrediccionPlagaProvider {
     @ConfigProperty(name = "gemini.api.key", defaultValue = "")
     String apiKey;
 
-    @ConfigProperty(name = "gemini.api.model", defaultValue = "gemini-2.0-flash-lite")
+    @ConfigProperty(name = "gemini.api.model")
     String model;
 
     @ConfigProperty(name = "gemini.api.timeout-seconds", defaultValue = "30")
@@ -106,9 +106,14 @@ public class GeminiPlagaPredictionProvider implements PrediccionPlagaProvider {
                 .append("      \"justificacion\": string,\n")
                 .append("      \"productoSugerido\": string\n")
                 .append("    }\n")
-                .append("  ]\n")
+                .append("  ],\n")
+                .append("  \"recomendaciones\": [string]\n")
                 .append("}\n")
-                .append("Incluye entre 3 y 7 predicciones, ordenadas por probabilidad descendente.");
+                .append("- 'predicciones': 3 a 7 plagas, ordenadas por probabilidad descendente.\n")
+                .append("- 'recomendaciones': 4 a 6 acciones concretas para el ejecutivo de ventas ")
+                .append("(visitas, posicionamiento de producto, manejo de inventario, comunicacion a productores). ")
+                .append("Cada accion debe iniciar con un verbo en infinitivo. ")
+                .append("Considera la temporada, los hospedantes afectados y los productos sugeridos.");
 
         return sb.toString();
     }
@@ -164,7 +169,20 @@ public class GeminiPlagaPredictionProvider implements PrediccionPlagaProvider {
             if (predicciones.isEmpty()) {
                 return fallbackHeuristic(region, temporada, historico);
             }
-            return new PrediccionResult(resumen, predicciones);
+            List<String> recomendaciones = new ArrayList<>();
+            JsonNode recArr = payload.path("recomendaciones");
+            if (recArr.isArray()) {
+                for (JsonNode rec : recArr) {
+                    String item = rec.asText("").trim();
+                    if (!item.isEmpty()) {
+                        recomendaciones.add(item);
+                    }
+                }
+            }
+            if (recomendaciones.isEmpty()) {
+                recomendaciones = deriveRecomendaciones(predicciones, region, temporada);
+            }
+            return new PrediccionResult(resumen, predicciones, recomendaciones);
         } catch (Exception e) {
             LOG.errorf(e, "No se pudo parsear respuesta de Gemini: %s", response);
             return fallbackHeuristic(region, temporada, historico);
@@ -201,7 +219,36 @@ public class GeminiPlagaPredictionProvider implements PrediccionPlagaProvider {
 
         String resumen = "Prediccion heuristica (sin Gemini) basada en " + total + " observaciones historicas para "
                 + region + " en " + temporada.getDisplayName() + ".";
-        return new PrediccionResult(resumen, predicciones);
+        return new PrediccionResult(resumen, predicciones, deriveRecomendaciones(predicciones, region, temporada));
+    }
+
+    /**
+     * Recomendaciones derivadas localmente cuando Gemini no las provee.
+     * Se basan en los hospedantes y productos sugeridos ya presentes en las predicciones.
+     */
+    private List<String> deriveRecomendaciones(List<PrediccionPlaga> predicciones, String region, Temporada temporada) {
+        List<String> recs = new ArrayList<>();
+        if (predicciones == null || predicciones.isEmpty()) {
+            return recs;
+        }
+        PrediccionPlaga top = predicciones.get(0);
+        String topPlaga = Optional.ofNullable(top.getPlagaNombre()).orElse("la plaga principal");
+        String topHosp = Optional.ofNullable(top.getHospedanteAfectado()).orElse("cultivos relevantes");
+
+        recs.add("Intensificar visitas de monitoreo en zonas productoras de " + topHosp + " durante "
+                + temporada.getDisplayName().toLowerCase() + ".");
+        recs.add("Priorizar campanas comerciales en torno a " + topPlaga + " en " + region + ".");
+
+        String productosTop = predicciones.stream()
+                .map(PrediccionPlaga::getProductoSugerido)
+                .filter(p -> p != null && !p.isBlank())
+                .findFirst()
+                .orElse(null);
+        if (productosTop != null) {
+            recs.add("Asegurar inventario disponible de " + productosTop + " antes del periodo critico.");
+        }
+        recs.add("Comunicar a productores recurrentes el periodo estimado de mayor presion fitosanitaria.");
+        return recs;
     }
 
     private String stripCodeFences(String text) {

@@ -1,5 +1,6 @@
 package itesm.mx.infrastructure.reporte;
 
+import itesm.mx.domain.models.reporte.Hotspot;
 import itesm.mx.domain.models.reporte.PrediccionPlaga;
 import itesm.mx.domain.models.reporte.ReportePredictivoPlagas;
 import itesm.mx.domain.repository.reporte.ReportePredictivoExporter;
@@ -35,8 +36,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @ApplicationScoped
 public class ReportePredictivoExporterImpl implements ReportePredictivoExporter {
@@ -47,6 +51,8 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
     // Brand palette (from front-plaguie/src/tokens/colors.ts)
     private static final Color BRAND_GREEN = new Color(0x75, 0xC7, 0x9E);
     private static final Color BRAND_GREEN_DARK = new Color(0x4F, 0x8F, 0x73);
+    // Stronger header band — more saturated than BRAND_GREEN, lighter than BRAND_GREEN_DARK
+    private static final Color HEADER_GREEN = new Color(0x3F, 0x9D, 0x76);
     private static final Color TEXT_PRIMARY = new Color(0x0F, 0x17, 0x2B);
     private static final Color TEXT_SECONDARY = new Color(0x45, 0x55, 0x6C);
     private static final Color TEXT_MUTED = new Color(0x62, 0x74, 0x8E);
@@ -79,6 +85,7 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
             renderHeader(ctx, reporte);
             renderKpiStrip(ctx, reporte);
             renderExecutiveSummary(ctx, reporte);
+            renderHotspots(ctx, reporte);
             renderPredictionsTitle(ctx);
 
             List<PrediccionPlaga> predicciones = reporte.getPredicciones() == null
@@ -92,6 +99,10 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
                     idx++;
                 }
             }
+
+            renderOportunidades(ctx, reporte);
+            renderRecomendaciones(ctx, reporte);
+            renderMetodologia(ctx, reporte);
 
             ctx.finalizePages();
             renderFooters(document);
@@ -157,24 +168,39 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
     }
 
     private void renderHeader(PdfContext ctx, ReportePredictivoPlagas reporte) throws IOException {
-        float bandHeight = 80f;
-        // Green band at top
+        float bandHeight = 88f;
+        float pageH = ctx.page.getMediaBox().getHeight();
+        // Stronger green band at top
+        ctx.stream.setNonStrokingColor(toPdColor(HEADER_GREEN));
+        ctx.stream.addRect(0, pageH - bandHeight, ctx.pageWidth(), bandHeight);
+        ctx.stream.fill();
+        // Subtle highlight stripe at the bottom of the band for depth
         ctx.stream.setNonStrokingColor(toPdColor(BRAND_GREEN));
-        ctx.stream.addRect(0, ctx.pageWidth() == 0 ? 0 : ctx.page.getMediaBox().getHeight() - bandHeight,
-                ctx.pageWidth(), bandHeight);
+        ctx.stream.addRect(0, pageH - bandHeight, ctx.pageWidth(), 3f);
         ctx.stream.fill();
 
-        // Brand label (top-left, white)
-        drawText(ctx, "PLAGUIE", ctx.marginX, ctx.page.getMediaBox().getHeight() - 30,
-                ctx.fontBold, 11, Color.WHITE);
-        drawText(ctx, "REPORTE PREDICTIVO DE PLAGAS",
-                ctx.marginX, ctx.page.getMediaBox().getHeight() - 50,
-                ctx.fontBold, 18, Color.WHITE);
-        drawText(ctx, "Inteligencia comercial para ejecutivos de ventas",
-                ctx.marginX, ctx.page.getMediaBox().getHeight() - 68,
-                ctx.fontRegular, 10, new Color(255, 255, 255, 220));
+        // Editorial title block (left-aligned)
+        Color whiteTranslucent = new Color(255, 255, 255, 210);
 
-        ctx.y = ctx.page.getMediaBox().getHeight() - bandHeight - 20f;
+        drawText(ctx, "INTELIGENCIA AGRICOLA", ctx.marginX, pageH - 32,
+                ctx.fontBold, 9, whiteTranslucent);
+        drawText(ctx, "Reporte predictivo de plagas",
+                ctx.marginX, pageH - 56,
+                ctx.fontBold, 22, Color.WHITE);
+        drawText(ctx, "Analisis fitosanitario para ejecutivos de ventas",
+                ctx.marginX, pageH - 74,
+                ctx.fontRegular, 10, whiteTranslucent);
+
+        // Right-aligned attribution: regular "Elaborado por" + bold "PLAGUIE"
+        String prefix = "Elaborado por  ";
+        String brand = "PLAGUIE";
+        float prefixWidth = textWidth(ctx.fontRegular, 9, prefix);
+        float brandWidth = textWidth(ctx.fontBold, 9, brand);
+        float attrX = ctx.pageWidth() - ctx.marginX - prefixWidth - brandWidth;
+        drawText(ctx, prefix, attrX, pageH - 32, ctx.fontRegular, 9, whiteTranslucent);
+        drawText(ctx, brand, attrX + prefixWidth, pageH - 32, ctx.fontBold, 9, Color.WHITE);
+
+        ctx.y = pageH - bandHeight - 20f;
 
         // Region + temporada line (big)
         String regionLabel = (reporte.getRegion() == null ? "-" : reporte.getRegion());
@@ -214,7 +240,7 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
 
         drawKpiCard(ctx, ctx.marginX, top, kpiWidth, kpiHeight,
                 "Observaciones", String.valueOf(reporte.getObservacionesAnalizadas()),
-                "registros analizados", BRAND_GREEN);
+                "registros analizados", BRAND_GREEN_DARK);
 
         drawKpiCard(ctx, ctx.marginX + (kpiWidth + gap), top, kpiWidth, kpiHeight,
                 "Plagas previstas", String.valueOf(predicciones.size()),
@@ -312,10 +338,298 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
         ctx.y -= 18f;
     }
 
+    // ============================================================
+    // Geographic Hotspots — "where pest pressure concentrates"
+    // ============================================================
+    private void renderHotspots(PdfContext ctx, ReportePredictivoPlagas reporte) throws IOException {
+        List<Hotspot> hotspots = reporte.getHotspots() == null ? List.of() : reporte.getHotspots();
+        if (hotspots.isEmpty()) {
+            return;
+        }
+
+        renderSectionHeader(ctx, "Concentracion geografica",
+                "Municipios con mayor presion fitosanitaria en el historico analizado");
+
+        // Column layout
+        float[] cols = computeColumnWidths(ctx.contentWidth(), new float[]{0.06f, 0.30f, 0.22f, 0.18f, 0.12f, 0.12f});
+        String[] headers = {"#", "Municipio", "Estado", "Observaciones", "Plagas", "Riesgo"};
+        renderTableHeader(ctx, cols, headers);
+
+        int idx = 1;
+        for (Hotspot h : hotspots) {
+            ctx.ensureSpace(22f);
+            float rowY = ctx.y;
+            // Alternating row band
+            if (idx % 2 == 0) {
+                ctx.stream.setNonStrokingColor(toPdColor(SURFACE_LIGHT));
+                ctx.stream.addRect(ctx.marginX, rowY - 20f, ctx.contentWidth(), 20f);
+                ctx.stream.fill();
+            }
+
+            float cx = ctx.marginX;
+            drawTextTruncated(ctx, String.valueOf(idx), cx + 6, rowY - 13,
+                    ctx.fontBold, 9.5f, TEXT_PRIMARY, cols[0] - 8); cx += cols[0];
+            drawTextTruncated(ctx, nullSafe(h.getMunicipio()), cx + 4, rowY - 13,
+                    ctx.fontBold, 9.5f, TEXT_PRIMARY, cols[1] - 8); cx += cols[1];
+            drawTextTruncated(ctx, nullSafe(h.getEstado()), cx + 4, rowY - 13,
+                    ctx.fontRegular, 9.5f, TEXT_SECONDARY, cols[2] - 8); cx += cols[2];
+            drawTextTruncated(ctx, String.valueOf(h.getObservaciones()), cx + 4, rowY - 13,
+                    ctx.fontRegular, 9.5f, TEXT_PRIMARY, cols[3] - 8); cx += cols[3];
+            drawTextTruncated(ctx, String.valueOf(h.getPlagasDistintas()), cx + 4, rowY - 13,
+                    ctx.fontRegular, 9.5f, TEXT_PRIMARY, cols[4] - 8); cx += cols[4];
+
+            // Risk badge in last column
+            String nivel = nullSafe(h.getNivelRiesgo());
+            Color bx = riskColor(nivel);
+            Color tx = riskText(nivel);
+            drawRiskBadge(ctx, cx + 4, rowY - 4, nivel, tx, bx);
+
+            ctx.y -= 20f;
+            idx++;
+        }
+        ctx.y -= 14f;
+    }
+
+    // ============================================================
+    // Product Opportunity Mapping — group predictions by suggested product
+    // ============================================================
+    private void renderOportunidades(PdfContext ctx, ReportePredictivoPlagas reporte) throws IOException {
+        List<PrediccionPlaga> predicciones = reporte.getPredicciones() == null
+                ? List.of() : reporte.getPredicciones();
+        if (predicciones.isEmpty()) {
+            return;
+        }
+
+        // Group: producto -> { plagas, hospedantes, riesgoDominante }
+        Map<String, List<PrediccionPlaga>> grupos = new LinkedHashMap<>();
+        for (PrediccionPlaga p : predicciones) {
+            String prod = p.getProductoSugerido();
+            if (prod == null || prod.isBlank()) {
+                continue;
+            }
+            grupos.computeIfAbsent(prod, k -> new ArrayList<>()).add(p);
+        }
+        if (grupos.isEmpty()) {
+            return;
+        }
+
+        renderSectionHeader(ctx, "Oportunidades comerciales",
+                "Mapeo de productos sugeridos a las plagas y cultivos que abordan");
+
+        float[] cols = computeColumnWidths(ctx.contentWidth(),
+                new float[]{0.28f, 0.30f, 0.30f, 0.12f});
+        renderTableHeader(ctx, cols,
+                new String[]{"Producto sugerido", "Plagas asociadas", "Hospedantes objetivo", "Riesgo"});
+
+        int idx = 0;
+        for (Map.Entry<String, List<PrediccionPlaga>> entry : grupos.entrySet()) {
+            String producto = entry.getKey();
+            List<PrediccionPlaga> items = entry.getValue();
+            String plagas = items.stream()
+                    .map(PrediccionPlaga::getPlagaNombre)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .reduce((a, b) -> a + ", " + b).orElse("-");
+            String hospedantes = items.stream()
+                    .map(PrediccionPlaga::getHospedanteAfectado)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .reduce((a, b) -> a + ", " + b).orElse("-");
+            String riesgoDominante = items.stream()
+                    .map(PrediccionPlaga::getNivelRiesgo)
+                    .filter(s -> s != null && !s.isBlank())
+                    .max(Comparator.comparingInt(this::riskRank))
+                    .orElse("-");
+
+            // Determine row height from wrapped text
+            List<String> productoLines = wrapText(producto, ctx.fontBold, 9.5f, cols[0] - 8);
+            List<String> plagasLines = wrapText(plagas, ctx.fontRegular, 9.5f, cols[1] - 8);
+            List<String> hospLines = wrapText(hospedantes, ctx.fontRegular, 9.5f, cols[2] - 8);
+            int maxLines = Math.max(productoLines.size(), Math.max(plagasLines.size(), hospLines.size()));
+            float rowHeight = Math.max(22f, 6f + maxLines * 12f);
+
+            ctx.ensureSpace(rowHeight + 4f);
+
+            float rowY = ctx.y;
+            if (idx % 2 == 0) {
+                ctx.stream.setNonStrokingColor(toPdColor(SURFACE_LIGHT));
+                ctx.stream.addRect(ctx.marginX, rowY - rowHeight, ctx.contentWidth(), rowHeight);
+                ctx.stream.fill();
+            }
+
+            float cx = ctx.marginX;
+            drawWrappedLines(ctx, productoLines, cx + 4, rowY - 14, ctx.fontBold, 9.5f, TEXT_PRIMARY);
+            cx += cols[0];
+            drawWrappedLines(ctx, plagasLines, cx + 4, rowY - 14, ctx.fontRegular, 9.5f, TEXT_PRIMARY);
+            cx += cols[1];
+            drawWrappedLines(ctx, hospLines, cx + 4, rowY - 14, ctx.fontRegular, 9.5f, TEXT_SECONDARY);
+            cx += cols[2];
+
+            Color tx = riskText(riesgoDominante);
+            Color bx = riskColor(riesgoDominante);
+            drawRiskBadge(ctx, cx + 4, rowY - 6, riesgoDominante, tx, bx);
+
+            ctx.y -= rowHeight;
+            idx++;
+        }
+        ctx.y -= 14f;
+    }
+
+    // ============================================================
+    // Recommendations — explicit action items for sales executives
+    // ============================================================
+    private void renderRecomendaciones(PdfContext ctx, ReportePredictivoPlagas reporte) throws IOException {
+        List<String> recs = reporte.getRecomendaciones() == null ? List.of() : reporte.getRecomendaciones();
+        if (recs.isEmpty()) {
+            return;
+        }
+
+        renderSectionHeader(ctx, "Acciones recomendadas",
+                "Pasos concretos para capitalizar el escenario predicho");
+
+        int idx = 1;
+        for (String rec : recs) {
+            List<String> lines = wrapText(rec, ctx.fontRegular, 10.5f, ctx.contentWidth() - 32);
+            float blockHeight = lines.size() * 13f + 10f;
+            ctx.ensureSpace(blockHeight + 4f);
+
+            float topY = ctx.y;
+            // Number badge (brand green disc with white digit)
+            float discCx = ctx.marginX + 10f;
+            float discCy = topY - 12f;
+            float discR = 9f;
+            ctx.stream.setNonStrokingColor(toPdColor(BRAND_GREEN_DARK));
+            drawFilledCircle(ctx, discCx, discCy, discR);
+            String num = String.valueOf(idx);
+            float numWidth = textWidth(ctx.fontBold, 10, num);
+            drawText(ctx, num, discCx - numWidth / 2f, discCy - 3.5f,
+                    ctx.fontBold, 10, Color.WHITE);
+
+            float textX = ctx.marginX + 28f;
+            float cy = topY - 13f;
+            for (String line : lines) {
+                drawText(ctx, line, textX, cy, ctx.fontRegular, 10.5f, TEXT_PRIMARY);
+                cy -= 13f;
+            }
+            ctx.y -= blockHeight;
+            idx++;
+        }
+        ctx.y -= 8f;
+    }
+
+    // ============================================================
+    // Methodology / Appendix
+    // ============================================================
+    private void renderMetodologia(PdfContext ctx, ReportePredictivoPlagas reporte) throws IOException {
+        renderSectionHeader(ctx, "Metodologia y fuentes", null);
+
+        String temporada = reporte.getTemporada() == null
+                ? "la temporada solicitada"
+                : reporte.getTemporada().getDisplayName().toLowerCase() + " (meses " + reporte.getTemporada().getMeses() + ")";
+        String region = reporte.getRegion() == null ? "la region solicitada" : reporte.getRegion();
+        long obs = reporte.getObservacionesAnalizadas();
+
+        String[] paragraphs = new String[]{
+                "Las predicciones de este reporte se generan agregando observaciones historicas de "
+                        + "vigilancia fitosanitaria registradas en la plataforma Plaguie para " + region + " durante "
+                        + temporada + ". Se analizaron " + obs + " registros validados.",
+                "El motor de prediccion combina patrones de recurrencia estacional con interpretacion "
+                        + "agronomica asistida por IA (Gemini). Los niveles de riesgo y los productos sugeridos "
+                        + "son orientativos y deben validarse con personal tecnico antes de tomar decisiones de inventario o campo.",
+                "Limitaciones: el reporte no incorpora variables climaticas en tiempo real ni resultados de "
+                        + "campanas previas. Su confiabilidad aumenta con la cantidad y diversidad de observaciones validadas."
+        };
+
+        for (String p : paragraphs) {
+            List<String> lines = wrapText(p, ctx.fontRegular, 9.5f, ctx.contentWidth());
+            float blockHeight = lines.size() * 12f + 6f;
+            ctx.ensureSpace(blockHeight);
+            for (String line : lines) {
+                drawText(ctx, line, ctx.marginX, ctx.y - 10, ctx.fontRegular, 9.5f, TEXT_SECONDARY);
+                ctx.y -= 12f;
+            }
+            ctx.y -= 6f;
+        }
+    }
+
+    // ============================================================
+    // Section helpers
+    // ============================================================
+    private void renderSectionHeader(PdfContext ctx, String title, String subtitle) throws IOException {
+        float needed = subtitle == null ? 30f : 44f;
+        ctx.ensureSpace(needed);
+        drawText(ctx, title, ctx.marginX, ctx.y, ctx.fontBold, 14, TEXT_PRIMARY);
+        ctx.y -= 6f;
+        // separator
+        ctx.stream.setStrokingColor(toPdColor(BORDER_LIGHT));
+        ctx.stream.setLineWidth(0.6f);
+        ctx.stream.moveTo(ctx.marginX, ctx.y);
+        ctx.stream.lineTo(ctx.marginX + ctx.contentWidth(), ctx.y);
+        ctx.stream.stroke();
+        ctx.y -= 12f;
+        if (subtitle != null && !subtitle.isBlank()) {
+            drawText(ctx, subtitle, ctx.marginX, ctx.y, ctx.fontOblique, 9, TEXT_MUTED);
+            ctx.y -= 14f;
+        }
+    }
+
+    private float[] computeColumnWidths(float total, float[] fractions) {
+        float[] widths = new float[fractions.length];
+        for (int i = 0; i < fractions.length; i++) {
+            widths[i] = total * fractions[i];
+        }
+        return widths;
+    }
+
+    private void renderTableHeader(PdfContext ctx, float[] cols, String[] headers) throws IOException {
+        ctx.ensureSpace(24f);
+        float rowY = ctx.y;
+        ctx.stream.setNonStrokingColor(toPdColor(BRAND_GREEN_DARK));
+        ctx.stream.addRect(ctx.marginX, rowY - 18f, ctx.contentWidth(), 18f);
+        ctx.stream.fill();
+
+        float cx = ctx.marginX;
+        for (int i = 0; i < headers.length; i++) {
+            drawTextTruncated(ctx, headers[i], cx + (i == 0 ? 6 : 4), rowY - 12,
+                    ctx.fontBold, 9, Color.WHITE, cols[i] - 8);
+            cx += cols[i];
+        }
+        ctx.y -= 20f;
+    }
+
+    private void drawWrappedLines(PdfContext ctx, List<String> lines, float x, float startY,
+                                  PDType1Font font, float size, Color color) throws IOException {
+        float cy = startY;
+        for (String l : lines) {
+            drawText(ctx, l, x, cy, font, size, color);
+            cy -= 12f;
+        }
+    }
+
+    private void drawFilledCircle(PdfContext ctx, float cx, float cy, float r) throws IOException {
+        // Approximate circle with 4 cubic bezier curves
+        float k = r * 0.5522847498f;
+        ctx.stream.moveTo(cx - r, cy);
+        ctx.stream.curveTo(cx - r, cy + k, cx - k, cy + r, cx, cy + r);
+        ctx.stream.curveTo(cx + k, cy + r, cx + r, cy + k, cx + r, cy);
+        ctx.stream.curveTo(cx + r, cy - k, cx + k, cy - r, cx, cy - r);
+        ctx.stream.curveTo(cx - k, cy - r, cx - r, cy - k, cx - r, cy);
+        ctx.stream.fill();
+    }
+
+    private int riskRank(String level) {
+        if (level == null) return 0;
+        String l = level.toLowerCase(Locale.ROOT);
+        if (l.contains("crit")) return 4;
+        if (l.contains("alto")) return 3;
+        if (l.contains("medio")) return 2;
+        if (l.contains("bajo")) return 1;
+        return 0;
+    }
+
     private void renderPredictionCard(PdfContext ctx, PrediccionPlaga p, int idx) throws IOException {
-        Color border = riskColor(p.getNivelRiesgo());
-        Color bg = riskBg(p.getNivelRiesgo());
-        Color textColor = riskText(p.getNivelRiesgo());
+        Color riskBorder = riskColor(p.getNivelRiesgo());
+        Color riskTxt = riskText(p.getNivelRiesgo());
 
         String plaga = nullSafe(p.getPlagaNombre());
         String host = nullSafe(p.getHospedanteAfectado());
@@ -324,19 +638,25 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
         String justificacion = nullSafe(p.getJustificacion());
         String producto = p.getProductoSugerido();
 
+        Integer prob = p.getProbabilidad();
+        // Reserve right column for the prominent probability anchor + badge below
+        float rightColWidth = 90f;
+        float bodyWidth = ctx.contentWidth() - 28 - rightColWidth - 8;
+
         List<String> justLines = wrapText(justificacion, ctx.fontRegular, 9.5f, ctx.contentWidth() - 28);
         boolean hasProducto = producto != null && !producto.isBlank();
         List<String> prodLines = hasProducto
                 ? wrapText("Producto sugerido: " + producto, ctx.fontBold, 9.5f, ctx.contentWidth() - 28)
                 : List.of();
 
-        // Compute card height
-        float cardHeight = 22f /* header */
-                + 16f /* meta line */
-                + 14f /* progress bar + spacing */
+        // Headline block (left col stacks title + meta; right col stacks prob + badge)
+        float headlineHeight = 22f /* title */ + 14f /* meta */;
+        float cardHeight = 14f /* top padding */
+                + headlineHeight
+                + 12f /* divider + spacing */
                 + justLines.size() * 12f
-                + (hasProducto ? (8f + prodLines.size() * 12f + 4f) : 0f)
-                + 14f /* padding bottom */;
+                + (hasProducto ? (10f + prodLines.size() * 12f + 6f) : 0f)
+                + 14f /* bottom padding */;
 
         ctx.ensureSpace(cardHeight + 10f);
 
@@ -350,61 +670,71 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
         ctx.stream.setLineWidth(0.6f);
         ctx.stream.addRect(ctx.marginX, topY - cardHeight, ctx.contentWidth(), cardHeight);
         ctx.stream.stroke();
-        // Risk accent bar (left)
-        ctx.stream.setNonStrokingColor(toPdColor(border));
-        ctx.stream.addRect(ctx.marginX, topY - cardHeight, 4, cardHeight);
+        // Risk-colored left accent (semantic, scannable)
+        ctx.stream.setNonStrokingColor(toPdColor(riskBorder));
+        ctx.stream.addRect(ctx.marginX, topY - cardHeight, 3, cardHeight);
         ctx.stream.fill();
 
-        // Header: numbered plague title
-        float cursorY = topY - 16f;
+        // Left column: numbered title + meta line
+        float cursorY = topY - 22f;
         String title = idx + ". " + plaga;
-        drawText(ctx, title, ctx.marginX + 14, cursorY, ctx.fontBold, 12, TEXT_PRIMARY);
+        // Truncate title visually if too long for the body column
+        drawTextTruncated(ctx, title, ctx.marginX + 14, cursorY, ctx.fontBold, 13, TEXT_PRIMARY, bodyWidth);
+        cursorY -= 16f;
+        String meta = "Hospedante: " + host + "   ·   Periodo: " + periodo;
+        drawTextTruncated(ctx, meta, ctx.marginX + 14, cursorY, ctx.fontRegular, 9.5f, TEXT_SECONDARY, bodyWidth);
 
-        // Probability badge (right-aligned)
-        Integer prob = p.getProbabilidad();
+        // Right column: large probability anchor + small "probabilidad" label + risk badge below
+        float anchorRight = ctx.marginX + ctx.contentWidth() - 14;
+        float anchorTopY = topY - 26f;
         if (prob != null) {
             String probText = prob + "%";
-            float probWidth = textWidth(ctx.fontBold, 12, probText);
-            float badgeX = ctx.marginX + ctx.contentWidth() - probWidth - 110;
-            // Risk badge box
-            drawRiskBadge(ctx, badgeX + probWidth + 8, cursorY + 4, nivel, bg, textColor, border);
-            // Probability text
-            drawText(ctx, probText, badgeX, cursorY, ctx.fontBold, 12, TEXT_PRIMARY);
-        } else {
-            drawRiskBadge(ctx, ctx.marginX + ctx.contentWidth() - 80, cursorY + 4, nivel, bg, textColor, border);
+            float probWidth = textWidth(ctx.fontBold, 22, probText);
+            drawText(ctx, probText, anchorRight - probWidth, anchorTopY,
+                    ctx.fontBold, 22, riskBorder);
+            String probLabel = "probabilidad";
+            float lblWidth = textWidth(ctx.fontRegular, 7.5f, probLabel.toUpperCase(Locale.ROOT));
+            drawText(ctx, probLabel.toUpperCase(Locale.ROOT),
+                    anchorRight - lblWidth, anchorTopY - 10f,
+                    ctx.fontRegular, 7.5f, TEXT_MUTED);
+        }
+        if (!"-".equals(nivel)) {
+            String levelUpper = nivel.toUpperCase(Locale.ROOT);
+            float bw = textWidth(ctx.fontBold, 8.5f, levelUpper) + 14;
+            drawRiskBadge(ctx, anchorRight - bw, anchorTopY - 20f, nivel, riskTxt, riskBorder);
         }
 
-        cursorY -= 16f;
-        // Meta line: host + period
-        String meta = "Hospedante: " + host + "    ·    Periodo: " + periodo;
-        drawText(ctx, meta, ctx.marginX + 14, cursorY, ctx.fontRegular, 9.5f, TEXT_SECONDARY);
+        // Move below headline
+        cursorY = topY - 14f - headlineHeight - 4f;
 
-        // Probability bar (under meta, with safe spacing)
-        if (prob != null) {
-            cursorY -= 8f;
-            drawProgressBar(ctx, ctx.marginX + 14, cursorY,
-                    ctx.contentWidth() - 28, 5, prob, border);
-            cursorY -= 12f;
-        } else {
-            cursorY -= 14f;
-        }
+        // Hairline divider separates "headline" from "evidence"
+        ctx.stream.setStrokingColor(toPdColor(BORDER_LIGHT));
+        ctx.stream.setLineWidth(0.4f);
+        ctx.stream.moveTo(ctx.marginX + 14, cursorY);
+        ctx.stream.lineTo(ctx.marginX + ctx.contentWidth() - 14, cursorY);
+        ctx.stream.stroke();
+        cursorY -= 12f;
 
-        // Justification
+        // Justification (full width — evidence narrative)
         for (String line : justLines) {
             drawText(ctx, line, ctx.marginX + 14, cursorY, ctx.fontRegular, 9.5f, TEXT_PRIMARY);
             cursorY -= 12f;
         }
 
         if (hasProducto) {
-            cursorY -= 6f;
-            // Product highlight box
-            float prodBoxH = prodLines.size() * 12f + 8f;
-            ctx.stream.setNonStrokingColor(toPdColor(new Color(0xEC, 0xFD, 0xF5)));
-            ctx.stream.addRect(ctx.marginX + 14, cursorY - prodBoxH + 10, ctx.contentWidth() - 28, prodBoxH);
+            cursorY -= 4f;
+            float prodBoxH = prodLines.size() * 12f + 10f;
+            // Subtle neutral surface with a brand-green left tick
+            ctx.stream.setNonStrokingColor(toPdColor(SURFACE_LIGHT));
+            ctx.stream.addRect(ctx.marginX + 14, cursorY - prodBoxH + 12, ctx.contentWidth() - 28, prodBoxH);
             ctx.stream.fill();
+            ctx.stream.setNonStrokingColor(toPdColor(BRAND_GREEN));
+            ctx.stream.addRect(ctx.marginX + 14, cursorY - prodBoxH + 12, 2.5f, prodBoxH);
+            ctx.stream.fill();
+
             float pcy = cursorY + 2;
             for (String line : prodLines) {
-                drawText(ctx, line, ctx.marginX + 20, pcy, ctx.fontBold, 9.5f, BRAND_GREEN_DARK);
+                drawText(ctx, line, ctx.marginX + 22, pcy, ctx.fontBold, 9.5f, BRAND_GREEN_DARK);
                 pcy -= 12f;
             }
         }
@@ -412,8 +742,23 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
         ctx.y = topY - cardHeight - 10f;
     }
 
+    private void drawTextTruncated(PdfContext ctx, String text, float x, float y,
+                                   PDType1Font font, float size, Color color, float maxWidth) throws IOException {
+        String value = sanitize(text);
+        if (font.getStringWidth(value) / 1000f * size <= maxWidth) {
+            drawText(ctx, value, x, y, font, size, color);
+            return;
+        }
+        String ellipsis = "...";
+        while (value.length() > 0 &&
+                font.getStringWidth(value + ellipsis) / 1000f * size > maxWidth) {
+            value = value.substring(0, value.length() - 1);
+        }
+        drawText(ctx, value + ellipsis, x, y, font, size, color);
+    }
+
     private void drawRiskBadge(PdfContext ctx, float x, float y, String level,
-                               Color bg, Color text, Color border) throws IOException {
+                               Color text, Color border) throws IOException {
         if (level == null || level.isBlank() || "-".equals(level)) {
             return;
         }
@@ -423,30 +768,14 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
         float bx = x;
         float by = y - h;
 
-        ctx.stream.setNonStrokingColor(toPdColor(bg));
-        ctx.stream.addRect(bx, by, w, h);
-        ctx.stream.fill();
+        // No fill — outlined badge keeps the layout calm
         ctx.stream.setStrokingColor(toPdColor(border));
-        ctx.stream.setLineWidth(0.5f);
+        ctx.stream.setLineWidth(0.6f);
         ctx.stream.addRect(bx, by, w, h);
         ctx.stream.stroke();
 
         drawText(ctx, level.toUpperCase(Locale.ROOT), bx + pad, by + 3.5f,
                 ctx.fontBold, 8.5f, text);
-    }
-
-    private void drawProgressBar(PdfContext ctx, float x, float y, float width, float height,
-                                 int probability, Color fill) throws IOException {
-        int p = Math.max(0, Math.min(100, probability));
-        // Track
-        ctx.stream.setNonStrokingColor(toPdColor(BORDER_LIGHT));
-        ctx.stream.addRect(x, y, width, height);
-        ctx.stream.fill();
-        // Fill
-        float fillW = width * (p / 100f);
-        ctx.stream.setNonStrokingColor(toPdColor(fill));
-        ctx.stream.addRect(x, y, fillW, height);
-        ctx.stream.fill();
     }
 
     private void renderFooters(PDDocument document) throws IOException {
@@ -590,6 +919,8 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
 
             buildResumenSheet(workbook, styles, reporte);
             buildPrediccionesSheet(workbook, styles, reporte);
+            buildHotspotsSheet(workbook, styles, reporte);
+            buildOportunidadesSheet(workbook, styles, reporte);
 
             workbook.write(baos);
             return baos.toByteArray();
@@ -676,6 +1007,156 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
                 : reporte.getResumenEjecutivo());
         summaryCell.setCellStyle(styles.summaryBox);
         sheet.addMergedRegion(new CellRangeAddress(r, r, 1, 4));
+        r += 2;
+
+        // Recomendaciones
+        List<String> recs = reporte.getRecomendaciones() == null ? List.of() : reporte.getRecomendaciones();
+        if (!recs.isEmpty()) {
+            Row recHeader = sheet.createRow(r);
+            XSSFCell recHeaderCell = (XSSFCell) recHeader.createCell(1);
+            recHeaderCell.setCellValue("ACCIONES RECOMENDADAS");
+            recHeaderCell.setCellStyle(styles.sectionHeader);
+            sheet.addMergedRegion(new CellRangeAddress(r, r, 1, 4));
+            r++;
+
+            int idx = 1;
+            for (String rec : recs) {
+                Row recRow = sheet.createRow(r);
+                recRow.setHeightInPoints(28f);
+                XSSFCell numCell = (XSSFCell) recRow.createCell(1);
+                numCell.setCellValue(idx + ".");
+                numCell.setCellStyle(styles.recommendationNumber);
+                XSSFCell textCell = (XSSFCell) recRow.createCell(2);
+                textCell.setCellValue(rec);
+                textCell.setCellStyle(styles.recommendationText);
+                sheet.addMergedRegion(new CellRangeAddress(r, r, 2, 4));
+                r++;
+                idx++;
+            }
+        }
+    }
+
+    private void buildHotspotsSheet(XSSFWorkbook wb, ExcelStyles styles, ReportePredictivoPlagas reporte) {
+        XSSFSheet sheet = wb.createSheet("Hotspots");
+        sheet.setDisplayGridlines(false);
+
+        String[] headers = {"#", "Municipio", "Estado", "Observaciones", "Plagas distintas", "Riesgo"};
+        int[] widths = {4, 28, 22, 16, 18, 14};
+        for (int i = 0; i < widths.length; i++) {
+            sheet.setColumnWidth(i, widths[i] * 256);
+        }
+
+        Row header = sheet.createRow(0);
+        header.setHeightInPoints(26f);
+        for (int i = 0; i < headers.length; i++) {
+            XSSFCell c = (XSSFCell) header.createCell(i);
+            c.setCellValue(headers[i]);
+            c.setCellStyle(styles.tableHeader);
+        }
+        sheet.createFreezePane(0, 1);
+
+        List<Hotspot> hotspots = reporte.getHotspots() == null ? List.of() : reporte.getHotspots();
+        int r = 1;
+        for (Hotspot h : hotspots) {
+            Row row = sheet.createRow(r);
+            row.setHeightInPoints(22f);
+            boolean alt = (r % 2 == 0);
+            CellStyle base = alt ? styles.tableCellAlt : styles.tableCell;
+            CellStyle baseCenter = alt ? styles.tableCellCenterAlt : styles.tableCellCenter;
+            CellStyle baseBold = alt ? styles.tableCellBoldAlt : styles.tableCellBold;
+
+            createStyledCell(row, 0, String.valueOf(r), baseCenter);
+            createStyledCell(row, 1, nullSafe(h.getMunicipio()), baseBold);
+            createStyledCell(row, 2, nullSafe(h.getEstado()), base);
+            createStyledCell(row, 3, String.valueOf(h.getObservaciones()), baseCenter);
+            createStyledCell(row, 4, String.valueOf(h.getPlagasDistintas()), baseCenter);
+
+            XSSFCell riskCell = (XSSFCell) row.createCell(5);
+            riskCell.setCellValue(nullSafe(h.getNivelRiesgo()).toUpperCase(Locale.ROOT));
+            riskCell.setCellStyle(styles.riskStyle(h.getNivelRiesgo()));
+            r++;
+        }
+        if (hotspots.isEmpty()) {
+            Row row = sheet.createRow(1);
+            row.setHeightInPoints(28f);
+            XSSFCell c = (XSSFCell) row.createCell(1);
+            c.setCellValue("Sin hotspots disponibles para este escenario.");
+            c.setCellStyle(styles.tableCell);
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 5));
+        }
+    }
+
+    private void buildOportunidadesSheet(XSSFWorkbook wb, ExcelStyles styles, ReportePredictivoPlagas reporte) {
+        XSSFSheet sheet = wb.createSheet("Oportunidades");
+        sheet.setDisplayGridlines(false);
+
+        String[] headers = {"Producto sugerido", "Plagas asociadas", "Hospedantes objetivo", "Riesgo dominante"};
+        int[] widths = {28, 32, 32, 16};
+        for (int i = 0; i < widths.length; i++) {
+            sheet.setColumnWidth(i, widths[i] * 256);
+        }
+
+        Row header = sheet.createRow(0);
+        header.setHeightInPoints(26f);
+        for (int i = 0; i < headers.length; i++) {
+            XSSFCell c = (XSSFCell) header.createCell(i);
+            c.setCellValue(headers[i]);
+            c.setCellStyle(styles.tableHeader);
+        }
+        sheet.createFreezePane(0, 1);
+
+        List<PrediccionPlaga> predicciones = reporte.getPredicciones() == null
+                ? List.of() : reporte.getPredicciones();
+        Map<String, List<PrediccionPlaga>> grupos = new LinkedHashMap<>();
+        for (PrediccionPlaga p : predicciones) {
+            String prod = p.getProductoSugerido();
+            if (prod == null || prod.isBlank()) {
+                continue;
+            }
+            grupos.computeIfAbsent(prod, k -> new ArrayList<>()).add(p);
+        }
+
+        int r = 1;
+        for (Map.Entry<String, List<PrediccionPlaga>> entry : grupos.entrySet()) {
+            String producto = entry.getKey();
+            List<PrediccionPlaga> items = entry.getValue();
+            String plagas = items.stream()
+                    .map(PrediccionPlaga::getPlagaNombre)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .reduce((a, b) -> a + ", " + b).orElse("-");
+            String hospedantes = items.stream()
+                    .map(PrediccionPlaga::getHospedanteAfectado)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .reduce((a, b) -> a + ", " + b).orElse("-");
+            String riesgoDominante = items.stream()
+                    .map(PrediccionPlaga::getNivelRiesgo)
+                    .filter(s -> s != null && !s.isBlank())
+                    .max(Comparator.comparingInt(this::riskRank))
+                    .orElse("-");
+
+            Row row = sheet.createRow(r);
+            row.setHeightInPoints(40f);
+            boolean alt = (r % 2 == 0);
+            CellStyle base = alt ? styles.tableCellAlt : styles.tableCell;
+            CellStyle baseBold = alt ? styles.tableCellBoldAlt : styles.tableCellBold;
+            createStyledCell(row, 0, producto, baseBold);
+            createStyledCell(row, 1, plagas, base);
+            createStyledCell(row, 2, hospedantes, base);
+            XSSFCell riskCell = (XSSFCell) row.createCell(3);
+            riskCell.setCellValue(riesgoDominante.toUpperCase(Locale.ROOT));
+            riskCell.setCellStyle(styles.riskStyle(riesgoDominante));
+            r++;
+        }
+        if (grupos.isEmpty()) {
+            Row row = sheet.createRow(1);
+            row.setHeightInPoints(28f);
+            XSSFCell c = (XSSFCell) row.createCell(0);
+            c.setCellValue("Sin productos sugeridos en este escenario.");
+            c.setCellStyle(styles.tableCell);
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 3));
+        }
     }
 
     private void addMetaRow(XSSFSheet sheet, ExcelStyles styles, int rowIdx, String label, String value) {
@@ -794,6 +1275,8 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
         final XSSFCellStyle riskMedio;
         final XSSFCellStyle riskBajo;
         final XSSFCellStyle riskNeutral;
+        final XSSFCellStyle recommendationNumber;
+        final XSSFCellStyle recommendationText;
 
         ExcelStyles(XSSFWorkbook wb) {
             IndexedColorMap cm = wb.getStylesSource().getIndexedColors();
@@ -805,7 +1288,7 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
             titleFont.setFontHeightInPoints((short) 18);
 
             titleBanner = wb.createCellStyle();
-            titleBanner.setFillForegroundColor(new XSSFColor(BRAND_GREEN, cm));
+            titleBanner.setFillForegroundColor(new XSSFColor(HEADER_GREEN, cm));
             titleBanner.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             titleBanner.setAlignment(HorizontalAlignment.LEFT);
             titleBanner.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -865,7 +1348,7 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
             kpiLabel = wb.createCellStyle();
             kpiHint = wb.createCellStyle();
 
-            kpiValueGreen = buildKpiStyle(wb, cm, BRAND_GREEN);
+            kpiValueGreen = buildKpiStyle(wb, cm, BRAND_GREEN_DARK);
             kpiValueBlue = buildKpiStyle(wb, cm, RISK_MEDIO_BORDER);
             kpiValueRed = buildKpiStyle(wb, cm, RISK_CRITICO_BORDER);
             kpiValueOrange = buildKpiStyle(wb, cm, RISK_ALTO_BORDER);
@@ -909,6 +1392,26 @@ public class ReportePredictivoExporterImpl implements ReportePredictivoExporter 
             riskMedio = buildRiskStyle(wb, cm, RISK_MEDIO_BG, RISK_MEDIO_TEXT);
             riskBajo = buildRiskStyle(wb, cm, RISK_BAJO_BG, RISK_BAJO_TEXT);
             riskNeutral = buildRiskStyle(wb, cm, SURFACE_LIGHT, TEXT_SECONDARY);
+
+            XSSFFont recNumFont = wb.createFont();
+            recNumFont.setFontName("Calibri");
+            recNumFont.setBold(true);
+            recNumFont.setColor(new XSSFColor(BRAND_GREEN_DARK, cm));
+            recNumFont.setFontHeightInPoints((short) 12);
+            recommendationNumber = wb.createCellStyle();
+            recommendationNumber.setAlignment(HorizontalAlignment.CENTER);
+            recommendationNumber.setVerticalAlignment(VerticalAlignment.CENTER);
+            recommendationNumber.setFont(recNumFont);
+
+            XSSFFont recTextFont = wb.createFont();
+            recTextFont.setFontName("Calibri");
+            recTextFont.setColor(new XSSFColor(TEXT_PRIMARY, cm));
+            recTextFont.setFontHeightInPoints((short) 11);
+            recommendationText = wb.createCellStyle();
+            recommendationText.setAlignment(HorizontalAlignment.LEFT);
+            recommendationText.setVerticalAlignment(VerticalAlignment.CENTER);
+            recommendationText.setWrapText(true);
+            recommendationText.setFont(recTextFont);
         }
 
         private XSSFCellStyle buildKpiStyle(XSSFWorkbook wb, IndexedColorMap cm, Color accent) {

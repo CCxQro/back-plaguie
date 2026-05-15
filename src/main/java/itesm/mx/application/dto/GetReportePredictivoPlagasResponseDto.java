@@ -9,6 +9,8 @@ public class GetReportePredictivoPlagasResponseDto {
     public long observationsAnalyzed;
     public String executiveSummary;
     public List<PrediccionPlagaItemDto> predictions;
+    public List<HotspotItemDto> hotspots;
+    public List<String> recommendations;
 
     public GetReportePredictivoPlagasResponseDto() {
     }
@@ -19,7 +21,9 @@ public class GetReportePredictivoPlagasResponseDto {
             String generatedAt,
             long observationsAnalyzed,
             String executiveSummary,
-            List<PrediccionPlagaItemDto> predictions
+            List<PrediccionPlagaItemDto> predictions,
+            List<HotspotItemDto> hotspots,
+            List<String> recommendations
     ) {
         this.region = region;
         this.season = season;
@@ -27,5 +31,7 @@ public class GetReportePredictivoPlagasResponseDto {
         this.observationsAnalyzed = observationsAnalyzed;
         this.executiveSummary = executiveSummary;
         this.predictions = predictions;
+        this.hotspots = hotspots;
+        this.recommendations = recommendations;
     }
 }
