@@ -12,10 +12,16 @@ public interface PrediccionPlagaProvider {
     class PrediccionResult {
         private final String resumenEjecutivo;
         private final List<PrediccionPlaga> predicciones;
+        private final List<String> recomendaciones;
 
         public PrediccionResult(String resumenEjecutivo, List<PrediccionPlaga> predicciones) {
+            this(resumenEjecutivo, predicciones, List.of());
+        }
+
+        public PrediccionResult(String resumenEjecutivo, List<PrediccionPlaga> predicciones, List<String> recomendaciones) {
             this.resumenEjecutivo = resumenEjecutivo;
             this.predicciones = predicciones;
+            this.recomendaciones = recomendaciones == null ? List.of() : recomendaciones;
         }
 
         public String getResumenEjecutivo() {
@@ -24,6 +30,10 @@ public interface PrediccionPlagaProvider {
 
         public List<PrediccionPlaga> getPredicciones() {
             return predicciones;
+        }
+
+        public List<String> getRecomendaciones() {
+            return recomendaciones;
         }
     }
 }
