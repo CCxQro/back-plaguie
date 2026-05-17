@@ -18,6 +18,7 @@ import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.TechnicalSeller;
 
 import java.util.List;
+import java.util.Map;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
@@ -34,6 +35,10 @@ public class ProductResource {
     @Inject GetProductsBySellerUseCase getProductsBySellerUseCase;
     @Inject GetProductsByProviderUseCase getProductsByProviderUseCase;
     @Inject GetProductsByStatusUseCase getProductsByStatusUseCase;
+    @Inject CountAllProductsUseCase countAllProductsUseCase;
+    @Inject CountNormalStockProductsUseCase countNormalStockProductsUseCase;
+    @Inject CountLowStockProductsUseCase countLowStockProductsUseCase;
+    @Inject CountCriticStockProductsUseCase countCriticStockProductsUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
 
     @GET
@@ -70,6 +75,69 @@ public class ProductResource {
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
+    }
+
+    @GET
+    @Path("/count")
+    public Response countProducts() {
+        Response auth = requireAdminOrSeller();
+        if (auth != null) return auth;
+        try {
+            long count = countAllProductsUseCase.execute();
+            return Response.ok(Map.of("count", count)).build();
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/normalstock")
+    public Response countNormalStock() {
+        Response auth = requireAdminOrSeller();
+        if (auth != null) return auth;
+        try {
+            long count = countNormalStockProductsUseCase.execute();
+            return Response.ok(Map.of("count", count)).build();
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/lowstock")
+    public Response countLowStock() {
+        Response auth = requireAdminOrSeller();
+        if (auth != null) return auth;
+        try {
+            long count = countLowStockProductsUseCase.execute();
+            return Response.ok(Map.of("count", count)).build();
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/criticstock")
+    public Response countCriticStock() {
+        Response auth = requireAdminOrSeller();
+        if (auth != null) return auth;
+        try {
+            long count = countCriticStockProductsUseCase.execute();
+            return Response.ok(Map.of("count", count)).build();
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    private Response requireAdminOrSeller() {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticacion");
+        }
+        Integer role = authenticatedUserContext.getCurrentUser().getRoleId();
+        if (!RoleConstants.ADMIN.equals(role) && !RoleConstants.SELLER.equals(role)) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo administradores y tecnicos vendedores pueden consultar estos conteos");
+        }
+        return null;
     }
 
     @POST
