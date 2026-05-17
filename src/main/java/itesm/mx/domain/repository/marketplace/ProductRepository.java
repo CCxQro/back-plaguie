@@ -14,4 +14,8 @@ public interface ProductRepository {
     List<Product> findAllBySellerId(Long sellerId);
     List<Product> findAllByProviderId(Long providerId);
     List<Product> findAllByStatusId(Long statusId);
+    long countAllProducts();
+    long countProductsByStockAbove(int threshold);
+    long countProductsByStockBetween(int minInclusive, int maxInclusive);
+    long countProductsByStockBelow(int threshold);
 }

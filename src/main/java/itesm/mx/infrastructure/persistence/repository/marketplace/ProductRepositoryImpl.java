@@ -79,4 +79,44 @@ public class ProductRepositoryImpl implements PanacheRepositoryBase<ProductEntit
                 .map(ProductMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public long countAllProducts() {
+        return count();
+    }
+
+    private static final String STOCK_EXPR =
+            "(COALESCE((SELECT SUM(i.cantidad) FROM InventoryEntity i " +
+            "WHERE i.skuSellerId = p.skuSellerId AND i.actionId = 1), 0) " +
+            "- COALESCE((SELECT SUM(i.cantidad) FROM InventoryEntity i " +
+            "WHERE i.skuSellerId = p.skuSellerId AND i.actionId = 2), 0))";
+
+    @Override
+    public long countProductsByStockAbove(int threshold) {
+        return getEntityManager().createQuery(
+                "SELECT COUNT(p) FROM ProductEntity p WHERE " + STOCK_EXPR + " > :threshold",
+                Long.class)
+                .setParameter("threshold", threshold)
+                .getSingleResult();
+    }
+
+    @Override
+    public long countProductsByStockBetween(int minInclusive, int maxInclusive) {
+        return getEntityManager().createQuery(
+                "SELECT COUNT(p) FROM ProductEntity p WHERE " + STOCK_EXPR +
+                        " >= :minVal AND " + STOCK_EXPR + " <= :maxVal",
+                Long.class)
+                .setParameter("minVal", minInclusive)
+                .setParameter("maxVal", maxInclusive)
+                .getSingleResult();
+    }
+
+    @Override
+    public long countProductsByStockBelow(int threshold) {
+        return getEntityManager().createQuery(
+                "SELECT COUNT(p) FROM ProductEntity p WHERE " + STOCK_EXPR + " < :threshold",
+                Long.class)
+                .setParameter("threshold", threshold)
+                .getSingleResult();
+    }
 }
