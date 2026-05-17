@@ -78,3 +78,41 @@ SELECT COALESCE(SUM(cantidad), 0) AS subtracted
 FROM Inventario
 WHERE id_accion_inventario = 2
   AND sku_id_vendedor = ?;
+
+
+-- =====================================================================
+-- ProductRepositoryImpl
+-- =====================================================================
+
+-- countAllProducts()
+SELECT COUNT(*) FROM Productos;
+
+-- countProductsByStockAbove(int threshold)
+SELECT COUNT(*)
+FROM Productos p
+WHERE (
+        COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
+                  WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 1), 0)
+      - COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
+                  WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 2), 0)
+      ) > ?;
+
+-- countProductsByStockBetween(int minInclusive, int maxInclusive)
+SELECT COUNT(*)
+FROM Productos p
+WHERE (
+        COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
+                  WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 1), 0)
+      - COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
+                  WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 2), 0)
+      ) BETWEEN ? AND ?;
+
+-- countProductsByStockBelow(int threshold)
+SELECT COUNT(*)
+FROM Productos p
+WHERE (
+        COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
+                  WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 1), 0)
+      - COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
+                  WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 2), 0)
+      ) < ?;
