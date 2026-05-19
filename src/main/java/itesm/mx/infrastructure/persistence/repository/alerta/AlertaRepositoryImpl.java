@@ -26,6 +26,15 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
     }
 
     @Override
+    public List<Alerta> findByReportedUserId(Long userId) {
+        return findDetailedQuery("where a.reportedByUserId = ?1", userId)
+                .list()
+                .stream()
+                .map(AlertaMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Alerta save(Alerta alerta) {
         AlertaEntity entity = AlertaMapper.toEntity(alerta);
         persistAndFlush(entity);
