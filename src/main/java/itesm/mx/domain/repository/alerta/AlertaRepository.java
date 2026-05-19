@@ -10,6 +10,8 @@ public interface AlertaRepository {
 
     Optional<Alerta> findAlertaById(Long alertaId);
 
+    List<Alerta> findByReportedUserId(Long userId);
+
     Alerta save(Alerta alerta);
 
     Alerta update(Alerta alerta);
