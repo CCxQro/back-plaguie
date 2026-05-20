@@ -1,8 +1,0 @@
-2026-05-14 12:49:09,845 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] INFO  [org.hib.spa.int.SpatialService] (Quarkus Main Thread) HHH80000001: Hibernate Spatial integration enabled: true
-2026-05-14 12:49:11,299 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] WARN  [io.qua.config] (Quarkus Main Thread) The "quarkus.log.file.enable" config property is deprecated and should not be used anymore.
-2026-05-14 12:49:18,744 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] INFO  [ite.mx.inf.fir.FirebaseConfig] (Quarkus Main Thread) Firebase inicializado
-2026-05-14 12:49:18,942 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] INFO  [io.quarkus] (Quarkus Main Thread) back-plaguie 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.34.3) started in 17.761s. Listening on: http://localhost:8080
-2026-05-14 12:49:18,944 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
-2026-05-14 12:49:18,945 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [agroal, cdi, compose, hibernate-orm, hibernate-orm-panache, hibernate-validator, jdbc-mysql, narayana-jta, rest, rest-jackson, smallrye-context-propagation, smallrye-openapi, swagger-ui, vertx]
-2026-05-14 13:16:57,548 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] WARNING [org.aes.rea.ter.imp.AbstractWindowsTerminal] (Shutdown thread) Failed to write out.
-2026-05-14 13:16:57,546 minipoderosa C:\Program Files\jdk-25.0.1\bin\java.exe[101124] INFO  [io.quarkus] (Shutdown thread) back-plaguie stopped in 0.072s
