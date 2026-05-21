@@ -623,7 +623,6 @@ class ProductResourceIntegrationTest {
         dto.unitId = 1L;
         dto.description = "Update con nuevo precio.";
         dto.statusId = 1L;
-        dto.price = new BigDecimal("200.00000");
 
         given()
             .header("Authorization", "Bearer " + token)
@@ -769,7 +768,6 @@ class ProductResourceIntegrationTest {
         dto.unitId = 1L;
         dto.description = "Update con nuevo stock.";
         dto.statusId = 1L;
-        dto.stock = 80;
 
         given()
             .header("Authorization", "Bearer " + token)

@@ -78,6 +78,22 @@ public class ProductResource {
     }
 
     @GET
+    @Path("/{skuSellerId}")
+    public Response getProductById(@PathParam("skuSellerId") Long skuSellerId) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticacion");
+        }
+        try {
+            Product product = getProductByIdUseCase.execute(skuSellerId);
+            return Response.ok(toResponseDto(product)).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.NOT_FOUND, "Producto no encontrado");
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
     @Path("/count")
     public Response countProducts() {
         Response auth = requireAdminOrSeller();
@@ -277,11 +293,8 @@ public class ProductResource {
         Status status = new Status();
         status.setStatusId(dto.statusId);
 
-        Product product = new Product(null, null, dto.name, dto.sku,
+        return new Product(null, null, dto.name, dto.sku,
                 category, provider, dto.unitValue, unit, dto.description, status, dto.firebaseImageId);
-        product.setLatestPrice(dto.price);
-        product.setStock(dto.stock);
-        return product;
     }
 
     private ProductResponseDto toResponseDto(Product product) {
