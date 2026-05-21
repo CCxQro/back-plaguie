@@ -76,11 +76,11 @@ INSERT INTO Usuario (id_usuario, email, uuid_firebase, isActive, nombre, id_rol)
 -- ==========================================
 
 -- Colores
-INSERT INTO Colores (id_color, name, hexa) VALUES (1, 'Rojo', '#FF0000');
-INSERT INTO Colores (id_color, name, hexa) VALUES (2, 'Verde', '#008000');
-INSERT INTO Colores (id_color, name, hexa) VALUES (3, 'Azul', '#0000FF');
-INSERT INTO Colores (id_color, name, hexa) VALUES (4, 'Amarillo', '#FFFF00');
-INSERT INTO Colores (id_color, name, hexa) VALUES (5, 'Naranja', '#FFA500');
+INSERT INTO Colores (id_color, name, hexa) VALUES (1, 'Rojo',    '#DC2626');
+INSERT INTO Colores (id_color, name, hexa) VALUES (2, 'Verde',   '#16A34A');
+INSERT INTO Colores (id_color, name, hexa) VALUES (3, 'Morado',  '#7C3AED');
+INSERT INTO Colores (id_color, name, hexa) VALUES (4, 'Cafe',    '#92400E');
+INSERT INTO Colores (id_color, name, hexa) VALUES (5, 'Naranja', '#EA580C');
 
 -- Status
 INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
@@ -409,6 +409,24 @@ INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, 
 -- ==========================================
 -- 8.B PRECIOS (historico por producto; el mas reciente = valor_unidad del producto)
 -- ==========================================
+-- Producto 1 (Insecticida Ultra, valor_unidad=80)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (20, 1,  75.00000, '2025-02-04 09:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (21, 1,  80.00000, '2025-04-18 10:30:00');
+
+-- Producto 2 (Fungicida Mancozeb, valor_unidad=120)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (22, 2, 120.00000, '2025-03-12 11:00:00');
+
+-- Producto 3 (Fertilizante Bio, valor_unidad=50)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (23, 3,  45.00000, '2025-01-20 08:30:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (24, 3,  50.00000, '2025-04-02 13:15:00');
+
+-- Producto 4 (Plaguicida Pro, valor_unidad=150)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (25, 4, 150.00000, '2025-03-25 12:45:00');
+
+-- Producto 5 (Herbicida 2,4-D, valor_unidad=90)
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (26, 5,  85.00000, '2025-02-14 10:00:00');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (27, 5,  90.00000, '2025-05-05 14:30:00');
+
 -- Producto 1001 (Fertilizante NPK 20-20-20, valor_unidad=250)
 INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (1,  1001, 220.00000, '2025-01-12 09:00:00');
 INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (2,  1001, 240.00000, '2025-03-08 11:30:00');
