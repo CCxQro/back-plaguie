@@ -4,4 +4,5 @@ public class UpdateUserDto {
     public String name;
     public Integer roleId;
     public Boolean isActive;
+    public RegisterLocationDto location;
 }

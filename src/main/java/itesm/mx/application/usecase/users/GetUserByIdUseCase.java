@@ -12,6 +12,9 @@ public class GetUserByIdUseCase {
     @Inject
     UserRepository userRepository;
 
+    @Inject
+    UserLocationEnricher userLocationEnricher;
+
     public GetUserResponseDto execute(Long userId) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("El ID de usuario no es válido");
@@ -20,7 +23,7 @@ public class GetUserByIdUseCase {
         User user = userRepository.findUserById(userId)
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado con id: " + userId));
 
-        return new GetUserResponseDto(
+        GetUserResponseDto dto = new GetUserResponseDto(
                 user.getUserId(),
                 user.getFirebaseUuid(),
                 user.getName(),
@@ -28,5 +31,7 @@ public class GetUserByIdUseCase {
                 user.getRoleId(),
                 user.getActive()
         );
+        userLocationEnricher.enrich(dto, user);
+        return dto;
     }
 }
