@@ -42,17 +42,17 @@ class GetFarmerLocationsBySellerUseCaseTest {
 
     private Order buildOrderWithLocation(Long orderId, Long farmerId, String farmerName,
                                           double lon, double lat, Long locationId) {
-        User user = new User();
-        user.setName(farmerName);
-
         Location location = new Location();
         location.setLocationId(locationId);
         location.setCoordinates(buildPoint(lon, lat));
 
+        User user = new User();
+        user.setName(farmerName);
+        user.setLocation(location);
+
         Farmer farmer = new Farmer();
         farmer.setFarmerId(farmerId);
         farmer.setUser(user);
-        farmer.setLocation(location);
 
         TechnicalSeller seller = new TechnicalSeller();
         seller.setTechnicalSellerId(1L);

@@ -45,6 +45,9 @@ public class ParcelaEntity {
     @Column(name = "id_sistema_riego", nullable = false)
     public Long sistemaRiegoId;
 
+    @Column(name = "activo", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    public Boolean isActive = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agricultor", referencedColumnName = "id_agricultor",
             insertable = false, updatable = false,

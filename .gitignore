@@ -49,6 +49,10 @@ firebase-dev.json
 # TLS Certificates
 .certs/
 
+# Quarkus runtime logs
+quarkus.log
+quarkus.log.*
+
 # Claude Code
 CLAUDE.md
 .claude/

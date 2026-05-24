@@ -1,6 +1,9 @@
 package itesm.mx.infrastructure.mapper.user;
 
+import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.user.User;
+import itesm.mx.infrastructure.mapper.location.LocationMapper;
+import itesm.mx.infrastructure.persistence.entity.location.LocationEntity;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
 
 public class UserMapper {
@@ -12,6 +15,9 @@ public class UserMapper {
         userEntity.email = user.getEmail();
         userEntity.roleId = user.getRoleId();
         userEntity.isActive = user.getActive();
+        if (user.getLocation() != null) {
+            userEntity.locationId = user.getLocation().getLocationId();
+        }
         return userEntity;
     }
 
@@ -23,7 +29,20 @@ public class UserMapper {
         user.setEmail(userEntity.email);
         user.setRoleId(userEntity.roleId);
         user.setActive(userEntity.isActive);
+        user.setLocation(mapLocation(userEntity));
         return user;
     }
-    
+
+    private static Location mapLocation(UserEntity entity) {
+        LocationEntity locationEntity = entity.location;
+        if (locationEntity != null) {
+            return LocationMapper.toDomain(locationEntity);
+        }
+        if (entity.locationId != null) {
+            Location location = new Location();
+            location.setLocationId(entity.locationId);
+            return location;
+        }
+        return null;
+    }
 }

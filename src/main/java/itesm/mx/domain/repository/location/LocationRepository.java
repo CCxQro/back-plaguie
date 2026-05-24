@@ -10,14 +10,7 @@ public interface LocationRepository {
 
     Optional<Location> findLocationById(Long locationId);
 
-    Optional<Location> findByResolvedData(
-            Double x,
-            Double y,
-            Long stateId,
-            Long municipalityId,
-            Long localityId,
-            Long propertyId
-    );
-
     Location register(Location location);
+
+    Location update(Location location);
 }

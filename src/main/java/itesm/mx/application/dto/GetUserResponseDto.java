@@ -1,5 +1,8 @@
 package itesm.mx.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GetUserResponseDto {
     public Long userId;
     public String firebaseUuid;
@@ -7,6 +10,7 @@ public class GetUserResponseDto {
     public String email;
     public Integer roleId;
     public Boolean isActive;
+    public GetLocationResponseDto location;
 
     public GetUserResponseDto() {}
 

@@ -101,11 +101,11 @@ class GetFarmerLocationsBySellerUseCaseIntegrationTest {
         farmerUser.email = "loc.farmer@itesm.mx";
         farmerUser.roleId = 2;
         farmerUser.isActive = true;
+        farmerUser.locationId = location.locationId;
         em.persist(farmerUser);
 
         FarmerEntity farmer = new FarmerEntity();
         farmer.userId = farmerUser.userId;
-        farmer.locationId = location.locationId;
         farmer.isActive = true;
         em.persist(farmer);
         farmerId = farmer.farmerId;
@@ -116,12 +116,12 @@ class GetFarmerLocationsBySellerUseCaseIntegrationTest {
         sellerUser.email = "loc.seller@itesm.mx";
         sellerUser.roleId = 3;
         sellerUser.isActive = true;
+        sellerUser.locationId = location.locationId;
         em.persist(sellerUser);
         sellerUserId = sellerUser.userId;
 
         TechnicalSellerEntity seller = new TechnicalSellerEntity();
         seller.userId = sellerUser.userId;
-        seller.locationId = location.locationId;
         seller.isActive = true;
         em.persist(seller);
 
@@ -144,12 +144,12 @@ class GetFarmerLocationsBySellerUseCaseIntegrationTest {
         emptySellerUser.email = "loc.emptyseller@itesm.mx";
         emptySellerUser.roleId = 3;
         emptySellerUser.isActive = true;
+        emptySellerUser.locationId = seedLocationId;
         em.persist(emptySellerUser);
         emptySellerUserId = emptySellerUser.userId;
 
         TechnicalSellerEntity emptySeller = new TechnicalSellerEntity();
         emptySeller.userId = emptySellerUser.userId;
-        emptySeller.locationId = seedLocationId;
         emptySeller.isActive = true;
         em.persist(emptySeller);
     }

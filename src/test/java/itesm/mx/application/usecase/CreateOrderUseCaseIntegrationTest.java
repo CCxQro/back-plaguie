@@ -107,11 +107,11 @@ class CreateOrderUseCaseIntegrationTest {
         farmerUser.email = "create.farmer@itesm.mx";
         farmerUser.roleId = 2;
         farmerUser.isActive = true;
+        farmerUser.locationId = location.locationId;
         em.persist(farmerUser);
 
         FarmerEntity farmer = new FarmerEntity();
         farmer.userId = farmerUser.userId;
-        farmer.locationId = location.locationId;
         farmer.isActive = true;
         em.persist(farmer);
         farmerId = farmer.farmerId;
@@ -122,11 +122,11 @@ class CreateOrderUseCaseIntegrationTest {
         sellerUser.email = "create.seller@itesm.mx";
         sellerUser.roleId = 3;
         sellerUser.isActive = true;
+        sellerUser.locationId = location.locationId;
         em.persist(sellerUser);
 
         TechnicalSellerEntity seller = new TechnicalSellerEntity();
         seller.userId = sellerUser.userId;
-        seller.locationId = location.locationId;
         seller.isActive = true;
         em.persist(seller);
         sellerId = seller.technicalSellerId;

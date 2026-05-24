@@ -68,7 +68,7 @@ public class GetClientsMapBySellerUseCase {
             Order anyOrder = entry.getValue().get(0);
             Farmer farmer = anyOrder.getFarmer();
             User user = farmer.getUser();
-            Location location = farmer.getLocation();
+            Location location = user != null ? user.getLocation() : null;
 
             List<Parcela> parcelas = parcelaRepository.findByFarmerId(farmer.getFarmerId());
             List<Alerta> alertas = user != null

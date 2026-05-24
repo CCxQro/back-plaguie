@@ -56,11 +56,6 @@ class GetClientsMapBySellerUseCaseTest {
     private Farmer buildFarmer(Long farmerId, Long userId, String name, String email,
                                 Long locationId, String state, String municipality,
                                 double lon, double lat) {
-        User user = new User();
-        user.setUserId(userId);
-        user.setName(name);
-        user.setEmail(email);
-
         State stateModel = new State();
         stateModel.setName(state);
 
@@ -73,10 +68,15 @@ class GetClientsMapBySellerUseCaseTest {
         location.setState(stateModel);
         location.setMunicipality(municipalityModel);
 
+        User user = new User();
+        user.setUserId(userId);
+        user.setName(name);
+        user.setEmail(email);
+        user.setLocation(location);
+
         Farmer farmer = new Farmer();
         farmer.setFarmerId(farmerId);
         farmer.setUser(user);
-        farmer.setLocation(location);
         farmer.setActive(true);
         return farmer;
     }

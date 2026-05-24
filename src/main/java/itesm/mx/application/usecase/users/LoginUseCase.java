@@ -58,21 +58,20 @@ public class LoginUseCase {
         }
 
         LoginResponseDto response = new LoginResponseDto(user.getUserId(), user.getName(), user.getEmail(), user.getRoleId());
+        response.location = resolveLocation(user.getLocation());
 
         if (RoleConstants.ADMIN.equals(user.getRoleId())) {
             administratorRepository.findByIdUser(user.getUserId()).ifPresent(admin ->
                     response.isActive = admin.getActive()
             );
         } else if (RoleConstants.SELLER.equals(user.getRoleId())) {
-            technicalSellerRepository.findByIdUser(user.getUserId()).ifPresent(seller -> {
-                response.isActive = seller.getActive();
-                response.location = resolveLocation(seller.getLocation());
-            });
+            technicalSellerRepository.findByIdUser(user.getUserId()).ifPresent(seller ->
+                    response.isActive = seller.getActive()
+            );
         } else if (RoleConstants.FARMER.equals(user.getRoleId())) {
-            farmerRepository.findByIdUser(user.getUserId()).ifPresent(farmer -> {
-                response.isActive = farmer.getActive();
-                response.location = resolveLocation(farmer.getLocation());
-            });
+            farmerRepository.findByIdUser(user.getUserId()).ifPresent(farmer ->
+                    response.isActive = farmer.getActive()
+            );
         }
 
         return response;

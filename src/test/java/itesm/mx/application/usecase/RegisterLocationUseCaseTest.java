@@ -1,6 +1,7 @@
 package itesm.mx.application.usecase;
 
 import itesm.mx.application.dto.GetLocationResponseDto;
+import itesm.mx.application.usecase.location.location.LocationCatalogResolver;
 import itesm.mx.application.usecase.location.location.RegisterLocationUseCase;
 import itesm.mx.domain.models.location.Locality;
 import itesm.mx.domain.models.location.Location;
@@ -8,11 +9,7 @@ import itesm.mx.domain.models.location.LocationData;
 import itesm.mx.domain.models.location.Municipality;
 import itesm.mx.domain.models.location.Property;
 import itesm.mx.domain.models.location.State;
-import itesm.mx.domain.repository.location.LocalityRepository;
 import itesm.mx.domain.repository.location.LocationRepository;
-import itesm.mx.domain.repository.location.MunicipalityRepository;
-import itesm.mx.domain.repository.location.PropertyRepository;
-import itesm.mx.domain.repository.location.StateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.Coordinate;
@@ -22,13 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,19 +36,17 @@ class RegisterLocationUseCaseTest {
     LocationRepository locationRepository;
 
     @Mock
-    StateRepository stateRepository;
-
-    @Mock
-    MunicipalityRepository municipalityRepository;
-
-    @Mock
-    LocalityRepository localityRepository;
-
-    @Mock
-    PropertyRepository propertyRepository;
+    LocationCatalogResolver catalogResolver;
 
     @InjectMocks
     RegisterLocationUseCase registerLocationUseCase;
+
+    private void stubCatalogs(State state, Municipality municipality, Locality locality, Property property) {
+        when(catalogResolver.resolveState(any())).thenReturn(state);
+        when(catalogResolver.resolveMunicipality(any())).thenReturn(municipality);
+        when(catalogResolver.resolveLocality(any())).thenReturn(locality);
+        when(catalogResolver.resolveProperty(any())).thenReturn(property);
+    }
 
     @Test
     void execute_WhenCoordinatesAreInvalid_ThrowsIllegalArgumentException() {
@@ -69,7 +62,7 @@ class RegisterLocationUseCaseTest {
     }
 
     @Test
-    void execute_WhenLocationAlreadyExists_ReturnsExistingLocation() {
+    void execute_WhenIdenticalLocationExists_StillCreatesNewRow() {
         Point coordinates = GEOMETRY_FACTORY.createPoint(new Coordinate(-103.35, 20.67));
         LocationData locationData = new LocationData(coordinates, "Jalisco", "Guadalajara", "Centro", "Predio Norte");
 
@@ -77,26 +70,22 @@ class RegisterLocationUseCaseTest {
         Municipality municipality = new Municipality(2L, "guadalajara");
         Locality locality = new Locality(3L, "centro");
         Property property = new Property(4L, "predio norte");
-        Location existingLocation = new Location(9L, coordinates, state, municipality, locality, property);
+        Location createdLocation = new Location(11L, coordinates, state, municipality, locality, property);
 
-        when(stateRepository.findByName("jalisco")).thenReturn(Optional.of(state));
-        when(municipalityRepository.findByName("guadalajara")).thenReturn(Optional.of(municipality));
-        when(localityRepository.findByName("centro")).thenReturn(Optional.of(locality));
-        when(propertyRepository.findByName("predio norte")).thenReturn(Optional.of(property));
-        when(locationRepository.findByResolvedData(eq(-103.35), eq(20.67), eq(1L), eq(2L), eq(3L), eq(4L)))
-                .thenReturn(Optional.of(existingLocation));
+        stubCatalogs(state, municipality, locality, property);
+        when(locationRepository.register(any(Location.class))).thenReturn(createdLocation);
 
         GetLocationResponseDto response = registerLocationUseCase.execute(locationData);
 
-        assertEquals(9L, response.locationId);
+        assertEquals(11L, response.locationId);
         assertEquals(20.67, response.latitude);
         assertEquals(-103.35, response.longitude);
         assertEquals("jalisco", response.stateName);
-        verify(locationRepository, never()).register(any(Location.class));
+        verify(locationRepository).register(any(Location.class));
     }
 
     @Test
-    void execute_WhenSameCoordinatesAndHierarchyAlreadyExist_DoesNotCreateDuplicate() {
+    void execute_WhenCalledTwiceWithSameData_CreatesTwoSeparateRows() {
         Point coordinates = GEOMETRY_FACTORY.createPoint(new Coordinate(-103.35, 20.67));
         LocationData locationData = new LocationData(coordinates, "Jalisco", "Guadalajara", "Centro", "Predio Norte");
 
@@ -104,48 +93,17 @@ class RegisterLocationUseCaseTest {
         Municipality municipality = new Municipality(2L, "guadalajara");
         Locality locality = new Locality(3L, "centro");
         Property property = new Property(4L, "predio norte");
-        Location existingLocation = new Location(9L, coordinates, state, municipality, locality, property);
+        Location firstRow = new Location(11L, coordinates, state, municipality, locality, property);
+        Location secondRow = new Location(12L, coordinates, state, municipality, locality, property);
 
-        when(stateRepository.findByName("jalisco")).thenReturn(Optional.of(state));
-        when(municipalityRepository.findByName("guadalajara")).thenReturn(Optional.of(municipality));
-        when(localityRepository.findByName("centro")).thenReturn(Optional.of(locality));
-        when(propertyRepository.findByName("predio norte")).thenReturn(Optional.of(property));
-        when(locationRepository.findByResolvedData(eq(-103.35), eq(20.67), eq(1L), eq(2L), eq(3L), eq(4L)))
-                .thenReturn(Optional.of(existingLocation));
+        stubCatalogs(state, municipality, locality, property);
+        when(locationRepository.register(any(Location.class))).thenReturn(firstRow, secondRow);
 
         GetLocationResponseDto first = registerLocationUseCase.execute(locationData);
         GetLocationResponseDto second = registerLocationUseCase.execute(locationData);
 
-        assertEquals(first.locationId, second.locationId);
-        verify(locationRepository, never()).register(any(Location.class));
-    }
-
-    @Test
-    void execute_WhenSameHierarchyButDifferentCoordinates_RegistersNewLocation() {
-        Point coordinates1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-103.35, 20.67));
-        Point coordinates2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-103.40, 20.70));
-        LocationData locationData = new LocationData(coordinates2, "Jalisco", "Guadalajara", "Centro", "Predio Norte");
-
-        State state = new State(1L, "jalisco");
-        Municipality municipality = new Municipality(2L, "guadalajara");
-        Locality locality = new Locality(3L, "centro");
-        Property property = new Property(4L, "predio norte");
-        Location newLocation = new Location(10L, coordinates2, state, municipality, locality, property);
-
-        when(stateRepository.findByName("jalisco")).thenReturn(Optional.of(state));
-        when(municipalityRepository.findByName("guadalajara")).thenReturn(Optional.of(municipality));
-        when(localityRepository.findByName("centro")).thenReturn(Optional.of(locality));
-        when(propertyRepository.findByName("predio norte")).thenReturn(Optional.of(property));
-        when(locationRepository.findByResolvedData(eq(-103.40), eq(20.70), eq(1L), eq(2L), eq(3L), eq(4L)))
-                .thenReturn(Optional.empty());
-        when(locationRepository.register(any(Location.class))).thenReturn(newLocation);
-
-        GetLocationResponseDto response = registerLocationUseCase.execute(locationData);
-
-        assertEquals(10L, response.locationId);
-        assertEquals(20.70, response.latitude);
-        assertEquals(-103.40, response.longitude);
-        verify(locationRepository).register(any(Location.class));
+        assertNotEquals(first.locationId, second.locationId);
+        verify(locationRepository, times(2)).register(any(Location.class));
     }
 
     @Test
@@ -172,7 +130,7 @@ class RegisterLocationUseCaseTest {
     }
 
     @Test
-    void execute_WhenCatalogsAndLocationDoNotExist_RegistersEverythingNeeded() {
+    void execute_WithValidLocationData_RegistersAndReturnsLocation() {
         Point coordinates = GEOMETRY_FACTORY.createPoint(new Coordinate(-103.40, 20.70));
         LocationData locationData = new LocationData(coordinates, "Jalisco", "Zapopan", "Arcos", "Predio Sur");
 
@@ -182,16 +140,7 @@ class RegisterLocationUseCaseTest {
         Property property = new Property(4L, "predio sur");
         Location createdLocation = new Location(10L, coordinates, state, municipality, locality, property);
 
-        when(stateRepository.findByName("jalisco")).thenReturn(Optional.empty());
-        when(stateRepository.register(any(State.class))).thenReturn(state);
-        when(municipalityRepository.findByName("zapopan")).thenReturn(Optional.empty());
-        when(municipalityRepository.register(any(Municipality.class))).thenReturn(municipality);
-        when(localityRepository.findByName("arcos")).thenReturn(Optional.empty());
-        when(localityRepository.register(any(Locality.class))).thenReturn(locality);
-        when(propertyRepository.findByName("predio sur")).thenReturn(Optional.empty());
-        when(propertyRepository.register(any(Property.class))).thenReturn(property);
-        when(locationRepository.findByResolvedData(eq(-103.40), eq(20.70), eq(1L), eq(2L), eq(3L), eq(4L)))
-                .thenReturn(Optional.empty());
+        stubCatalogs(state, municipality, locality, property);
         when(locationRepository.register(any(Location.class))).thenReturn(createdLocation);
 
         GetLocationResponseDto response = registerLocationUseCase.execute(locationData);
@@ -201,10 +150,6 @@ class RegisterLocationUseCaseTest {
         assertEquals("zapopan", response.municipalityName);
         assertEquals("arcos", response.localityName);
         assertEquals("predio sur", response.propertyName);
-        verify(stateRepository).register(any(State.class));
-        verify(municipalityRepository).register(any(Municipality.class));
-        verify(localityRepository).register(any(Locality.class));
-        verify(propertyRepository).register(any(Property.class));
         verify(locationRepository).register(any(Location.class));
     }
 }

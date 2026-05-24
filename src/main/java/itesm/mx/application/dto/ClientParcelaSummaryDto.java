@@ -12,12 +12,14 @@ public class ClientParcelaSummaryDto {
     public Double phSuelo;
     public LocalDate fechaSiembra;
     public LocalDate fechaCosecha;
+    public Boolean isActive;
 
     public ClientParcelaSummaryDto() {}
 
     public ClientParcelaSummaryDto(Long parcelaId, String nombreParcela, Double tamanoHectareas,
                                     String tipoCultivo, String estadoParcela, String sistemaRiego,
-                                    Double phSuelo, LocalDate fechaSiembra, LocalDate fechaCosecha) {
+                                    Double phSuelo, LocalDate fechaSiembra, LocalDate fechaCosecha,
+                                    Boolean isActive) {
         this.parcelaId = parcelaId;
         this.nombreParcela = nombreParcela;
         this.tamanoHectareas = tamanoHectareas;
@@ -27,5 +29,6 @@ public class ClientParcelaSummaryDto {
         this.phSuelo = phSuelo;
         this.fechaSiembra = fechaSiembra;
         this.fechaCosecha = fechaCosecha;
+        this.isActive = isActive;
     }
 }

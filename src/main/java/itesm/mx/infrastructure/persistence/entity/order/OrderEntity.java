@@ -22,7 +22,12 @@ import java.util.List;
             @NamedSubgraph(
                 name = "farmer-full",
                 attributeNodes = {
-                    @NamedAttributeNode("user"),
+                    @NamedAttributeNode(value = "user", subgraph = "user-with-location")
+                }
+            ),
+            @NamedSubgraph(
+                name = "user-with-location",
+                attributeNodes = {
                     @NamedAttributeNode("location")
                 }
             )
