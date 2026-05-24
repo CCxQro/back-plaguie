@@ -25,10 +25,11 @@ public final class ParcelaAppMapper {
 
         return new ParcelaResponseDto(
                 parcela.getParcelaId(),
-                parcela.getNombreParcela(), // mapped to 'nombre' field in DTO
+                parcela.getNombreParcela(),
                 parcela.getTamanoHectareas(),
                 tipoCultivoNombre,
-                estadoParcelaNombre
+                estadoParcelaNombre,
+                parcela.getIsActive()
         );
     }
 }

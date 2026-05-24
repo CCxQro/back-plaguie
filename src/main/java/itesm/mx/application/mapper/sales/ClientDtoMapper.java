@@ -31,7 +31,8 @@ public class ClientDtoMapper {
                 parcela.getSistemaRiego() != null ? parcela.getSistemaRiego().getNombre() : null,
                 parcela.getPhSuelo(),
                 parcela.getFechaSiembra(),
-                parcela.getFechaCosecha()
+                parcela.getFechaCosecha(),
+                parcela.getIsActive()
         );
     }
 

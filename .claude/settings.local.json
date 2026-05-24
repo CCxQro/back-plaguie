@@ -32,7 +32,11 @@
       "Bash(./mvnw test -Dtest=*)",
       "Bash(./mvnw compile)",
       "Bash(./mvnw package)",
-      "Bash(./mvnw verify:*)",
+      "Bash(./mvnw verify *)",
+      "Bash(./mvnw -q compile *)",
+      "Bash(./mvnw -q test *)",
+      "Bash(./mvnw -q verify *)",
+      "Bash(./mvnw -q package *)",
       "Bash(mysql:*)",
       "Bash(git status)",
       "Bash(git diff:*)",
@@ -47,7 +51,9 @@
       "Bash(./mvnw -q -DskipTests compile)",
       "Bash(./mvnw -q test-compile)",
       "Bash(./mvnw -q verify -DskipITs=false -Dtest='*' -Dit.test='ProductResourceIntegrationTest,PriceResourceIntegrationTest')",
-      "Bash(./mvnw -q test -Dtest='ProductResourceIntegrationTest,PriceResourceIntegrationTest,UpdateProductUseCaseTest')"
+      "Bash(./mvnw -q test -Dtest='ProductResourceIntegrationTest,PriceResourceIntegrationTest,UpdateProductUseCaseTest')",
+      "Bash(xargs -I{} sh -c 'jq -r \"select\\(.message.role==\\\\\"assistant\\\\\"\\) | .message.content[]? | select\\(.type==\\\\\"tool_use\\\\\"\\) | select\\(.name==\\\\\"Bash\\\\\"\\) | .input.command\" \"{}\" 2>/dev/null')",
+      "Bash(awk \"{print \\\\$1, \\\\$2}\")"
     ],
     "deny": [
       "Bash(rm:*)",

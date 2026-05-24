@@ -85,6 +85,7 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
         entity.estadoParcelaId = parcela.getEstadoParcela().getEstadoParcelaId();
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
+        entity.isActive = parcela.getIsActive();
         getEntityManager().flush();
         return findParcelaById(entity.parcelaId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela actualizada"));
@@ -93,5 +94,10 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
     @Override
     public void delete(Long parcelaId) {
         deleteById(parcelaId);
+    }
+
+    @Override
+    public void setActiveByFarmerId(Long farmerId, boolean isActive) {
+        update("isActive = ?1 where farmerId = ?2", isActive, farmerId);
     }
 }

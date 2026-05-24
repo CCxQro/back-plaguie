@@ -17,6 +17,7 @@ public class Parcela {
     private EstadoParcela estadoParcela;
     private TipoCultivo tipoCultivo;
     private SistemaRiego sistemaRiego;
+    private Boolean isActive;
 
     public Parcela() {
     }
@@ -32,7 +33,8 @@ public class Parcela {
             Location location,
             EstadoParcela estadoParcela,
             TipoCultivo tipoCultivo,
-            SistemaRiego sistemaRiego
+            SistemaRiego sistemaRiego,
+            Boolean isActive
     ) {
         this.parcelaId = parcelaId;
         this.nombreParcela = nombreParcela;
@@ -45,6 +47,7 @@ public class Parcela {
         this.estadoParcela = estadoParcela;
         this.tipoCultivo = tipoCultivo;
         this.sistemaRiego = sistemaRiego;
+        this.isActive = isActive;
     }
 
     public Long getParcelaId() {
@@ -133,5 +136,13 @@ public class Parcela {
 
     public void setSistemaRiego(SistemaRiego sistemaRiego) {
         this.sistemaRiego = sistemaRiego;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }

@@ -18,4 +18,5 @@ public interface ProductRepository {
     long countProductsByStockAbove(int threshold);
     long countProductsByStockBetween(int minInclusive, int maxInclusive);
     long countProductsByStockBelow(int threshold);
+    void setActiveBySellerId(Long sellerId, boolean isActive);
 }

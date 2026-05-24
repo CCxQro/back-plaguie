@@ -41,6 +41,9 @@ public class ProductEntity {
     @Column(name = "imagen_firebase_id")
     public String firebaseImageId;
 
+    @Column(name = "activo")
+    public Boolean isActive = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_vendedor", referencedColumnName = "id_tecnico_vendedor", insertable = false, updatable = false)
     public TechnicalSellerEntity seller;

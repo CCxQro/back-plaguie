@@ -16,6 +16,8 @@ import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.TechnicalSeller;
 import itesm.mx.domain.models.user.User;
+import itesm.mx.domain.repository.marketplace.ProductRepository;
+import itesm.mx.domain.repository.parcela.ParcelaRepository;
 import itesm.mx.domain.repository.user.AdministratorRepository;
 import itesm.mx.domain.repository.user.FarmerRepository;
 import itesm.mx.domain.repository.user.TechnicalSellerRepository;
@@ -31,6 +33,12 @@ public class UpdateUserUseCase {
 
     @Inject
     FarmerRepository farmerRepository;
+
+    @Inject
+    ParcelaRepository parcelaRepository;
+
+    @Inject
+    ProductRepository productRepository;
 
     @Inject
     TechnicalSellerRepository technicalSellerRepository;
@@ -130,11 +138,13 @@ public class UpdateUserUseCase {
             technicalSellerRepository.findByIdUser(userId).ifPresent(seller -> {
                 seller.setActive(false);
                 technicalSellerRepository.update(seller);
+                productRepository.setActiveBySellerId(seller.getTechnicalSellerId(), false);
             });
         } else if (RoleConstants.FARMER.equals(roleId)) {
             farmerRepository.findByIdUser(userId).ifPresent(farmer -> {
                 farmer.setActive(false);
                 farmerRepository.update(farmer);
+                parcelaRepository.setActiveByFarmerId(farmer.getFarmerId(), false);
             });
         }
     }
@@ -155,6 +165,7 @@ public class UpdateUserUseCase {
                 TechnicalSeller seller = existing.get();
                 seller.setActive(true);
                 technicalSellerRepository.update(seller);
+                productRepository.setActiveBySellerId(seller.getTechnicalSellerId(), true);
             } else {
                 technicalSellerRepository.save(
                         new TechnicalSeller(null, userReference(userId), true));
@@ -165,6 +176,7 @@ public class UpdateUserUseCase {
                 Farmer farmer = existing.get();
                 farmer.setActive(true);
                 farmerRepository.update(farmer);
+                parcelaRepository.setActiveByFarmerId(farmer.getFarmerId(), true);
             } else {
                 farmerRepository.save(
                         new Farmer(null, userReference(userId), true));

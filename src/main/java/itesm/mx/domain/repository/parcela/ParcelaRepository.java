@@ -12,4 +12,5 @@ public interface ParcelaRepository {
     Parcela save(Parcela parcela);
     Parcela update(Parcela parcela);
     void delete(Long parcelaId);
+    void setActiveByFarmerId(Long farmerId, boolean isActive);
 }

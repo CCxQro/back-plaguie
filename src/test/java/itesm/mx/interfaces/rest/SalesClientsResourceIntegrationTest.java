@@ -94,7 +94,7 @@ class SalesClientsResourceIntegrationTest {
 
     private ClientDetailDto sampleClientDetailDto() {
         ClientParcelaSummaryDto parcela = new ClientParcelaSummaryDto(
-                1L, "Parcela 1", 2.5, "Maíz", "Siembra", "Goteo", 7.0, null, null);
+                1L, "Parcela 1", 2.5, "Maíz", "Siembra", "Goteo", 7.0, null, null, true);
         ClientAlertaSummaryDto alerta = new ClientAlertaSummaryDto(
                 1L, "Alerta plaga", "Pulgón", "alta",
                 new BigDecimal("1.50"), LocalDateTime.parse("2026-01-10T08:30:00"),
