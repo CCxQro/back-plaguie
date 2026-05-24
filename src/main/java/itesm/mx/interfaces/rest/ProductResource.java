@@ -339,6 +339,7 @@ public class ProductResource {
         dto.latestPrice = product.getLatestPrice();
         dto.latestPriceDate = product.getLatestPriceDate();
         dto.stock = product.getStock();
+        dto.isActive = product.getIsActive();
 
         return dto;
     }

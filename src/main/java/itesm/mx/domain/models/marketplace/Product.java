@@ -20,6 +20,7 @@ public class Product {
     private BigDecimal latestPrice;
     private LocalDateTime latestPriceDate;
     private Integer stock;
+    private Boolean isActive = true;
 
     public Product() {}
 
@@ -80,4 +81,7 @@ public class Product {
 
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

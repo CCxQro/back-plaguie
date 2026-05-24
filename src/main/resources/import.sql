@@ -86,6 +86,7 @@ INSERT INTO Colores (id_color, name, hexa) VALUES (5, 'Naranja', '#EA580C');
 INSERT INTO Status (id_status, nombre) VALUES (1, 'Accepted');
 INSERT INTO Status (id_status, nombre) VALUES (2, 'Revision');
 INSERT INTO Status (id_status, nombre) VALUES (3, 'Rejected');
+INSERT INTO Status (id_status, nombre) VALUES (4, 'Inactivo');
 
 -- Acciones de Inventario (catalogo estatico: 1=add, 2=subtract)
 INSERT INTO Acciones_Inventario (id_accion_inventario, accion) VALUES (1, 'add');
