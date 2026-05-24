@@ -49,7 +49,8 @@ public class OrderDtoMapper {
 
     public static FarmerLocationDto toFarmerLocationDto(Order order) {
         Farmer farmer = order.getFarmer();
-        Location location = farmer != null ? farmer.getLocation() : null;
+        Location location = farmer != null && farmer.getUser() != null
+                ? farmer.getUser().getLocation() : null;
 
         Double latitude = null;
         Double longitude = null;

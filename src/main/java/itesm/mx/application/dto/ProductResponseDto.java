@@ -23,4 +23,5 @@ public class ProductResponseDto {
     public BigDecimal latestPrice;
     public LocalDateTime latestPriceDate;
     public Integer stock;
+    public Boolean isActive;
 }

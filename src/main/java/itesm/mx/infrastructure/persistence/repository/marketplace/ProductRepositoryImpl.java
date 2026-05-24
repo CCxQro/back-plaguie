@@ -119,4 +119,9 @@ public class ProductRepositoryImpl implements PanacheRepositoryBase<ProductEntit
                 .setParameter("threshold", threshold)
                 .getSingleResult();
     }
+
+    @Override
+    public void setActiveBySellerId(Long sellerId, boolean isActive) {
+        update("isActive = ?1 where sellerId = ?2", isActive, sellerId);
+    }
 }

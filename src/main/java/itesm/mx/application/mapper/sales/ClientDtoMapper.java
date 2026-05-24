@@ -31,7 +31,8 @@ public class ClientDtoMapper {
                 parcela.getSistemaRiego() != null ? parcela.getSistemaRiego().getNombre() : null,
                 parcela.getPhSuelo(),
                 parcela.getFechaSiembra(),
-                parcela.getFechaCosecha()
+                parcela.getFechaCosecha(),
+                parcela.getIsActive()
         );
     }
 
@@ -72,7 +73,7 @@ public class ClientDtoMapper {
                                               List<Alerta> alertas,
                                               List<Order> orders) {
         User user = farmer.getUser();
-        Location location = farmer.getLocation();
+        Location location = user != null ? user.getLocation() : null;
 
         Double latitude = null;
         Double longitude = null;

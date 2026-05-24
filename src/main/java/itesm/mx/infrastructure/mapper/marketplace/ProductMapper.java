@@ -21,6 +21,7 @@ public class ProductMapper {
         entity.description = product.getDescription();
         entity.statusId = product.getStatus().getStatusId();
         entity.firebaseImageId = product.getFirebaseImageId();
+        entity.isActive = product.getIsActive();
         return entity;
     }
 
@@ -37,6 +38,7 @@ public class ProductMapper {
         product.setDescription(entity.description);
         product.setStatus(mapStatus(entity));
         product.setFirebaseImageId(entity.firebaseImageId);
+        product.setIsActive(entity.isActive);
         return product;
     }
 

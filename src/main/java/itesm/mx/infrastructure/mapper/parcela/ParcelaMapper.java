@@ -24,6 +24,7 @@ public class ParcelaMapper {
         entity.estadoParcelaId = parcela.getEstadoParcela().getEstadoParcelaId();
         entity.tipoCultivoId = parcela.getTipoCultivo().getTipoCultivoId();
         entity.sistemaRiegoId = parcela.getSistemaRiego().getSistemaRiegoId();
+        entity.isActive = parcela.getIsActive();
         return entity;
     }
 
@@ -40,6 +41,7 @@ public class ParcelaMapper {
         parcela.setEstadoParcela(mapEstadoParcela(entity));
         parcela.setTipoCultivo(mapTipoCultivo(entity));
         parcela.setSistemaRiego(mapSistemaRiego(entity));
+        parcela.setIsActive(entity.isActive);
         return parcela;
     }
 

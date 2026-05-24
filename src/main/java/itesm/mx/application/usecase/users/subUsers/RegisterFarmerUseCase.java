@@ -20,11 +20,7 @@ public class RegisterFarmerUseCase {
         if (farmer.getUser() == null || farmer.getUser().getUserId() == null) {
             throw new IllegalArgumentException("Se requiere el id_usuario del agricultor");
         }
-        if (farmer.getLocation() == null || farmer.getLocation().getLocationId() == null) {
-            throw new IllegalArgumentException("Se requiere el id_ubicacion del agricultor");
-        }
 
         return farmerRepository.save(farmer);
     }
 }
-

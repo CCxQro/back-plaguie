@@ -37,9 +37,6 @@ public class TechnicalSellerRepositoryImpl implements PanacheRepositoryBase<Tech
         if (technicalSeller.getUser() != null && technicalSeller.getUser().getUserId() != null) {
             entity.userId = technicalSeller.getUser().getUserId();
         }
-        if (technicalSeller.getLocation() != null && technicalSeller.getLocation().getLocationId() != null) {
-            entity.locationId = technicalSeller.getLocation().getLocationId();
-        }
         if (technicalSeller.getActive() != null) {
             entity.isActive = technicalSeller.getActive();
         }

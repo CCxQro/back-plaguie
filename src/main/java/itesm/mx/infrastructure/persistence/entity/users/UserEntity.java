@@ -1,5 +1,6 @@
 package itesm.mx.infrastructure.persistence.entity.users;
 
+import itesm.mx.infrastructure.persistence.entity.location.LocationEntity;
 import jakarta.persistence.*;
 
 @Entity
@@ -25,4 +26,12 @@ public class UserEntity {
 
     @Column(name = "isActive")
     public Boolean isActive;
+
+    @Column(name = "id_ubicacion")
+    public Long locationId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ubicacion", referencedColumnName = "id_ubicacion",
+                insertable = false, updatable = false)
+    public LocationEntity location;
 }

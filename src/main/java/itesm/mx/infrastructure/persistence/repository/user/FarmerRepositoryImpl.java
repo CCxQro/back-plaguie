@@ -36,9 +36,6 @@ public class FarmerRepositoryImpl implements PanacheRepositoryBase<FarmerEntity,
         if (farmer.getUser() != null && farmer.getUser().getUserId() != null) {
             entity.userId = farmer.getUser().getUserId();
         }
-        if (farmer.getLocation() != null && farmer.getLocation().getLocationId() != null) {
-            entity.locationId = farmer.getLocation().getLocationId();
-        }
         if (farmer.getActive() != null) {
             entity.isActive = farmer.getActive();
         }
