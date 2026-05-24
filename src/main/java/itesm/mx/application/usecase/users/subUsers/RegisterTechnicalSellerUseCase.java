@@ -20,11 +20,7 @@ public class RegisterTechnicalSellerUseCase {
         if (technicalSeller.getUser() == null || technicalSeller.getUser().getUserId() == null) {
             throw new IllegalArgumentException("Se requiere el id_usuario del tecnico vendedor");
         }
-        if (technicalSeller.getLocation() == null || technicalSeller.getLocation().getLocationId() == null) {
-            throw new IllegalArgumentException("Se requiere el id_ubicacion del tecnico vendedor");
-        }
 
         return technicalSellerRepository.save(technicalSeller);
     }
 }
-

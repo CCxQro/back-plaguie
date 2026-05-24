@@ -130,7 +130,7 @@ class SubUsersResourceIntegrationTest {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(ADMIN_TOKEN)).thenReturn("uuid-admin-user");
         User user = new User(farmerId, "uuid-farmer-user", "Farmer User", "farmer@itesm.mx", 2, true);
         when(getFarmerByUserIdUseCase.execute(farmerId))
-                .thenReturn(Optional.of(new Farmer(1L, user, null, true)));
+                .thenReturn(Optional.of(new Farmer(1L, user, true)));
 
         given()
             .header("Authorization", "Bearer " + ADMIN_TOKEN)
@@ -148,7 +148,7 @@ class SubUsersResourceIntegrationTest {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
         User user = new User(farmerId, "uuid-farmer-user", "Farmer User", "farmer@itesm.mx", 2, true);
         when(getFarmerByUserIdUseCase.execute(farmerId))
-                .thenReturn(Optional.of(new Farmer(1L, user, null, true)));
+                .thenReturn(Optional.of(new Farmer(1L, user, true)));
 
         given()
             .header("Authorization", "Bearer " + FARMER_TOKEN)
@@ -202,7 +202,7 @@ class SubUsersResourceIntegrationTest {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(ADMIN_TOKEN)).thenReturn("uuid-admin-user");
         User user = new User(sellerId, "uuid-seller-user", "Seller User", "seller@itesm.mx", 3, true);
         when(getTechnicalSellerByUserIdUseCase.execute(sellerId))
-                .thenReturn(Optional.of(new TechnicalSeller(1L, user, null, true)));
+                .thenReturn(Optional.of(new TechnicalSeller(1L, user, true)));
 
         given()
             .header("Authorization", "Bearer " + ADMIN_TOKEN)
@@ -220,7 +220,7 @@ class SubUsersResourceIntegrationTest {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN)).thenReturn("uuid-seller-user");
         User user = new User(sellerId, "uuid-seller-user", "Seller User", "seller@itesm.mx", 3, true);
         when(getTechnicalSellerByUserIdUseCase.execute(sellerId))
-                .thenReturn(Optional.of(new TechnicalSeller(1L, user, null, true)));
+                .thenReturn(Optional.of(new TechnicalSeller(1L, user, true)));
 
         given()
             .header("Authorization", "Bearer " + SELLER_TOKEN)

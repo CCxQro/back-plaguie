@@ -2,9 +2,6 @@ package itesm.mx.application.usecase.location.location;
 
 import itesm.mx.application.dto.GetLocationResponseDto;
 import itesm.mx.application.mapper.location.LocationDtoMapper;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import itesm.mx.domain.models.location.Locality;
 import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.location.LocationData;
@@ -12,9 +9,13 @@ import itesm.mx.domain.models.location.Municipality;
 import itesm.mx.domain.models.location.Property;
 import itesm.mx.domain.models.location.State;
 import itesm.mx.domain.repository.location.LocationRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import org.locationtech.jts.geom.Point;
 
 @ApplicationScoped
-public class RegisterLocationUseCase {
+public class UpdateLocationUseCase {
 
     @Inject
     LocationRepository locationRepository;
@@ -23,30 +24,24 @@ public class RegisterLocationUseCase {
     LocationCatalogResolver catalogResolver;
 
     @Transactional
-    public GetLocationResponseDto execute(LocationData locationData) {
+    public GetLocationResponseDto execute(Long existingLocationId, LocationData locationData) {
+        if (existingLocationId == null || existingLocationId <= 0) {
+            throw new IllegalArgumentException("El ID de la ubicacion es requerido");
+        }
         if (locationData == null) {
             throw new IllegalArgumentException("La ubicacion es requerida");
         }
 
         validateCoordinates(locationData.getCoordinates());
 
-        Location location = registerLocation(locationData);
-        return LocationDtoMapper.toResponseDto(location);
-    }
-
-    private Location registerLocation(LocationData locationData) {
-        if (locationData.getCoordinates() == null) {
-            throw new IllegalArgumentException("Las coordenadas son requeridas");
-        }
-
         State state = catalogResolver.resolveState(locationData.getStateName());
         Municipality municipality = catalogResolver.resolveMunicipality(locationData.getMunicipalityName());
         Locality locality = catalogResolver.resolveLocality(locationData.getLocalityName());
         Property property = catalogResolver.resolveProperty(locationData.getPropertyName());
 
-        return locationRepository.register(
+        Location updated = locationRepository.update(
                 new Location(
-                        null,
+                        existingLocationId,
                         locationData.getCoordinates(),
                         state,
                         municipality,
@@ -54,9 +49,10 @@ public class RegisterLocationUseCase {
                         property
                 )
         );
+        return LocationDtoMapper.toResponseDto(updated);
     }
 
-    private void validateCoordinates(org.locationtech.jts.geom.Point coordinates) {
+    private void validateCoordinates(Point coordinates) {
         if (coordinates == null) {
             throw new IllegalArgumentException("Las coordenadas son requeridas");
         }

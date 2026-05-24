@@ -20,6 +20,7 @@ import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.TechnicalSeller;
 import itesm.mx.domain.models.user.User;
+import itesm.mx.domain.repository.user.UserRepository;
 import itesm.mx.application.dto.RegisterUserDto;
 import itesm.mx.application.dto.RegisterUserResponseDto;
 import itesm.mx.application.dto.SignupDto;
@@ -61,6 +62,9 @@ public class AuthResource {
 
     @Inject
     RegisterLocationUseCase registerLocationUseCase;
+
+    @Inject
+    UserRepository userRepository;
 
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
@@ -134,13 +138,18 @@ public class AuthResource {
                 GetLocationResponseDto locationResponse = registerLocationUseCase.execute(
                         LocationDtoMapper.toLocationData(registerUserDto.location)
                 );
-                Location location = new Location();
-                location.setLocationId(locationResponse.locationId);
+
+                Location locationRef = new Location();
+                locationRef.setLocationId(locationResponse.locationId);
+                User locationUpdate = new User();
+                locationUpdate.setUserId(response.userId);
+                locationUpdate.setLocation(locationRef);
+                userRepository.update(locationUpdate);
 
                 if (RoleConstants.SELLER.equals(response.roleId)) {
-                    registerTechnicalSellerUseCase.execute(new TechnicalSeller(null, createdUser, location, true));
+                    registerTechnicalSellerUseCase.execute(new TechnicalSeller(null, createdUser, true));
                 } else if (RoleConstants.FARMER.equals(response.roleId)) {
-                    registerFarmerUseCase.execute(new Farmer(null, createdUser, location, true));
+                    registerFarmerUseCase.execute(new Farmer(null, createdUser, true));
                 }
 
                 response.isActive = true;
