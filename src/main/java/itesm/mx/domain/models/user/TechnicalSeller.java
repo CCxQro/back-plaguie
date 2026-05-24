@@ -1,20 +1,16 @@
 package itesm.mx.domain.models.user;
 
-import itesm.mx.domain.models.location.Location;
-
 public class TechnicalSeller {
     private Long technicalSellerId;
     private User user;
-    private Location location;
     private Boolean isActive;
 
     public TechnicalSeller() {
     }
 
-    public TechnicalSeller(Long technicalSellerId, User user, Location location, Boolean isActive) {
+    public TechnicalSeller(Long technicalSellerId, User user, Boolean isActive) {
         this.technicalSellerId = technicalSellerId;
         this.user = user;
-        this.location = location;
         this.isActive = isActive;
     }
 
@@ -32,14 +28,6 @@ public class TechnicalSeller {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     public Boolean getActive() {

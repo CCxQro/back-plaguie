@@ -72,7 +72,7 @@ public class ClientDtoMapper {
                                               List<Alerta> alertas,
                                               List<Order> orders) {
         User user = farmer.getUser();
-        Location location = farmer.getLocation();
+        Location location = user != null ? user.getLocation() : null;
 
         Double latitude = null;
         Double longitude = null;

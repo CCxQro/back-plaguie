@@ -1,5 +1,7 @@
 package itesm.mx.domain.models.user;
 
+import itesm.mx.domain.models.location.Location;
+
 public class User {
     private Long userId;
     private String firebaseUuid;
@@ -7,6 +9,7 @@ public class User {
     private String email;
     private Integer roleId;
     private Boolean isActive;
+    private Location location;
 
     public User() {}
 
@@ -45,5 +48,13 @@ public class User {
 
     public void setActive(Boolean active) {
         isActive = active;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

@@ -5,11 +5,12 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import itesm.mx.application.dto.GetLocationResponseDto;
 import itesm.mx.application.dto.GetUserResponseDto;
-import itesm.mx.application.dto.RegisterLocationDto;
 import itesm.mx.application.dto.UpdateUserDto;
 import itesm.mx.application.mapper.location.LocationDtoMapper;
 import itesm.mx.application.usecase.location.location.RegisterLocationUseCase;
+import itesm.mx.application.usecase.location.location.UpdateLocationUseCase;
 import itesm.mx.domain.models.location.Location;
+import itesm.mx.domain.models.location.LocationData;
 import itesm.mx.domain.models.user.Administrator;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
@@ -40,6 +41,12 @@ public class UpdateUserUseCase {
     @Inject
     RegisterLocationUseCase registerLocationUseCase;
 
+    @Inject
+    UpdateLocationUseCase updateLocationUseCase;
+
+    @Inject
+    UserLocationEnricher userLocationEnricher;
+
     @Transactional
     public GetUserResponseDto execute(Long userId, UpdateUserDto updateUserDto) {
         if (userId == null || userId <= 0) {
@@ -66,9 +73,19 @@ public class UpdateUserUseCase {
             throw new IllegalArgumentException("No se puede cambiar el rol de un Agricultor");
         }
 
+        Integer effectiveRoleId = (newRoleId != null) ? newRoleId : currentRoleId;
+        Long existingLocationId = (existing.getLocation() != null) ? existing.getLocation().getLocationId() : null;
+        boolean locationProvided = updateUserDto.location != null;
+        boolean requiresLocation = !RoleConstants.ADMIN.equals(effectiveRoleId);
+
+        if (requiresLocation && existingLocationId == null && !locationProvided) {
+            throw new IllegalArgumentException(
+                    "La ubicacion es obligatoria para los usuarios que no son administradores");
+        }
+
         if (roleChanged) {
             deactivateRoleProfile(currentRoleId, userId);
-            activateRoleProfile(newRoleId, userId, updateUserDto.location);
+            activateRoleProfile(newRoleId, userId);
         }
 
         User userToUpdate = new User();
@@ -77,9 +94,21 @@ public class UpdateUserUseCase {
         userToUpdate.setRoleId(updateUserDto.roleId);
         userToUpdate.setActive(updateUserDto.isActive);
 
+        if (locationProvided) {
+            LocationData locationData = LocationDtoMapper.toLocationData(updateUserDto.location);
+            if (existingLocationId != null) {
+                updateLocationUseCase.execute(existingLocationId, locationData);
+            } else {
+                GetLocationResponseDto locationResponse = registerLocationUseCase.execute(locationData);
+                Location location = new Location();
+                location.setLocationId(locationResponse.locationId);
+                userToUpdate.setLocation(location);
+            }
+        }
+
         User updated = userRepository.update(userToUpdate);
 
-        return new GetUserResponseDto(
+        GetUserResponseDto dto = new GetUserResponseDto(
                 updated.getUserId(),
                 updated.getFirebaseUuid(),
                 updated.getName(),
@@ -87,6 +116,8 @@ public class UpdateUserUseCase {
                 updated.getRoleId(),
                 updated.getActive()
         );
+        userLocationEnricher.enrich(dto, updated);
+        return dto;
     }
 
     private void deactivateRoleProfile(Integer roleId, Long userId) {
@@ -108,7 +139,7 @@ public class UpdateUserUseCase {
         }
     }
 
-    private void activateRoleProfile(Integer roleId, Long userId, RegisterLocationDto locationDto) {
+    private void activateRoleProfile(Integer roleId, Long userId) {
         if (RoleConstants.ADMIN.equals(roleId)) {
             Optional<Administrator> existing = administratorRepository.findByIdUser(userId);
             if (existing.isPresent()) {
@@ -126,7 +157,7 @@ public class UpdateUserUseCase {
                 technicalSellerRepository.update(seller);
             } else {
                 technicalSellerRepository.save(
-                        new TechnicalSeller(null, userReference(userId), resolveLocation(locationDto), true));
+                        new TechnicalSeller(null, userReference(userId), true));
             }
         } else if (RoleConstants.FARMER.equals(roleId)) {
             Optional<Farmer> existing = farmerRepository.findByIdUser(userId);
@@ -136,21 +167,9 @@ public class UpdateUserUseCase {
                 farmerRepository.update(farmer);
             } else {
                 farmerRepository.save(
-                        new Farmer(null, userReference(userId), resolveLocation(locationDto), true));
+                        new Farmer(null, userReference(userId), true));
             }
         }
-    }
-
-    private Location resolveLocation(RegisterLocationDto locationDto) {
-        if (locationDto == null) {
-            throw new IllegalArgumentException(
-                    "Se requiere la ubicación para asignar este rol al usuario por primera vez");
-        }
-        GetLocationResponseDto locationResponse = registerLocationUseCase.execute(
-                LocationDtoMapper.toLocationData(locationDto));
-        Location location = new Location();
-        location.setLocationId(locationResponse.locationId);
-        return location;
     }
 
     private User userReference(Long userId) {

@@ -54,19 +54,19 @@ class GetClientDetailBySellerUseCaseTest {
     }
 
     private Farmer farmer(Long farmerId, Long userId, String name, String email) {
-        User user = new User();
-        user.setUserId(userId);
-        user.setName(name);
-        user.setEmail(email);
-
         Location location = new Location();
         location.setLocationId(200L);
         location.setCoordinates(new GeometryFactory().createPoint(new Coordinate(-100.39, 20.59)));
 
+        User user = new User();
+        user.setUserId(userId);
+        user.setName(name);
+        user.setEmail(email);
+        user.setLocation(location);
+
         Farmer f = new Farmer();
         f.setFarmerId(farmerId);
         f.setUser(user);
-        f.setLocation(location);
         f.setActive(true);
         return f;
     }

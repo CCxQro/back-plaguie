@@ -113,6 +113,9 @@ public class UserRepositoryImpl implements PanacheRepositoryBase<UserEntity, Lon
         if (user.getActive() != null) {
             entity.isActive = user.getActive();
         }
+        if (user.getLocation() != null && user.getLocation().getLocationId() != null) {
+            entity.locationId = user.getLocation().getLocationId();
+        }
 
         persistAndFlush(entity);
         return UserMapper.toDomain(entity);

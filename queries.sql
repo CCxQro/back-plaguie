@@ -116,3 +116,17 @@ WHERE (
       - COALESCE((SELECT SUM(i.cantidad) FROM Inventario i
                   WHERE i.sku_id_vendedor = p.sku_id_vendedor AND i.id_accion_inventario = 2), 0)
       ) < ?;
+
+
+-- =====================================================================
+-- LocationRepositoryImpl
+-- =====================================================================
+
+-- update(Location) -- mutate existing Ubicacion in place; user/farmer keeps the same id_ubicacion
+UPDATE Ubicacion
+SET coordenadas = ?,
+    id_estado = ?,
+    id_municipio = ?,
+    id_localidad = ?,
+    id_predio = ?
+WHERE id_ubicacion = ?;

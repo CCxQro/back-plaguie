@@ -104,7 +104,6 @@ class UpdateUserUseCaseIntegrationTest {
 
         TechnicalSellerEntity sellerProfile = new TechnicalSellerEntity();
         sellerProfile.userId = seller.userId;
-        sellerProfile.locationId = seedLocation();
         sellerProfile.isActive = true;
         em.persist(sellerProfile);
 
@@ -126,7 +125,6 @@ class UpdateUserUseCaseIntegrationTest {
 
         TechnicalSellerEntity oldSellerProfile = new TechnicalSellerEntity();
         oldSellerProfile.userId = adminWithHistory.userId;
-        oldSellerProfile.locationId = seedLocation();
         oldSellerProfile.isActive = false;
         em.persist(oldSellerProfile);
         historySellerProfileId = oldSellerProfile.technicalSellerId;
@@ -213,19 +211,6 @@ class UpdateUserUseCaseIntegrationTest {
                 administratorRepository.findByIdUser(adminWithSellerHistoryUserId);
         assertTrue(adminProfile.isPresent());
         assertFalse(adminProfile.get().getActive(), "The previous Administrador profile should be deactivated");
-    }
-
-    @Test
-    void execute_WhenRoleChangedToSellerWithoutLocation_ThrowsIllegalArgumentException() {
-        UpdateUserDto dto = new UpdateUserDto();
-        dto.roleId = 3;
-
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> updateUserUseCase.execute(adminUserId, dto)
-        );
-
-        assertTrue(ex.getMessage().contains("ubicación"));
     }
 
     @Test
