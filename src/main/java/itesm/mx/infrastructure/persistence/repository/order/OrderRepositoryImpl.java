@@ -66,6 +66,19 @@ public class OrderRepositoryImpl
     }
 
     @Override
+    public List<Order> findAllByFarmerIdWithDetails(Long farmerId) {
+        EntityGraph<?> graph = getEntityManager().getEntityGraph("Pedido.withDetails");
+        return getEntityManager()
+                .createQuery("select o from OrderEntity o where o.farmerId = :fid order by o.orderDate desc", OrderEntity.class)
+                .setParameter("fid", farmerId)
+                .setHint("jakarta.persistence.loadgraph", graph)
+                .getResultList()
+                .stream()
+                .map(OrderMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Order updateStatus(Long orderId, Long orderStatusId) {
         OrderEntity entity = findByIdOptional(orderId)
                 .orElseThrow(() -> new IllegalStateException("Pedido no encontrado con id: " + orderId));

@@ -13,7 +13,9 @@ import itesm.mx.application.dto.RegisterOrderDto;
 import itesm.mx.application.usecase.order.CreateOrderUseCase;
 import itesm.mx.application.usecase.order.GetFarmerLocationsBySellerUseCase;
 import itesm.mx.application.usecase.order.GetOrderByIdUseCase;
+import itesm.mx.application.usecase.order.GetOrdersByFarmerUseCase;
 import itesm.mx.application.usecase.order.GetOrdersBySellerUseCase;
+import itesm.mx.application.usecase.order.RealizarCompraUseCase;
 import itesm.mx.application.usecase.order.UpdateOrderStatusUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
@@ -43,8 +45,10 @@ class OrderResourceIntegrationTest {
     @InjectMock FirebaseTokenVerifier firebaseTokenVerifier;
     @InjectMock FirebaseUserManager firebaseUserManager;
     @InjectMock CreateOrderUseCase createOrderUseCase;
+    @InjectMock RealizarCompraUseCase realizarCompraUseCase;
     @InjectMock GetOrderByIdUseCase getOrderByIdUseCase;
     @InjectMock GetOrdersBySellerUseCase getOrdersBySellerUseCase;
+    @InjectMock GetOrdersByFarmerUseCase getOrdersByFarmerUseCase;
     @InjectMock GetFarmerLocationsBySellerUseCase getFarmerLocationsBySellerUseCase;
     @InjectMock UpdateOrderStatusUseCase updateOrderStatusUseCase;
 
@@ -52,8 +56,10 @@ class OrderResourceIntegrationTest {
 
     private static final String SELLER_TOKEN = "seller-token";
     private static final String ADMIN_TOKEN  = "admin-token";
+    private static final String FARMER_TOKEN = "farmer-token";
 
     private Long sellerId;
+    private Long farmerUserId;
 
     @BeforeEach
     @Transactional
@@ -76,6 +82,15 @@ class OrderResourceIntegrationTest {
         seller.isActive = true;
         userRepository.persist(seller);
         sellerId = seller.userId;
+
+        UserEntity farmer = new UserEntity();
+        farmer.firebaseUuid = "uuid-or-farmer";
+        farmer.name = "Farmer";
+        farmer.email = "orfarmer@itesm.mx";
+        farmer.roleId = 2;
+        farmer.isActive = true;
+        userRepository.persist(farmer);
+        farmerUserId = farmer.userId;
     }
 
     private OrderResponseDto sampleOrderResponse() {
@@ -151,6 +166,68 @@ class OrderResourceIntegrationTest {
             .body("totalAmount", notNullValue());
     }
 
+    // --- POST /api/orders/realizar-compra ---
+
+    @Test
+    void realizarCompra_WhenFarmerAndValidBody_Returns201() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-or-farmer");
+        when(realizarCompraUseCase.execute(anyLong(), any())).thenReturn(List.of(sampleOrderResponse()));
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body("{\"items\":[{\"productId\":1001,\"quantity\":2}]}")
+        .when()
+            .post("/api/orders/realizar-compra")
+        .then()
+            .statusCode(201)
+            .body("size()", equalTo(1))
+            .body("[0].orderId", equalTo(1));
+    }
+
+    @Test
+    void realizarCompra_WhenNoAuthHeader_Returns401() {
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"items\":[{\"productId\":1001,\"quantity\":2}]}")
+        .when()
+            .post("/api/orders/realizar-compra")
+        .then()
+            .statusCode(401);
+    }
+
+    @Test
+    void realizarCompra_WhenNonFarmer_Returns403() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN)).thenReturn("uuid-or-seller");
+
+        given()
+            .header("Authorization", "Bearer " + SELLER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body("{\"items\":[{\"productId\":1001,\"quantity\":2}]}")
+        .when()
+            .post("/api/orders/realizar-compra")
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("Solo un agricultor puede realizar compras"));
+    }
+
+    @Test
+    void realizarCompra_WhenUseCaseRejectsStock_Returns400() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-or-farmer");
+        when(realizarCompraUseCase.execute(anyLong(), any()))
+                .thenThrow(new IllegalArgumentException("Stock insuficiente"));
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body("{\"items\":[{\"productId\":1001,\"quantity\":99}]}")
+        .when()
+            .post("/api/orders/realizar-compra")
+        .then()
+            .statusCode(400)
+            .body("error", equalTo("Stock insuficiente"));
+    }
+
     @Test
     void createOrder_WhenUseCaseThrowsNotFound_Returns404() throws Exception {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN)).thenReturn("uuid-or-seller");
@@ -176,6 +253,45 @@ class OrderResourceIntegrationTest {
             .post("/api/orders")
         .then()
             .statusCode(404);
+    }
+
+    // --- GET /api/orders/mis-pedidos ---
+
+    @Test
+    void getMisPedidos_WhenFarmer_Returns200AndList() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-or-farmer");
+        when(getOrdersByFarmerUseCase.execute(farmerUserId)).thenReturn(List.of(sampleOrderResponse()));
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+        .when()
+            .get("/api/orders/mis-pedidos")
+        .then()
+            .statusCode(200)
+            .body("size()", equalTo(1))
+            .body("[0].orderId", equalTo(1));
+    }
+
+    @Test
+    void getMisPedidos_WhenNonFarmer_Returns403() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN)).thenReturn("uuid-or-seller");
+
+        given()
+            .header("Authorization", "Bearer " + SELLER_TOKEN)
+        .when()
+            .get("/api/orders/mis-pedidos")
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("Solo un agricultor puede consultar sus pedidos"));
+    }
+
+    @Test
+    void getMisPedidos_WhenNoAuthHeader_Returns401() {
+        given()
+        .when()
+            .get("/api/orders/mis-pedidos")
+        .then()
+            .statusCode(401);
     }
 
     // --- GET /api/orders/{orderId} ---

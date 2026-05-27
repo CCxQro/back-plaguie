@@ -32,14 +32,22 @@ import java.util.List;
         name = "Pedido.withDetails",
         attributeNodes = {
             @NamedAttributeNode(value = "details", subgraph = "detail-product"),
-            @NamedAttributeNode("farmer"),
-            @NamedAttributeNode("seller"),
+            @NamedAttributeNode(value = "farmer", subgraph = "farmer-user"),
+            @NamedAttributeNode(value = "seller", subgraph = "seller-user"),
             @NamedAttributeNode("orderStatus")
         },
         subgraphs = {
             @NamedSubgraph(
                 name = "detail-product",
                 attributeNodes = { @NamedAttributeNode("product") }
+            ),
+            @NamedSubgraph(
+                name = "farmer-user",
+                attributeNodes = { @NamedAttributeNode("user") }
+            ),
+            @NamedSubgraph(
+                name = "seller-user",
+                attributeNodes = { @NamedAttributeNode("user") }
             )
         }
     )

@@ -7,12 +7,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import itesm.mx.application.dto.FarmerLocationDto;
 import itesm.mx.application.dto.OrderResponseDto;
+import itesm.mx.application.dto.RealizarCompraDto;
 import itesm.mx.application.dto.RegisterOrderDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.order.CreateOrderUseCase;
 import itesm.mx.application.usecase.order.GetFarmerLocationsBySellerUseCase;
 import itesm.mx.application.usecase.order.GetOrderByIdUseCase;
+import itesm.mx.application.usecase.order.GetOrdersByFarmerUseCase;
 import itesm.mx.application.usecase.order.GetOrdersBySellerUseCase;
+import itesm.mx.application.usecase.order.RealizarCompraUseCase;
 import itesm.mx.application.usecase.order.UpdateOrderStatusUseCase;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -33,11 +36,14 @@ import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 public class OrderResource {
 
     private static final Integer ADMIN_ROLE_ID = 1;
+    private static final Integer FARMER_ROLE_ID = 2;
     private static final Integer SELLER_ROLE_ID = 3;
 
     @Inject CreateOrderUseCase createOrderUseCase;
+    @Inject RealizarCompraUseCase realizarCompraUseCase;
     @Inject GetOrderByIdUseCase getOrderByIdUseCase;
     @Inject GetOrdersBySellerUseCase getOrdersBySellerUseCase;
+    @Inject GetOrdersByFarmerUseCase getOrdersByFarmerUseCase;
     @Inject GetFarmerLocationsBySellerUseCase getFarmerLocationsBySellerUseCase;
     @Inject UpdateOrderStatusUseCase updateOrderStatusUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
@@ -71,6 +77,67 @@ public class OrderResource {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (IllegalStateException e) {
             return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @POST
+    @Path("/realizar-compra")
+    @Operation(summary = "Realizar compra", description = "Creates one or more pending orders for the logged-in farmer and subtracts purchased inventory.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RealizarCompraDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "201", description = "Purchase completed and orders created",
+                    content = @Content(schema = @Schema(implementation = OrderResponseDto[].class))),
+            @APIResponse(responseCode = "400", description = "Invalid body, product, price or stock"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Farmer role required"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response realizarCompra(@Valid RealizarCompraDto dto) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!FARMER_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un agricultor puede realizar compras");
+        }
+        if (dto == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+        try {
+            return Response.status(Response.Status.CREATED)
+                    .entity(realizarCompraUseCase.execute(
+                            authenticatedUserContext.getCurrentUser().getUserId(), dto))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/mis-pedidos")
+    @Operation(summary = "List orders for current farmer", description = "Returns backend order statuses and details for the logged-in farmer.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Orders returned",
+                    content = @Content(schema = @Schema(implementation = OrderResponseDto[].class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Farmer role required"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getMisPedidos() {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!FARMER_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un agricultor puede consultar sus pedidos");
+        }
+        try {
+            return Response.ok(getOrdersByFarmerUseCase.execute(
+                    authenticatedUserContext.getCurrentUser().getUserId())).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
