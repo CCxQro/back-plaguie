@@ -172,10 +172,10 @@ public class AuthResource {
 
     @POST
     @Path("/signup")
-    @Operation(summary = "Public signup", description = "Registers a seller user without requiring an existing authenticated admin.")
+    @Operation(summary = "Public signup", description = "Registers a FARMER user without requiring an existing authenticated admin. A location is required and the role must be FARMER.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SignupDto.class)))
     @APIResponses({
-            @APIResponse(responseCode = "201", description = "User created", content = @Content(schema = @Schema(implementation = RegisterUserResponseDto.class))),
+            @APIResponse(responseCode = "201", description = "Farmer created", content = @Content(schema = @Schema(implementation = RegisterUserResponseDto.class))),
             @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
             @APIResponse(responseCode = "409", description = "User already exists or business conflict"),
             @APIResponse(responseCode = "500", description = "Internal server error")
@@ -185,14 +185,42 @@ public class AuthResource {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
         }
 
+        if (!RoleConstants.FARMER.equals(signupDto.roleId)) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El registro público solo permite usuarios de tipo agricultor");
+        }
+
+        if (signupDto.location == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "Se requiere la ubicación del agricultor");
+        }
+
         RegisterUserDto registerUserDto = new RegisterUserDto();
         registerUserDto.name = signupDto.name;
         registerUserDto.email = signupDto.email;
         registerUserDto.password = signupDto.password;
-        registerUserDto.roleId = RoleConstants.SELLER;
+        registerUserDto.roleId = RoleConstants.FARMER;
+        registerUserDto.location = signupDto.location;
 
         try {
             RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
+
+            User createdUser = new User(response.userId, response.firebaseUuid, response.name, response.email, response.roleId, true);
+
+            GetLocationResponseDto locationResponse = registerLocationUseCase.execute(
+                    LocationDtoMapper.toLocationData(registerUserDto.location)
+            );
+
+            Location locationRef = new Location();
+            locationRef.setLocationId(locationResponse.locationId);
+            User locationUpdate = new User();
+            locationUpdate.setUserId(response.userId);
+            locationUpdate.setLocation(locationRef);
+            userRepository.update(locationUpdate);
+
+            registerFarmerUseCase.execute(new Farmer(null, createdUser, true));
+
+            response.isActive = true;
+            response.location = locationResponse;
+
             return Response.status(Response.Status.CREATED)
                     .entity(response)
                     .build();

@@ -5,4 +5,5 @@ public class SignupDto {
     public String email;
     public String password;
     public Integer roleId;
+    public RegisterLocationDto location;
 }

@@ -34,6 +34,12 @@ public class LocationRepositoryImpl implements PanacheRepositoryBase<LocationEnt
         LocationEntity entity = LocationMapper.toEntity(location);
         persistAndFlush(entity);
 
+        // Detach so the join-fetch re-query loads a fresh graph with the state/
+        // municipality/locality/property associations initialized. Without this the
+        // managed instance is returned with those lazy associations still null, and the
+        // response loses the catalog names (only the FK ids survive).
+        getEntityManager().detach(entity);
+
         return findDetailedById(entity.locationId)
                 .map(LocationMapper::toDomain)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la ubicacion recien registrada"));
@@ -51,6 +57,10 @@ public class LocationRepositoryImpl implements PanacheRepositoryBase<LocationEnt
         entity.localityId = location.getLocality().getLocalityId();
         entity.propertyId = location.getProperty().getPropertyId();
         persistAndFlush(entity);
+
+        // Detach so the join-fetch re-query reloads the catalog associations by name
+        // rather than returning the managed instance with stale/null associations.
+        getEntityManager().detach(entity);
 
         return findDetailedById(entity.locationId)
                 .map(LocationMapper::toDomain)
