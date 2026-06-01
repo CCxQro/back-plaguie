@@ -306,6 +306,66 @@ INSERT INTO alertas (
 	validated_at
 ) VALUES (4, 'Reporte duplicado de mosca de la fruta', 'El reporte repite la misma evidencia de la alerta 1 y debe corregirse.', 4, 'Mosca de la fruta', 5.75, 'advertencia', 9, '2026-05-09 17:45:00', 3, 2, '2026-05-11 13:20:00');
 
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (5, 'Deteccion de Roya en El Milagro', 'Riesgo critico de infeccion por roya detectado cerca del predio El Milagro. Se recomienda inspeccion inmediata de hojas maduras y monitoreo de humedad.', 1, 'Roya', 6.40, 'critico', 6, '2026-06-01 09:20:00', 1, 1, '2026-06-01 09:35:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (6, 'Alerta de Pulgon en Cultivo Cercano', 'Se detecto presencia alta de pulgon en brotes tiernos dentro de la zona de Tesistan. Revisar bordes del cultivo y preparar manejo preventivo.', 1, 'Pulgon', 4.15, 'advertencia', 6, '2026-06-01 08:45:00', 1, 1, '2026-06-01 09:05:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (7, 'Posible Trips en Parcela El Milagro', 'Reporte pendiente de revision por posible presencia de trips en hojas jovenes. Requiere validacion administrativa antes de mostrarse al agricultor.', 1, 'Trips', 2.80, 'advertencia', 6, '2026-06-01 10:10:00', 2, NULL, NULL);
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (8, 'Revision de Mancha Foliar en Tesistan', 'Observacion enviada para confirmar mancha foliar en cultivo cercano. La alerta queda pendiente de aprobacion.', 1, 'Mancha foliar', 3.25, 'informacion', 6, '2026-06-01 10:25:00', 2, NULL, NULL);
+
 INSERT INTO recomendaciones (
 	id_recomendacion,
 	titulo,
