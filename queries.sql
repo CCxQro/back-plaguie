@@ -146,6 +146,30 @@ INSERT INTO Parcela (nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cose
                      id_tipo_cultivo, id_sistema_riego, activo)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- =====================================================================
+-- ParcelaCatalogRepositoryImpl
+-- Existence checks for the catalog IDs referenced when registering a parcela
+-- (FKs use NO_CONSTRAINT, so these are validated in the use case).
+-- =====================================================================
+
+-- estadoParcelaExists(Long)
+SELECT * FROM Estados_Parcelas WHERE id_estado_parcela = ?;
+
+-- tipoCultivoExists(Long)
+SELECT * FROM Tipos_Cultivos WHERE id_tipo_cultivo = ?;
+
+-- sistemaRiegoExists(Long)
+SELECT * FROM Sistemas_Riego WHERE id_sistema_riego = ?;
+
+-- findAllEstadosParcela()
+SELECT id_estado_parcela, nombre FROM Estados_Parcelas ORDER BY id_estado_parcela;
+
+-- findAllTiposCultivo()
+SELECT id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha FROM Tipos_Cultivos ORDER BY id_tipo_cultivo;
+
+-- findAllSistemasRiego()
+SELECT id_sistema_riego, nombre FROM Sistemas_Riego ORDER BY id_sistema_riego;
+
 -- update(Parcela)
 UPDATE Parcela
 SET nombre_parcela     = ?,
