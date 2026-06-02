@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Fertilizante Bio">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ecfdf5"/>
+      <stop offset="1" stop-color="#bbf7d0"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="42" fill="url(#bg)"/>
+  <circle cx="500" cy="100" r="82" fill="#ffffff" opacity=".42"/>
+  <path d="M222 130h196l34 189H188z" fill="#16a34a"/>
+  <path d="M248 161h144l22 119H226z" fill="#ffffff"/>
+  <path d="M320 245V139" stroke="#16a34a" stroke-width="18" stroke-linecap="round"/>
+  <path d="M320 166c-52-12-82-47-82-88 58 0 91 34 82 88z" fill="#22c55e"/>
+  <path d="M322 174c55-7 91-38 98-80-61-7-99 23-98 80z" fill="#15803d"/>
+  <text x="320" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="31" font-weight="800" fill="#14532d">FERTILIZANTE</text>
+</svg>
