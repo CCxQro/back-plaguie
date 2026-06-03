@@ -2,12 +2,10 @@ package itesm.mx.interfaces.rest;
 
 import itesm.mx.application.dto.GetLocationResponseDto;
 import itesm.mx.application.dto.RegisterLocationDto;
-import itesm.mx.application.dto.StateResponseDto;
 import itesm.mx.application.mapper.location.LocationDtoMapper;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.location.location.GetAllLocationsUseCase;
 import itesm.mx.application.usecase.location.location.RegisterLocationUseCase;
-import itesm.mx.application.usecase.location.state.GetAllStatesUseCase;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -41,9 +39,6 @@ public class LocationResource {
     RegisterLocationUseCase registerLocationUseCase;
 
     @Inject
-    GetAllStatesUseCase getAllStatesUseCase;
-
-    @Inject
     AuthenticatedUserContext authenticatedUserContext;
 
     @GET
@@ -61,28 +56,6 @@ public class LocationResource {
         try {
             List<GetLocationResponseDto> locations = getAllLocationsUseCase.execute();
             return Response.ok(locations).build();
-        } catch (RuntimeException e) {
-            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
-        }
-    }
-
-    @GET
-    @Path("/states")
-    @Operation(summary = "List states", description = "Returns the state catalog (id + nombre) for selectors. Requires authentication.")
-    @APIResponses({
-            @APIResponse(responseCode = "200", description = "States returned", content = @Content(schema = @Schema(implementation = StateResponseDto[].class))),
-            @APIResponse(responseCode = "401", description = "Authentication required"),
-            @APIResponse(responseCode = "500", description = "Internal server error")
-    })
-    public Response getAllStates() {
-        if (authenticatedUserContext.getCurrentUser() == null) {
-            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticacion");
-        }
-        try {
-            List<StateResponseDto> states = getAllStatesUseCase.execute().stream()
-                    .map(s -> new StateResponseDto(s.getStateId(), s.getName()))
-                    .toList();
-            return Response.ok(states).build();
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }

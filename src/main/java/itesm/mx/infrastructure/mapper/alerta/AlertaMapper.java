@@ -51,7 +51,7 @@ public final class AlertaMapper {
         return statusEntity != null ? statusEntity.name : null;
     }
 
-    /** Resolves state id/name from the alert's location, when fetched (null-safe). */
+    /** Resolves state and coordinates from the alert's location, when fetched (null-safe). */
     private static void mapState(AlertaEntity entity, Alerta alerta) {
         LocationEntity ubicacion = entity.ubicacion;
         if (ubicacion == null) {
@@ -60,6 +60,11 @@ public final class AlertaMapper {
         alerta.setStateId(ubicacion.stateId);
         if (ubicacion.state != null) {
             alerta.setStateName(ubicacion.state.name);
+        }
+        if (ubicacion.coordinates != null) {
+            // JTS Point: Y = latitude, X = longitude
+            alerta.setLatitude(ubicacion.coordinates.getY());
+            alerta.setLongitude(ubicacion.coordinates.getX());
         }
     }
 }

@@ -17,6 +17,10 @@ public class GetEarlyAlertaResponseDto {
     public Long ubicacionId;
     public Long stateId;
     public String stateName;
+    public Double latitude;
+    public Double longitude;
+    /** Distance in km from the requesting user's location. */
+    public Double distanceKm;
     public String tipoPlaga;
     public BigDecimal hectareas;
     public String severidad;
@@ -32,6 +36,7 @@ public class GetEarlyAlertaResponseDto {
 
     public GetEarlyAlertaResponseDto(Long alertaId, String titulo, String descripcion,
                                       Long ubicacionId, Long stateId, String stateName,
+                                      Double latitude, Double longitude, Double distanceKm,
                                       String tipoPlaga, BigDecimal hectareas, String severidad,
                                       Long reportedByUserId, String createdAt,
                                       Long statusId, String statusName,
@@ -42,6 +47,9 @@ public class GetEarlyAlertaResponseDto {
         this.ubicacionId = ubicacionId;
         this.stateId = stateId;
         this.stateName = stateName;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.distanceKm = distanceKm;
         this.tipoPlaga = tipoPlaga;
         this.hectareas = hectareas;
         this.severidad = severidad;

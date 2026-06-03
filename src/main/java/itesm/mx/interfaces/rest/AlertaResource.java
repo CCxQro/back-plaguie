@@ -2,26 +2,32 @@ package itesm.mx.interfaces.rest;
 
 import itesm.mx.application.dto.CreateAlertaDto;
 import itesm.mx.application.dto.GetAlertaResponseDto;
+import itesm.mx.application.dto.GetEarlyAlertaResponseDto;
 import itesm.mx.application.dto.ValidateVigilanciaDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.alerta.CreateAlertaUseCase;
 import itesm.mx.application.usecase.alerta.GetAlertaByIdUseCase;
 import itesm.mx.application.usecase.alerta.GetAllAlertasUseCase;
 import itesm.mx.application.usecase.alerta.ValidateAlertaUseCase;
+import itesm.mx.application.usecase.region.GetNearbyEarlyAlertsUseCase;
+import itesm.mx.domain.models.user.RoleConstants;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.Set;
 import org.jboss.logging.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -42,8 +48,13 @@ public class AlertaResource {
 
     private static final Integer ADMIN_ROLE_ID = 1;
 
+    private static final Set<Integer> NEARBY_ALLOWED_ROLES = Set.of(RoleConstants.ADMIN, RoleConstants.SELLER);
+
     @Inject
     GetAllAlertasUseCase getAllAlertasUseCase;
+
+    @Inject
+    GetNearbyEarlyAlertsUseCase getNearbyEarlyAlertsUseCase;
 
     @Inject
     GetAlertaByIdUseCase getAlertaByIdUseCase;
@@ -100,6 +111,45 @@ public class AlertaResource {
         } catch (IllegalStateException e) {
             return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/cercanas")
+    @Operation(summary = "Alertas tempranas cercanas",
+            description = "Devuelve las alertas validadas de los últimos 3 meses dentro de un radio "
+                    + "(por defecto 100 km) de la ubicación del usuario autenticado, ordenadas por "
+                    + "distancia ascendente. Pensado para el ejecutivo de ventas (HU-26).")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Alertas cercanas devueltas",
+                    content = @Content(schema = @Schema(implementation = GetEarlyAlertaResponseDto[].class))),
+            @APIResponse(responseCode = "400", description = "El usuario no tiene ubicación configurada"),
+            @APIResponse(responseCode = "401", description = "Autenticación requerida"),
+            @APIResponse(responseCode = "403", description = "Rol no autorizado"),
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public Response getAlertasCercanas(
+            @QueryParam("radioKm") @DefaultValue("100") double radioKm) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        Integer roleId = authenticatedUserContext.getCurrentUser().getRoleId();
+        if (roleId == null || !NEARBY_ALLOWED_ROLES.contains(roleId)) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo vendedores y administradores pueden consultar alertas cercanas");
+        }
+
+        try {
+            Long userId = authenticatedUserContext.getCurrentUser().getUserId();
+            List<GetEarlyAlertaResponseDto> alertas = getNearbyEarlyAlertsUseCase.execute(userId, radioKm);
+            return Response.ok(alertas).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            LOG.errorf(e, "Error obteniendo alertas cercanas");
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
     }

@@ -31,9 +31,4 @@ public class StateRepositoryImpl implements PanacheRepositoryBase<StateEntity, L
     public Optional<State> findByName(String name) {
         return find("name", name).firstResultOptional().map(StateMapper::toDomain);
     }
-
-    @Override
-    public Optional<State> findStateById(Long stateId) {
-        return findByIdOptional(stateId).map(StateMapper::toDomain);
-    }
 }

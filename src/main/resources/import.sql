@@ -40,6 +40,8 @@ INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, ST_GeomFromText('POINT(-107.3941 24.8053)'), 3, 3, 3, 3);
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, ST_GeomFromText('POINT(-110.9559 29.0729)'), 4, 4, 4, 4);
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, ST_GeomFromText('POINT(-96.9101 19.5437)'), 5, 5, 5, 5);
+-- HU-26: ubicación en Jalisco a ~52 km de la ubicación del vendedor tec1 (ubic 1), para que la distancia de las alertas cercanas no sea siempre 0.
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (6, ST_GeomFromText('POINT(-102.9500 20.7500)'), 1, 1, 1, 1);
 
 
 -- ==========================================
@@ -385,6 +387,10 @@ VALUES (12, 'Trips en cultivo de aguacate', 'Daño incipiente por trips en Jalis
 -- Alerta validada pero ANTERIOR a 3 meses: NO debe aparecer en el feed (demuestra la ventana temporal).
 INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
 VALUES (13, 'Roya vieja (fuera de ventana)', 'Alerta validada de hace varios meses; queda fuera del feed de alertas tempranas.', 2, 'Roya', 4.00, 'informacion', 6, '2026-01-10 09:00:00', 1, 1, '2026-01-10 12:00:00');
+
+-- Alerta en Jalisco a ~52 km del vendedor tec1: aparece dentro de 100 km con distancia > 0.
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (14, 'Cochinilla en cítricos cercanos', 'Presencia de cochinilla en huertas de cítricos a las afueras de la zona; monitoreo recomendado.', 6, 'Cochinilla', 6.30, 'advertencia', 6, '2026-05-25 09:00:00', 1, 1, '2026-05-25 13:00:00');
 
 INSERT INTO recomendaciones (
 	id_recomendacion,

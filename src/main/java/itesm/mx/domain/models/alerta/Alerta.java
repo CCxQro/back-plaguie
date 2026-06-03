@@ -20,6 +20,10 @@ public class Alerta {
     /** Resolved from the alert's location (only when the location/state is fetched). */
     private Long stateId;
     private String stateName;
+    private Double latitude;
+    private Double longitude;
+    /** Distance in km from the requesting user; set by the nearby-alerts use case. */
+    private Double distanceKm;
 
     public Alerta() {
     }
@@ -162,5 +166,29 @@ public class Alerta {
 
     public void setStateName(String stateName) {
         this.stateName = stateName;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getDistanceKm() {
+        return distanceKm;
+    }
+
+    public void setDistanceKm(Double distanceKm) {
+        this.distanceKm = distanceKm;
     }
 }
