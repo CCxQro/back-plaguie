@@ -84,7 +84,10 @@ public class GeminiProductRecommendationProvider {
             String response = geminiHttpClient.generateContent(endpoint, body, timeoutSeconds);
             return parseResponse(response, region, temporada, parcelas, historico);
         } catch (Exception e) {
-            LOG.errorf(e, "Error invocando Gemini para recomendaciones region=%s; usando fallback", region);
+            // Expected, handled condition (quota/connectivity): log a single WARN line,
+            // not a full ERROR stack trace, since we degrade gracefully (HU-24 CA-03).
+            LOG.warnf("Gemini no disponible para recomendaciones (region=%s); usando fallback heurístico. Causa: %s",
+                    region, e.getMessage());
             return fallback(region, temporada, parcelas, historico);
         }
     }
