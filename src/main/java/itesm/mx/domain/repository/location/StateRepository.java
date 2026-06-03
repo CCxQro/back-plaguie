@@ -9,4 +9,5 @@ public interface StateRepository {
     List<State> findAllStates();
     State register(State state);
     Optional<State> findByName(String name);
+    Optional<State> findStateById(Long stateId);
 }

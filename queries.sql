@@ -206,3 +206,53 @@ SET coordenadas = ?,
     id_localidad = ?,
     id_predio = ?
 WHERE id_ubicacion = ?;
+
+-- =====================================================================
+-- RegionInteresRepositoryImpl (HU-26)
+-- =====================================================================
+
+-- findByUserId(Long userId) -- join estado para el nombre
+SELECT r.*
+FROM Region_Interes_Vendedor r
+LEFT JOIN Estados e ON r.id_estado = e.id_estado
+WHERE r.id_usuario = ?
+ORDER BY r.created_at DESC;
+
+-- findByIdAndUserId(Long regionInteresId, Long userId)
+SELECT r.*
+FROM Region_Interes_Vendedor r
+LEFT JOIN Estados e ON r.id_estado = e.id_estado
+WHERE r.id_region_interes = ? AND r.id_usuario = ?;
+
+-- existsByUserIdAndStateId(Long userId, Long stateId)
+SELECT COUNT(*)
+FROM Region_Interes_Vendedor
+WHERE id_usuario = ? AND id_estado = ?;
+
+-- save(RegionInteres)
+INSERT INTO Region_Interes_Vendedor (id_usuario, id_estado, created_at)
+VALUES (?, ?, ?);
+
+-- deleteByIdAndUserId(Long regionInteresId, Long userId)
+DELETE FROM Region_Interes_Vendedor
+WHERE id_region_interes = ? AND id_usuario = ?;
+
+
+-- =====================================================================
+-- AlertaRepositoryImpl (HU-26 addition)
+-- =====================================================================
+
+-- findValidatedByStateIds(List<Long> stateIds) -- alertas validadas en regiones de interés
+SELECT a.*
+FROM alertas a
+LEFT JOIN Ubicacion u ON a.id_ubicacion = u.id_ubicacion
+WHERE a.id_status = 1 AND u.id_estado IN (?)
+ORDER BY a.created_at DESC;
+
+
+-- =====================================================================
+-- StateRepositoryImpl (HU-26 addition)
+-- =====================================================================
+
+-- findStateById(Long stateId)
+SELECT * FROM Estados WHERE id_estado = ?;

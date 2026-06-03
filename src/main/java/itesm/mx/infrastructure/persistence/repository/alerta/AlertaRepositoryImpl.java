@@ -35,6 +35,21 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
     }
 
     @Override
+    public List<Alerta> findValidatedByStateIds(List<Long> stateIds) {
+        if (stateIds == null || stateIds.isEmpty()) {
+            return List.of();
+        }
+        // Accepted = 1 (Status catalog). Join alert -> ubicacion to filter by state.
+        return findDetailedQuery(
+                "where a.statusId = 1 and a.ubicacion.stateId in ?1 order by a.createdAt desc",
+                stateIds)
+                .list()
+                .stream()
+                .map(AlertaMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Alerta save(Alerta alerta) {
         AlertaEntity entity = AlertaMapper.toEntity(alerta);
         persistAndFlush(entity);
