@@ -1,16 +1,19 @@
 package itesm.mx.interfaces.rest;
 
 import itesm.mx.application.dto.CreateVigilanciaFitosanitariaDto;
+import itesm.mx.application.dto.GetPestMapPointDto;
 import itesm.mx.application.dto.GetVigilanciaFitosanitariaResponseDto;
 import itesm.mx.application.dto.UpdateVigilanciaFitosanitariaDto;
 import itesm.mx.application.dto.ValidateVigilanciaDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
+import itesm.mx.application.usecase.reporte.GetPestMapUseCase;
 import itesm.mx.application.usecase.vigilancia.CreateVigilanciaFitosanitariaUseCase;
 import itesm.mx.application.usecase.vigilancia.DeleteVigilanciaFitosanitariaUseCase;
 import itesm.mx.application.usecase.vigilancia.GetAllVigilanciasFitosanitariasUseCase;
 import itesm.mx.application.usecase.vigilancia.GetVigilanciaFitosanitariaByIdUseCase;
 import itesm.mx.application.usecase.vigilancia.UpdateVigilanciaFitosanitariaUseCase;
 import itesm.mx.application.usecase.vigilancia.ValidateVigilanciaFitosanitariaUseCase;
+import itesm.mx.domain.models.user.RoleConstants;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -26,6 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.Set;
 import org.jboss.logging.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -46,8 +50,13 @@ public class VigilanciaFitosanitariaResource {
 
     private static final Integer ADMIN_ROLE_ID = 1;
 
+    private static final Set<Integer> MAP_ALLOWED_ROLES = Set.of(RoleConstants.ADMIN, RoleConstants.SELLER);
+
     @Inject
     GetAllVigilanciasFitosanitariasUseCase getAllVigilanciasFitosanitariasUseCase;
+
+    @Inject
+    GetPestMapUseCase getPestMapUseCase;
 
     @Inject
     GetVigilanciaFitosanitariaByIdUseCase getVigilanciaFitosanitariaByIdUseCase;
@@ -83,6 +92,39 @@ public class VigilanciaFitosanitariaResource {
             List<GetVigilanciaFitosanitariaResponseDto> vigilancias = getAllVigilanciasFitosanitariasUseCase.execute();
             return Response.ok(vigilancias).build();
         } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/mapa")
+    @Operation(summary = "Mapa de plagas por zona",
+            description = "Devuelve las observaciones de vigilancia validadas con coordenadas, "
+                    + "enriquecidas con estado y municipio, para el mapa interactivo de plagas (HU-27). "
+                    + "El filtrado (plaga, fecha, región) y la agregación por zona se hacen en el cliente. "
+                    + "Accesible por administradores y vendedores.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Puntos del mapa devueltos",
+                    content = @Content(schema = @Schema(implementation = GetPestMapPointDto[].class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Rol no autorizado"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getPestMap() {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        Integer roleId = authenticatedUserContext.getCurrentUser().getRoleId();
+        if (roleId == null || !MAP_ALLOWED_ROLES.contains(roleId)) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo administradores y vendedores pueden consultar el mapa de plagas");
+        }
+
+        try {
+            List<GetPestMapPointDto> puntos = getPestMapUseCase.execute();
+            return Response.ok(puntos).build();
+        } catch (RuntimeException e) {
+            LOG.errorf(e, "Error obteniendo el mapa de plagas");
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
     }

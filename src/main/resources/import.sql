@@ -249,6 +249,25 @@ INSERT INTO vigilancia_fitosanitaria (
 	validated_at
 ) VALUES (5, 1, 2, 19.54370000, -96.91010000, 5, 2, 2, 2, 2, 18.40, 3, 3, '2026-05-12 09:20:00');
 
+-- HU-27: vigilancias validadas adicionales (id_status=1) para alimentar el mapa de plagas por zona.
+-- Zona Zapopan (Jalisco, ubic 1): 3 observaciones (Mosca de la fruta x2, Araña roja x1)
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (6, 1, 1, 20.76000000, -103.47000000, 1, 1, 1, 1, 1, 11.00, 1, 1, '2026-05-28 10:00:00');
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (7, 2, 3, 20.74000000, -103.49000000, 1, 3, 3, 3, 3, 6.50, 1, 1, '2026-05-20 11:30:00');
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (8, 1, 1, 20.75000000, -103.50000000, 1, 1, 1, 1, 1, 13.20, 1, 1, '2026-04-15 09:15:00');
+
+-- Zona Uruapan (Michoacán, ubic 2): 2 observaciones (Roya asiatica x2)
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (9, 3, 2, 19.42000000, -102.06000000, 2, 2, 2, 2, 2, 9.00, 1, 1, '2026-05-25 08:45:00');
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (10, 1, 2, 19.41000000, -102.05000000, 2, 2, 2, 2, 2, 10.50, 1, 1, '2026-05-05 12:00:00');
+
+-- Zona Culiacán (Sinaloa, ubic 3): observación adicional (Mosca de la fruta) junto a la existente (Araña roja)
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (11, 2, 1, 24.81000000, -107.40000000, 3, 1, 1, 1, 1, 8.00, 1, 1, '2026-05-18 10:20:00');
+
 -- ==========================================
 -- 6. ALERTAS Y RECOMENDACIONES PARA VALIDACIÓN
 -- ==========================================
