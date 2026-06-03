@@ -58,7 +58,10 @@ public class GeminiPlagaPredictionProvider implements PrediccionPlagaProvider {
             String response = geminiHttpClient.generateContent(endpoint, requestBody, timeoutSeconds);
             return parseResponse(response, region, temporada, historico);
         } catch (Exception e) {
-            LOG.errorf(e, "Error invocando Gemini para region=%s temporada=%s; usando fallback", region, temporada);
+            // Expected, handled condition (quota/connectivity): log a single WARN line,
+            // not a full ERROR stack trace, since we degrade gracefully (HU-24 CA-03).
+            LOG.warnf("Gemini no disponible para predicción (region=%s, temporada=%s); usando fallback heurístico. Causa: %s",
+                    region, temporada, e.getMessage());
             return fallbackHeuristic(region, temporada, historico);
         }
     }
