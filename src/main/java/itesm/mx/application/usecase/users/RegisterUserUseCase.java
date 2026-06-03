@@ -21,15 +21,6 @@ public class RegisterUserUseCase {
 
     @Transactional
     public RegisterUserResponseDto execute(RegisterUserDto registerUserDto) {
-        return execute(registerUserDto, true);
-    }
-
-    /**
-     * Creates a user with an explicit active flag. Public self-signup uses
-     * active=false so the account stays pending until an administrator approves it.
-     */
-    @Transactional
-    public RegisterUserResponseDto execute(RegisterUserDto registerUserDto, boolean active) {
         if (registerUserDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es requerido");
         }
@@ -68,7 +59,7 @@ public class RegisterUserUseCase {
                 registerUserDto.name,
                 registerUserDto.email,
                 registerUserDto.roleId,
-                active
+                true
         );
 
         User createdUser;

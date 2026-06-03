@@ -10,6 +10,8 @@ import itesm.mx.application.dto.LoginDto;
 import itesm.mx.application.dto.LoginResponseDto;
 import itesm.mx.application.mapper.location.LocationDtoMapper;
 import itesm.mx.domain.models.location.Location;
+import itesm.mx.domain.models.user.AccountStatusConstants;
+import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.User;
 import itesm.mx.domain.repository.user.AdministratorRepository;
@@ -69,9 +71,18 @@ public class LoginUseCase {
                     response.isActive = seller.getActive()
             );
         } else if (RoleConstants.FARMER.equals(user.getRoleId())) {
-            farmerRepository.findByIdUser(user.getUserId()).ifPresent(farmer ->
-                    response.isActive = farmer.getActive()
-            );
+            Farmer farmer = farmerRepository.findByIdUser(user.getUserId())
+                    .orElseThrow(() -> new SecurityException("Perfil de agricultor no encontrado"));
+
+            // Account approval gate (HU-23): only farmers with status Accepted may log in.
+            if (AccountStatusConstants.REVISION.equals(farmer.getStatusId())) {
+                throw new SecurityException("Tu cuenta está pendiente de aprobación por un administrador");
+            }
+            if (AccountStatusConstants.REJECTED.equals(farmer.getStatusId())) {
+                throw new SecurityException("Tu cuenta fue rechazada. Contacta al administrador");
+            }
+
+            response.isActive = farmer.getActive();
         }
 
         return response;

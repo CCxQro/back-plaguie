@@ -11,6 +11,7 @@ public class FarmerMapper {
         entity.farmerId = farmer.getFarmerId();
         entity.userId = farmer.getUser().getUserId();
         entity.isActive = farmer.getActive();
+        entity.statusId = farmer.getStatusId();
         return entity;
     }
 
@@ -19,6 +20,10 @@ public class FarmerMapper {
         farmer.setFarmerId(entity.farmerId);
         farmer.setUser(mapUser(entity));
         farmer.setActive(entity.isActive);
+        farmer.setStatusId(entity.statusId);
+        if (entity.status != null) {
+            farmer.setStatusName(entity.status.name);
+        }
         return farmer;
     }
 

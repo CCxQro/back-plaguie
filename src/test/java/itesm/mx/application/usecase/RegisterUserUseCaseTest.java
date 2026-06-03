@@ -10,7 +10,6 @@ import itesm.mx.application.usecase.users.RegisterUserUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -144,49 +143,5 @@ class RegisterUserUseCaseTest {
         assertTrue(ex.getMessage().contains("Error al generar token"));
 
         verify(firebaseUserManager).deleteFirebaseUser("uid_gen_fail");
-    }
-
-    @Test
-    void execute_WhenActiveFalse_SavesPendingUser() throws FirebaseAuthException {
-        RegisterUserDto dto = new RegisterUserDto();
-        dto.name = "Pending Farmer";
-        dto.email = "pending@example.com";
-        dto.password = "Password123!";
-        dto.roleId = 2;
-
-        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.empty());
-        when(firebaseUserManager.createFirebaseUser(dto.email, dto.password, dto.name)).thenReturn("uid_pending");
-        when(userRepository.save(any(User.class)))
-                .thenReturn(new User(7L, "uid_pending", dto.name, dto.email, dto.roleId, false));
-        when(firebaseUserManager.generateCustomToken("uid_pending")).thenReturn("token_pending");
-
-        registerUserUseCase.execute(dto, false);
-
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(captor.capture());
-        assertEquals(Boolean.FALSE, captor.getValue().getActive(),
-                "Public signup must persist the user as inactive (pending approval)");
-    }
-
-    @Test
-    void execute_Default_SavesActiveUser() throws FirebaseAuthException {
-        RegisterUserDto dto = new RegisterUserDto();
-        dto.name = "Active Admin";
-        dto.email = "active@example.com";
-        dto.password = "Password123!";
-        dto.roleId = 1;
-
-        when(userRepository.findByEmail(dto.email)).thenReturn(Optional.empty());
-        when(firebaseUserManager.createFirebaseUser(dto.email, dto.password, dto.name)).thenReturn("uid_active");
-        when(userRepository.save(any(User.class)))
-                .thenReturn(new User(8L, "uid_active", dto.name, dto.email, dto.roleId, true));
-        when(firebaseUserManager.generateCustomToken("uid_active")).thenReturn("token_active");
-
-        registerUserUseCase.execute(dto);
-
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(captor.capture());
-        assertEquals(Boolean.TRUE, captor.getValue().getActive(),
-                "Default registration must persist the user as active");
     }
 }
