@@ -2,12 +2,15 @@ package itesm.mx.interfaces.rest;
 
 import itesm.mx.application.dto.CreateRecomendacionDto;
 import itesm.mx.application.dto.GetRecomendacionResponseDto;
+import itesm.mx.application.dto.GetRecomendacionesPersonalizadasResponseDto;
 import itesm.mx.application.dto.ValidateVigilanciaDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.recomendacion.CreateRecomendacionUseCase;
+import itesm.mx.application.usecase.recomendacion.GenerarRecomendacionesFarmerUseCase;
 import itesm.mx.application.usecase.recomendacion.GetRecomendacionByIdUseCase;
 import itesm.mx.application.usecase.recomendacion.GetAllRecomendacionesUseCase;
 import itesm.mx.application.usecase.recomendacion.ValidateRecomendacionUseCase;
+import itesm.mx.domain.models.user.RoleConstants;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -44,6 +47,9 @@ public class RecomendacionResource {
 
     @Inject
     GetAllRecomendacionesUseCase getAllRecomendacionesUseCase;
+
+    @Inject
+    GenerarRecomendacionesFarmerUseCase generarRecomendacionesFarmerUseCase;
 
     @Inject
     GetRecomendacionByIdUseCase getRecomendacionByIdUseCase;
@@ -198,6 +204,50 @@ public class RecomendacionResource {
             return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
             LOG.errorf(e, "Error validating recomendacion id=%s", id);
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    // ─── HU-24 CA-02: recomendaciones personalizadas para el agricultor ──────
+
+    @GET
+    @Path("/personalizadas")
+    @Operation(
+            summary = "Recomendaciones personalizadas para el agricultor autenticado",
+            description = "Genera, vía LLM (Gemini), recomendaciones de productos fitosanitarios "
+                    + "personalizadas según las parcelas y cultivos del agricultor autenticado y el "
+                    + "historial de plagas registrado en su región y temporada actual. "
+                    + "Si el servicio de IA no está disponible, devuelve recomendaciones heurísticas "
+                    + "basadas en los datos históricos (CA-03). Solo accesible por agricultores (roleId=2).")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Recomendaciones generadas",
+                    content = @Content(schema = @Schema(implementation = GetRecomendacionesPersonalizadasResponseDto.class))),
+            @APIResponse(responseCode = "401", description = "Autenticación requerida"),
+            @APIResponse(responseCode = "403", description = "Solo agricultores pueden consultar este endpoint"),
+            @APIResponse(responseCode = "404", description = "Perfil de agricultor no encontrado"),
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public Response getRecomendacionesPersonalizadas() {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!RoleConstants.FARMER.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo los agricultores pueden consultar recomendaciones personalizadas");
+        }
+
+        try {
+            Long userId = authenticatedUserContext.getCurrentUser().getUserId();
+            GetRecomendacionesPersonalizadasResponseDto result =
+                    generarRecomendacionesFarmerUseCase.execute(userId);
+            return Response.ok(result).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            LOG.errorf(e, "Error generando recomendaciones personalizadas userId=%s",
+                    authenticatedUserContext.getCurrentUser().getUserId());
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
     }
