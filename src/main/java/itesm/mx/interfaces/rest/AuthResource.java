@@ -201,7 +201,9 @@ public class AuthResource {
         registerUserDto.location = signupDto.location;
 
         try {
-            RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
+            // Public signup creates the farmer as PENDING (inactive). An administrator
+            // must approve the account before the user can log in (HU-23, SRS §1.4.1).
+            RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto, false);
 
             User createdUser = new User(response.userId, response.firebaseUuid, response.name, response.email, response.roleId, true);
 
@@ -218,7 +220,7 @@ public class AuthResource {
 
             registerFarmerUseCase.execute(new Farmer(null, createdUser, true));
 
-            response.isActive = true;
+            response.isActive = false;
             response.location = locationResponse;
 
             return Response.status(Response.Status.CREATED)
