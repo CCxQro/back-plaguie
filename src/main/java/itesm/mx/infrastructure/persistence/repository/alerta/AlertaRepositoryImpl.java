@@ -35,14 +35,16 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
     }
 
     @Override
-    public List<Alerta> findValidatedByStateIds(List<Long> stateIds) {
+    public List<Alerta> findValidatedByStateIds(List<Long> stateIds, java.time.LocalDateTime since) {
         if (stateIds == null || stateIds.isEmpty()) {
             return List.of();
         }
-        // Accepted = 1 (Status catalog). Join alert -> ubicacion to filter by state.
+        // Accepted = 1 (Status catalog). Join alert -> ubicacion to filter by state,
+        // and restrict to alerts created on/after `since` (recent early-alerts window).
         return findDetailedQuery(
-                "where a.statusId = 1 and a.ubicacion.stateId in ?1 order by a.createdAt desc",
-                stateIds)
+                "where a.statusId = 1 and a.createdAt >= ?2 and a.ubicacion.stateId in ?1 "
+                        + "order by a.createdAt desc",
+                stateIds, since)
                 .list()
                 .stream()
                 .map(AlertaMapper::toDomain)

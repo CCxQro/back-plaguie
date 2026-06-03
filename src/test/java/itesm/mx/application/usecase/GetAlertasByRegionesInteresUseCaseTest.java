@@ -17,7 +17,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,7 +48,7 @@ class GetAlertasByRegionesInteresUseCaseTest {
         List<GetAlertaResponseDto> result = useCase.execute(7L);
 
         assertTrue(result.isEmpty());
-        verify(alertaRepository, never()).findValidatedByStateIds(anyList());
+        verify(alertaRepository, never()).findValidatedByStateIds(anyList(), any());
     }
 
     @Test
@@ -55,13 +57,13 @@ class GetAlertasByRegionesInteresUseCaseTest {
                 new RegionInteres(1L, 7L, 5L, "Michoacán", LocalDateTime.now()),
                 new RegionInteres(2L, 7L, 8L, "Jalisco", LocalDateTime.now())
         ));
-        when(alertaRepository.findValidatedByStateIds(List.of(5L, 8L)))
+        when(alertaRepository.findValidatedByStateIds(eq(List.of(5L, 8L)), any(LocalDateTime.class)))
                 .thenReturn(List.of(sampleAlerta()));
 
         List<GetAlertaResponseDto> result = useCase.execute(7L);
 
         assertEquals(1, result.size());
         assertEquals("Brote", result.get(0).titulo);
-        verify(alertaRepository).findValidatedByStateIds(List.of(5L, 8L));
+        verify(alertaRepository).findValidatedByStateIds(eq(List.of(5L, 8L)), any(LocalDateTime.class));
     }
 }

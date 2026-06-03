@@ -367,6 +367,25 @@ INSERT INTO alertas (
 	validated_at
 ) VALUES (8, 'Revision de Mancha Foliar en Tesistan', 'Observacion enviada para confirmar mancha foliar en cultivo cercano. La alerta queda pendiente de aprobacion.', 1, 'Mancha foliar', 3.25, 'informacion', 6, '2026-06-01 10:25:00', 2, NULL, NULL);
 
+-- ── HU-26: alertas validadas (id_status=1) para alimentar las alertas tempranas por región ──
+-- Distribuidas en varios estados; las de los últimos 3 meses aparecen en el feed del vendedor.
+-- id_ubicacion → id_estado: 1=jalisco, 2=michoacán, 3=sinaloa, 4=sonora, 5=veracruz
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (9, 'Brote de gusano cogollero en maíz', 'Daño foliar confirmado en lotes de maíz; se recomienda monitoreo intensivo en Michoacán.', 2, 'Gusano cogollero', 18.00, 'critico', 6, '2026-05-20 08:30:00', 1, 1, '2026-05-20 12:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (10, 'Mosca blanca en hortalizas', 'Poblaciones elevadas de mosca blanca detectadas en Sonora; riesgo de virosis.', 4, 'Mosca blanca', 9.50, 'advertencia', 6, '2026-04-15 10:00:00', 1, 1, '2026-04-15 14:30:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (11, 'Picudo del chile en Veracruz', 'Capturas en trampas indican presencia activa del picudo; iniciar manejo preventivo.', 5, 'Picudo del chile', 7.20, 'advertencia', 6, '2026-03-28 09:15:00', 1, 1, '2026-03-29 11:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (12, 'Trips en cultivo de aguacate', 'Daño incipiente por trips en Jalisco; oportunidad de venta de control selectivo.', 1, 'Trips', 5.00, 'informacion', 6, '2026-06-02 07:50:00', 1, 1, '2026-06-02 10:20:00');
+
+-- Alerta validada pero ANTERIOR a 3 meses: NO debe aparecer en el feed (demuestra la ventana temporal).
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (13, 'Roya vieja (fuera de ventana)', 'Alerta validada de hace varios meses; queda fuera del feed de alertas tempranas.', 2, 'Roya', 4.00, 'informacion', 6, '2026-01-10 09:00:00', 1, 1, '2026-01-10 12:00:00');
+
 INSERT INTO recomendaciones (
 	id_recomendacion,
 	titulo,
