@@ -14,12 +14,11 @@ public interface AlertaRepository {
     List<Alerta> findByReportedUserId(Long userId);
 
     /**
-     * Validated (status = Accepted) alerts whose location belongs to any of the
-     * given states and that were created on or after {@code since}. Used for the
-     * seller's early-alerts feed scoped to their regions of interest within a
-     * recent time window (HU-26 CA-02). Returns empty when the list is empty.
+     * All validated (status = Accepted) alerts created on or after {@code since},
+     * across every state, each enriched with its state id/name. Region and other
+     * filtering is applied client-side (HU-26 CA-02).
      */
-    List<Alerta> findValidatedByStateIds(List<Long> stateIds, LocalDateTime since);
+    List<Alerta> findValidatedSince(LocalDateTime since);
 
     Alerta save(Alerta alerta);
 

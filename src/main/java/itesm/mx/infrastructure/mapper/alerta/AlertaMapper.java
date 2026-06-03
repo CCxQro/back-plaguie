@@ -2,6 +2,7 @@ package itesm.mx.infrastructure.mapper.alerta;
 
 import itesm.mx.domain.models.alerta.Alerta;
 import itesm.mx.infrastructure.persistence.entity.alerta.AlertaEntity;
+import itesm.mx.infrastructure.persistence.entity.location.LocationEntity;
 import itesm.mx.infrastructure.persistence.entity.marketplace.StatusEntity;
 
 public final class AlertaMapper {
@@ -41,11 +42,24 @@ public final class AlertaMapper {
         alerta.setStatusName(mapStatusName(entity));
         alerta.setValidatedByUserId(entity.validatedByUserId);
         alerta.setValidatedAt(entity.validatedAt);
+        mapState(entity, alerta);
         return alerta;
     }
 
     private static String mapStatusName(AlertaEntity entity) {
         StatusEntity statusEntity = entity.status;
         return statusEntity != null ? statusEntity.name : null;
+    }
+
+    /** Resolves state id/name from the alert's location, when fetched (null-safe). */
+    private static void mapState(AlertaEntity entity, Alerta alerta) {
+        LocationEntity ubicacion = entity.ubicacion;
+        if (ubicacion == null) {
+            return;
+        }
+        alerta.setStateId(ubicacion.stateId);
+        if (ubicacion.state != null) {
+            alerta.setStateName(ubicacion.state.name);
+        }
     }
 }

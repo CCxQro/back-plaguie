@@ -1,12 +1,12 @@
 package itesm.mx.interfaces.rest;
 
 import itesm.mx.application.dto.CreateRegionInteresDto;
-import itesm.mx.application.dto.GetAlertaResponseDto;
+import itesm.mx.application.dto.GetEarlyAlertaResponseDto;
 import itesm.mx.application.dto.GetRegionInteresResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.region.CreateRegionInteresUseCase;
 import itesm.mx.application.usecase.region.DeleteRegionInteresUseCase;
-import itesm.mx.application.usecase.region.GetAlertasByRegionesInteresUseCase;
+import itesm.mx.application.usecase.region.GetRecentEarlyAlertsUseCase;
 import itesm.mx.application.usecase.region.GetRegionesInteresByUserUseCase;
 import itesm.mx.domain.models.user.RoleConstants;
 import jakarta.inject.Inject;
@@ -58,7 +58,7 @@ public class RegionInteresResource {
     DeleteRegionInteresUseCase deleteRegionInteresUseCase;
 
     @Inject
-    GetAlertasByRegionesInteresUseCase getAlertasByRegionesInteresUseCase;
+    GetRecentEarlyAlertsUseCase getRecentEarlyAlertsUseCase;
 
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
@@ -157,11 +157,13 @@ public class RegionInteresResource {
 
     @GET
     @Path("/alertas")
-    @Operation(summary = "Alertas tempranas en mis regiones",
-            description = "Devuelve las alertas validadas ubicadas en los estados configurados como regiones de interés del vendedor.")
+    @Operation(summary = "Alertas tempranas recientes",
+            description = "Devuelve todas las alertas validadas creadas en los últimos 3 meses, "
+                    + "enriquecidas con su estado. El filtrado por región de interés, severidad, etc. "
+                    + "se aplica en el cliente.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Alertas devueltas",
-                    content = @Content(schema = @Schema(implementation = GetAlertaResponseDto[].class))),
+                    content = @Content(schema = @Schema(implementation = GetEarlyAlertaResponseDto[].class))),
             @APIResponse(responseCode = "401", description = "Autenticación requerida"),
             @APIResponse(responseCode = "403", description = "Rol no autorizado"),
             @APIResponse(responseCode = "500", description = "Error interno del servidor")
@@ -172,13 +174,10 @@ public class RegionInteresResource {
             return auth;
         }
         try {
-            Long userId = authenticatedUserContext.getCurrentUser().getUserId();
-            List<GetAlertaResponseDto> alertas = getAlertasByRegionesInteresUseCase.execute(userId);
+            List<GetEarlyAlertaResponseDto> alertas = getRecentEarlyAlertsUseCase.execute();
             return Response.ok(alertas).build();
-        } catch (IllegalArgumentException e) {
-            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (RuntimeException e) {
-            LOG.errorf(e, "Error obteniendo alertas tempranas por región");
+            LOG.errorf(e, "Error obteniendo alertas tempranas recientes");
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
     }

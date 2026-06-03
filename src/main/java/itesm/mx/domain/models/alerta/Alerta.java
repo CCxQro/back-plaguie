@@ -17,6 +17,9 @@ public class Alerta {
     private String statusName;
     private Long validatedByUserId;
     private LocalDateTime validatedAt;
+    /** Resolved from the alert's location (only when the location/state is fetched). */
+    private Long stateId;
+    private String stateName;
 
     public Alerta() {
     }
@@ -143,5 +146,21 @@ public class Alerta {
 
     public void setValidatedAt(LocalDateTime validatedAt) {
         this.validatedAt = validatedAt;
+    }
+
+    public Long getStateId() {
+        return stateId;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+
+    public String getStateName() {
+        return stateName;
+    }
+
+    public void setStateName(String stateName) {
+        this.stateName = stateName;
     }
 }

@@ -242,12 +242,14 @@ WHERE id_region_interes = ? AND id_usuario = ?;
 -- AlertaRepositoryImpl (HU-26 addition)
 -- =====================================================================
 
--- findValidatedByStateIds(List<Long> stateIds, LocalDateTime since)
--- alertas validadas en regiones de interés creadas en los últimos 3 meses (CA-02)
+-- findValidatedSince(LocalDateTime since)
+-- todas las alertas validadas de los últimos 3 meses (enriquecidas con estado vía join);
+-- el filtrado por región/severidad se hace en el cliente (CA-02)
 SELECT a.*
 FROM alertas a
 LEFT JOIN Ubicacion u ON a.id_ubicacion = u.id_ubicacion
-WHERE a.id_status = 1 AND a.created_at >= ? AND u.id_estado IN (?)
+LEFT JOIN Estados e ON u.id_estado = e.id_estado
+WHERE a.id_status = 1 AND a.created_at >= ?
 ORDER BY a.created_at DESC;
 
 
