@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Plaguicida Pro">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff7ed"/>
+      <stop offset="1" stop-color="#fed7aa"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="42" fill="url(#bg)"/>
+  <circle cx="118" cy="110" r="78" fill="#ffffff" opacity=".45"/>
+  <path d="M246 98h148v221H246z" fill="#ea580c"/>
+  <path d="M274 130h92v156h-92z" fill="#ffffff"/>
+  <path d="M284 69h72v43h-72z" fill="#9a3412"/>
+  <path d="M303 42h34v39h-34z" fill="#ea580c"/>
+  <path d="M320 171l50 86H270z" fill="#ea580c"/>
+  <path d="M320 199v28m0 34v2" stroke="#fff7ed" stroke-width="14" stroke-linecap="round"/>
+  <text x="320" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="31" font-weight="800" fill="#7c2d12">PLAGUICIDA</text>
+</svg>
