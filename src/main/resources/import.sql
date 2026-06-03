@@ -42,6 +42,10 @@ INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, ST_GeomFromText('POINT(-96.9101 19.5437)'), 5, 5, 5, 5);
 -- HU-26: ubicación en Jalisco a ~52 km de la ubicación del vendedor tec1 (ubic 1), para que la distancia de las alertas cercanas no sea siempre 0.
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (6, ST_GeomFromText('POINT(-102.9500 20.7500)'), 1, 1, 1, 1);
+-- HU-26: ubicaciones en Michoacán a ~8/18/28 km del agricultor agri2 (ubic 2: lat 19.4138, lng -102.0558) para probar radios de 10/20/30 km.
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (7, ST_GeomFromText('POINT(-102.0558 19.4859)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (8, ST_GeomFromText('POINT(-101.8839 19.4138)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (9, ST_GeomFromText('POINT(-102.0558 19.6661)'), 2, 2, 2, 2);
 
 
 -- ==========================================
@@ -391,6 +395,16 @@ VALUES (13, 'Roya vieja (fuera de ventana)', 'Alerta validada de hace varios mes
 -- Alerta en Jalisco a ~52 km del vendedor tec1: aparece dentro de 100 km con distancia > 0.
 INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
 VALUES (14, 'Cochinilla en cítricos cercanos', 'Presencia de cochinilla en huertas de cítricos a las afueras de la zona; monitoreo recomendado.', 6, 'Cochinilla', 6.30, 'advertencia', 6, '2026-05-25 09:00:00', 1, 1, '2026-05-25 13:00:00');
+
+-- HU-26: alertas validadas y recientes a ~8/18/28 km del agricultor agri2 (ubic 2) para probar radios 10/20/30 km.
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (15, 'Pulgón a ~8 km de tu parcela', 'Brote de pulgón detectado en huertas vecinas; revisar bordes del cultivo.', 7, 'Pulgón', 3.50, 'critico', 7, '2026-05-22 08:00:00', 1, 1, '2026-05-22 12:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (16, 'Trips a ~18 km de tu parcela', 'Presencia de trips en cultivos de la zona; monitoreo recomendado.', 8, 'Trips', 5.10, 'advertencia', 7, '2026-05-18 09:30:00', 1, 1, '2026-05-18 14:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (17, 'Mosca blanca a ~28 km de tu parcela', 'Poblaciones de mosca blanca reportadas en la región; riesgo de virosis.', 9, 'Mosca blanca', 4.20, 'informacion', 7, '2026-05-15 10:15:00', 1, 1, '2026-05-15 15:00:00');
 
 INSERT INTO recomendaciones (
 	id_recomendacion,
