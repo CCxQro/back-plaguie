@@ -206,3 +206,18 @@ SET coordenadas = ?,
     id_localidad = ?,
     id_predio = ?
 WHERE id_ubicacion = ?;
+
+-- =====================================================================
+-- AlertaRepositoryImpl (HU-26 addition)
+-- =====================================================================
+
+-- findValidatedSince(LocalDateTime since)
+-- todas las alertas validadas de los últimos 3 meses, enriquecidas con estado y
+-- coordenadas (join a Ubicacion/Estados). La distancia al vendedor y el filtro por
+-- radio (default 100 km) se calculan en el use case GetNearbyEarlyAlertsUseCase (CA-02).
+SELECT a.*
+FROM alertas a
+LEFT JOIN Ubicacion u ON a.id_ubicacion = u.id_ubicacion
+LEFT JOIN Estados e ON u.id_estado = e.id_estado
+WHERE a.id_status = 1 AND a.created_at >= ?
+ORDER BY a.created_at DESC;

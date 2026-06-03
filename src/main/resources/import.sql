@@ -40,6 +40,12 @@ INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, ST_GeomFromText('POINT(-107.3941 24.8053)'), 3, 3, 3, 3);
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, ST_GeomFromText('POINT(-110.9559 29.0729)'), 4, 4, 4, 4);
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, ST_GeomFromText('POINT(-96.9101 19.5437)'), 5, 5, 5, 5);
+-- HU-26: ubicación en Jalisco a ~52 km de la ubicación del vendedor tec1 (ubic 1), para que la distancia de las alertas cercanas no sea siempre 0.
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (6, ST_GeomFromText('POINT(-102.9500 20.7500)'), 1, 1, 1, 1);
+-- HU-26: ubicaciones en Michoacán a ~8/18/28 km del agricultor agri2 (ubic 2: lat 19.4138, lng -102.0558) para probar radios de 10/20/30 km.
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (7, ST_GeomFromText('POINT(-102.0558 19.4859)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (8, ST_GeomFromText('POINT(-101.8839 19.4138)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (9, ST_GeomFromText('POINT(-102.0558 19.6661)'), 2, 2, 2, 2);
 
 
 -- ==========================================
@@ -366,6 +372,39 @@ INSERT INTO alertas (
 	id_validated_by,
 	validated_at
 ) VALUES (8, 'Revision de Mancha Foliar en Tesistan', 'Observacion enviada para confirmar mancha foliar en cultivo cercano. La alerta queda pendiente de aprobacion.', 1, 'Mancha foliar', 3.25, 'informacion', 6, '2026-06-01 10:25:00', 2, NULL, NULL);
+
+-- ── HU-26: alertas validadas (id_status=1) para alimentar las alertas tempranas por región ──
+-- Distribuidas en varios estados; las de los últimos 3 meses aparecen en el feed del vendedor.
+-- id_ubicacion → id_estado: 1=jalisco, 2=michoacán, 3=sinaloa, 4=sonora, 5=veracruz
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (9, 'Brote de gusano cogollero en maíz', 'Daño foliar confirmado en lotes de maíz; se recomienda monitoreo intensivo en Michoacán.', 2, 'Gusano cogollero', 18.00, 'critico', 6, '2026-05-20 08:30:00', 1, 1, '2026-05-20 12:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (10, 'Mosca blanca en hortalizas', 'Poblaciones elevadas de mosca blanca detectadas en Sonora; riesgo de virosis.', 4, 'Mosca blanca', 9.50, 'advertencia', 6, '2026-04-15 10:00:00', 1, 1, '2026-04-15 14:30:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (11, 'Picudo del chile en Veracruz', 'Capturas en trampas indican presencia activa del picudo; iniciar manejo preventivo.', 5, 'Picudo del chile', 7.20, 'advertencia', 6, '2026-03-28 09:15:00', 1, 1, '2026-03-29 11:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (12, 'Trips en cultivo de aguacate', 'Daño incipiente por trips en Jalisco; oportunidad de venta de control selectivo.', 1, 'Trips', 5.00, 'informacion', 6, '2026-06-02 07:50:00', 1, 1, '2026-06-02 10:20:00');
+
+-- Alerta validada pero ANTERIOR a 3 meses: NO debe aparecer en el feed (demuestra la ventana temporal).
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (13, 'Roya vieja (fuera de ventana)', 'Alerta validada de hace varios meses; queda fuera del feed de alertas tempranas.', 2, 'Roya', 4.00, 'informacion', 6, '2026-01-10 09:00:00', 1, 1, '2026-01-10 12:00:00');
+
+-- Alerta en Jalisco a ~52 km del vendedor tec1: aparece dentro de 100 km con distancia > 0.
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (14, 'Cochinilla en cítricos cercanos', 'Presencia de cochinilla en huertas de cítricos a las afueras de la zona; monitoreo recomendado.', 6, 'Cochinilla', 6.30, 'advertencia', 6, '2026-05-25 09:00:00', 1, 1, '2026-05-25 13:00:00');
+
+-- HU-26: alertas validadas y recientes a ~8/18/28 km del agricultor agri2 (ubic 2) para probar radios 10/20/30 km.
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (15, 'Pulgón a ~8 km de tu parcela', 'Brote de pulgón detectado en huertas vecinas; revisar bordes del cultivo.', 7, 'Pulgón', 3.50, 'critico', 7, '2026-05-22 08:00:00', 1, 1, '2026-05-22 12:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (16, 'Trips a ~18 km de tu parcela', 'Presencia de trips en cultivos de la zona; monitoreo recomendado.', 8, 'Trips', 5.10, 'advertencia', 7, '2026-05-18 09:30:00', 1, 1, '2026-05-18 14:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (17, 'Mosca blanca a ~28 km de tu parcela', 'Poblaciones de mosca blanca reportadas en la región; riesgo de virosis.', 9, 'Mosca blanca', 4.20, 'informacion', 7, '2026-05-15 10:15:00', 1, 1, '2026-05-15 15:00:00');
 
 INSERT INTO recomendaciones (
 	id_recomendacion,
