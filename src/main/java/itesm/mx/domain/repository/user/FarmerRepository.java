@@ -11,5 +11,6 @@ public interface FarmerRepository {
     Optional<Farmer> findByFarmerId(Long farmerId);
     Optional<Farmer> findByIdUser(Long userId);
     List<Farmer> findAllFarmers();
+    List<Farmer> findByStatus(Long statusId);
 }
 

@@ -39,6 +39,9 @@ public class FarmerRepositoryImpl implements PanacheRepositoryBase<FarmerEntity,
         if (farmer.getActive() != null) {
             entity.isActive = farmer.getActive();
         }
+        if (farmer.getStatusId() != null) {
+            entity.statusId = farmer.getStatusId();
+        }
 
         persistAndFlush(entity);
         return FarmerMapper.toDomain(entity);
@@ -57,6 +60,13 @@ public class FarmerRepositoryImpl implements PanacheRepositoryBase<FarmerEntity,
     @Override
     public List<Farmer> findAllFarmers() {
         return listAll().stream()
+                .map(FarmerMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Farmer> findByStatus(Long statusId) {
+        return find("statusId", statusId).stream()
                 .map(FarmerMapper::toDomain)
                 .collect(Collectors.toList());
     }

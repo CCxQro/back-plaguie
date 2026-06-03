@@ -114,11 +114,12 @@ INSERT INTO Administrador (id_administrador, isActive, id_usuario) VALUES (4, 1,
 INSERT INTO Administrador (id_administrador, isActive, id_usuario) VALUES (5, 1, 5);
 
 -- 4.2 Agricultores (vinculados a usuarios 6 al 10; la ubicación vive en Usuario)
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (1, 1, 6);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (2, 1, 7);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (3, 1, 8);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (4, 1, 9);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (5, 1, 10);
+-- id_status = 1 (Accepted): agricultores sembrados quedan aprobados.
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (1, 1, 1, 6);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (2, 1, 1, 7);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (3, 1, 1, 8);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (4, 1, 1, 9);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (5, 1, 1, 10);
 
 -- 4.3 Técnicos Vendedores (vinculados a usuarios 11 al 15; la ubicación vive en Usuario)
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_usuario) VALUES (1, 1, 11);

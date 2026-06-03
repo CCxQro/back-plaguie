@@ -15,6 +15,7 @@ import itesm.mx.application.usecase.users.subUsers.RegisterAdministratorUseCase;
 import itesm.mx.application.usecase.users.subUsers.RegisterFarmerUseCase;
 import itesm.mx.application.usecase.users.subUsers.RegisterTechnicalSellerUseCase;
 import itesm.mx.domain.models.location.Location;
+import itesm.mx.domain.models.user.AccountStatusConstants;
 import itesm.mx.domain.models.user.Administrator;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
@@ -149,7 +150,8 @@ public class AuthResource {
                 if (RoleConstants.SELLER.equals(response.roleId)) {
                     registerTechnicalSellerUseCase.execute(new TechnicalSeller(null, createdUser, true));
                 } else if (RoleConstants.FARMER.equals(response.roleId)) {
-                    registerFarmerUseCase.execute(new Farmer(null, createdUser, true));
+                    // Admin-created farmers are auto-approved (status = Accepted).
+                    registerFarmerUseCase.execute(new Farmer(null, createdUser, true, AccountStatusConstants.ACCEPTED));
                 }
 
                 response.isActive = true;
@@ -201,9 +203,7 @@ public class AuthResource {
         registerUserDto.location = signupDto.location;
 
         try {
-            // Public signup creates the farmer as PENDING (inactive). An administrator
-            // must approve the account before the user can log in (HU-23, SRS §1.4.1).
-            RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto, false);
+            RegisterUserResponseDto response = registerUserUseCase.execute(registerUserDto);
 
             User createdUser = new User(response.userId, response.firebaseUuid, response.name, response.email, response.roleId, true);
 
@@ -218,9 +218,11 @@ public class AuthResource {
             locationUpdate.setLocation(locationRef);
             userRepository.update(locationUpdate);
 
-            registerFarmerUseCase.execute(new Farmer(null, createdUser, true));
+            // Public signup leaves the farmer account PENDING (status = Revision).
+            // An administrator must approve it before the farmer can log in (HU-23, SRS §1.4.1).
+            registerFarmerUseCase.execute(new Farmer(null, createdUser, true, AccountStatusConstants.REVISION));
 
-            response.isActive = false;
+            response.isActive = true;
             response.location = locationResponse;
 
             return Response.status(Response.Status.CREATED)
