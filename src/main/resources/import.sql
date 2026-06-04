@@ -526,6 +526,11 @@ INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, 
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1009, 5, 'Abono Organico Compostado', 'PLG-009', 8, 5,  45.0, 1, 'Mejora estructura del suelo',          1, '/marketplace-images/abono-organico.svg');
 INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1, '/marketplace-images/cal-agricola.svg');
 
+-- HU-24: producto de ejemplo claramente fitosanitario, comprable, para las recomendaciones de la IA.
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (6, 1, 'Insecticida Malathion 1000E', 'PLG-M06', 3, 1, 110.0, 2, 'Control de mosca de la fruta y plagas de huerto', 1, '/marketplace-images/insecticida-ultra.svg');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (9001, 6, 110.00000, '2026-05-20 09:00:00');
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (9001, 6, 80, 1);
+
 -- ==========================================
 -- 8.B PRECIOS (historico por producto; el mas reciente = valor_unidad del producto)
 -- ==========================================

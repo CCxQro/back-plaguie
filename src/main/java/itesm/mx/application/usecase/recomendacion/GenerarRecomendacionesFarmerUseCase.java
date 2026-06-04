@@ -3,7 +3,9 @@ package itesm.mx.application.usecase.recomendacion;
 import itesm.mx.application.dto.GetRecomendacionesPersonalizadasResponseDto;
 import itesm.mx.application.dto.GetRecomendacionesPersonalizadasResponseDto.RecomendacionProductoDto;
 import itesm.mx.application.dto.ParcelaResponseDto;
+import itesm.mx.application.usecase.marketplace.product.GetAllProductsUseCase;
 import itesm.mx.application.usecase.parcela.GetParcelasByFarmerUseCase;
+import itesm.mx.domain.models.marketplace.Product;
 import itesm.mx.domain.models.reporte.HistoricoVigilanciaSummary;
 import itesm.mx.domain.models.reporte.Temporada;
 import itesm.mx.domain.models.user.Farmer;
@@ -50,6 +52,9 @@ public class GenerarRecomendacionesFarmerUseCase {
     HistoricoVigilanciaRepository historicoVigilanciaRepository;
 
     @Inject
+    GetAllProductsUseCase getAllProductsUseCase;
+
+    @Inject
     GeminiProductRecommendationProvider geminiProvider;
 
     public GetRecomendacionesPersonalizadasResponseDto execute(Long userId) {
@@ -79,15 +84,23 @@ public class GenerarRecomendacionesFarmerUseCase {
                 ? historicoVigilanciaRepository.findResumenPorRegionYTemporada(region, temporada)
                 : List.of();
 
-        // 6. LLM call (or fallback)
+        // 6. Available marketplace products → so the LLM recommends real, buyable
+        //    products from the catalog (and the app can offer "add to cart").
+        List<Product> availableProducts = getAllProductsUseCase.execute().stream()
+                .filter(p -> !Boolean.FALSE.equals(p.getIsActive()))
+                .filter(p -> p.getStock() != null && p.getStock() > 0)
+                .collect(Collectors.toList());
+
+        // 7. LLM call (or fallback) grounded on the catalog
         RecomendacionResult result = geminiProvider.recommend(
                 region != null ? region : "México",
                 temporada,
                 parcelas,
-                historico
+                historico,
+                availableProducts
         );
 
-        // 7. Map to DTO
+        // 8. Map to DTO
         List<RecomendacionProductoDto> recDtos = result.getRecomendaciones().stream()
                 .map(r -> new RecomendacionProductoDto(
                         r.getProductoSugerido(),
