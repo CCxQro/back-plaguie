@@ -10,6 +10,7 @@ import itesm.mx.application.dto.ClientMapDto;
 import itesm.mx.application.dto.ClientOrderSummaryDto;
 import itesm.mx.application.dto.ClientParcelaSummaryDto;
 import itesm.mx.application.usecase.sales.GetClientDetailBySellerUseCase;
+import itesm.mx.application.usecase.sales.GetClientStatusBySellerUseCase;
 import itesm.mx.application.usecase.sales.GetClientsMapBySellerUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
@@ -40,6 +41,7 @@ class SalesClientsResourceIntegrationTest {
     @InjectMock FirebaseUserManager firebaseUserManager;
     @InjectMock GetClientsMapBySellerUseCase getClientsMapBySellerUseCase;
     @InjectMock GetClientDetailBySellerUseCase getClientDetailBySellerUseCase;
+    @InjectMock GetClientStatusBySellerUseCase getClientStatusBySellerUseCase;
 
     @Inject UserRepositoryImpl userRepository;
 
@@ -234,5 +236,59 @@ class SalesClientsResourceIntegrationTest {
         .then()
             .statusCode(404)
             .body("error", equalTo("El agricultor con id 99 no es cliente del vendedor actual"));
+    }
+
+    // --- GET /api/sales/clients/{farmerId}/status ---
+
+    @Test
+    void getClientStatus_WhenNoAuth_Returns401() {
+        given()
+        .when()
+            .get("/api/sales/clients/10/status")
+        .then()
+            .statusCode(401);
+    }
+
+    @Test
+    void getClientStatus_WhenFarmerRole_Returns403() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN))
+                .thenReturn("sales-clients-farmer-uuid");
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+        .when()
+            .get("/api/sales/clients/10/status")
+        .then()
+            .statusCode(403);
+    }
+
+    @Test
+    void getClientStatus_WhenSeller_Returns200() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN))
+                .thenReturn("sales-clients-seller-uuid");
+
+        ClientParcelaSummaryDto parcela = new ClientParcelaSummaryDto(
+                1L, "Parcela 1", 2.5, "Maíz", "Siembra", "Goteo", 7.0, null, null, true);
+        ClientAlertaSummaryDto alerta = new ClientAlertaSummaryDto(
+                1L, "Alerta plaga", "Pulgón", "alta",
+                new BigDecimal("1.50"), LocalDateTime.parse("2026-01-10T08:30:00"),
+                2L, "Revision", true);
+        itesm.mx.application.dto.ClientStatusDto statusDto = new itesm.mx.application.dto.ClientStatusDto(
+                10L, List.of(parcela), List.of(alerta)
+        );
+
+        when(getClientStatusBySellerUseCase.execute(eq(sellerUserId), eq(10L)))
+                .thenReturn(statusDto);
+
+        given()
+            .header("Authorization", "Bearer " + SELLER_TOKEN)
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/api/sales/clients/10/status")
+        .then()
+            .statusCode(200)
+            .body("farmerId", equalTo(10))
+            .body("parcelas.size()", equalTo(1))
+            .body("recentActiveAlerts.size()", equalTo(1));
     }
 }
