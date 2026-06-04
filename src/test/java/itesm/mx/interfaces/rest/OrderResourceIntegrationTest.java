@@ -17,11 +17,14 @@ import itesm.mx.application.usecase.order.GetOrdersBySellerUseCase;
 import itesm.mx.application.usecase.order.UpdateOrderStatusUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
+import itesm.mx.infrastructure.persistence.entity.users.FarmerEntity;
 import itesm.mx.infrastructure.persistence.entity.users.UserEntity;
+import itesm.mx.infrastructure.persistence.repository.user.FarmerRepositoryImpl;
 import itesm.mx.infrastructure.persistence.repository.user.UserRepositoryImpl;
 import itesm.mx.support.H2TestProfile;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,15 +53,21 @@ class OrderResourceIntegrationTest {
     @InjectMock itesm.mx.application.usecase.order.ShareOrderUseCase shareOrderUseCase;
 
     @Inject UserRepositoryImpl userRepository;
+    @Inject FarmerRepositoryImpl farmerEntityRepository;
 
-    private static final String SELLER_TOKEN = "seller-token";
-    private static final String ADMIN_TOKEN  = "admin-token";
+    private static final String SELLER_TOKEN  = "seller-token";
+    private static final String ADMIN_TOKEN   = "admin-token";
+    private static final String FARMER_TOKEN  = "farmer-token";
+    private static final String FARMER2_TOKEN = "farmer2-token";
 
     private Long sellerId;
+    /** farmerId (Agricultor PK) of the farmer that owns order #1 */
+    private Long ownerFarmerId;
 
     @BeforeEach
     @Transactional
     void setup() {
+        farmerEntityRepository.deleteAll();
         userRepository.deleteAll();
 
         UserEntity admin = new UserEntity();
@@ -80,11 +89,39 @@ class OrderResourceIntegrationTest {
 
         UserEntity farmer = new UserEntity();
         farmer.firebaseUuid = "uuid-or-farmer";
-        farmer.name = "Farmer";
+        farmer.name = "Farmer Owner";
         farmer.email = "orfarmer@itesm.mx";
         farmer.roleId = 2;
         farmer.isActive = true;
         userRepository.persist(farmer);
+
+        FarmerEntity farmerEntity = new FarmerEntity();
+        farmerEntity.userId = farmer.userId;
+        farmerEntity.isActive = true;
+        farmerEntityRepository.persist(farmerEntity);
+        ownerFarmerId = farmerEntity.farmerId;
+
+        UserEntity farmer2 = new UserEntity();
+        farmer2.firebaseUuid = "uuid-or-farmer2";
+        farmer2.name = "Farmer Other";
+        farmer2.email = "orfarmer2@itesm.mx";
+        farmer2.roleId = 2;
+        farmer2.isActive = true;
+        userRepository.persist(farmer2);
+
+        FarmerEntity farmerEntity2 = new FarmerEntity();
+        farmerEntity2.userId = farmer2.userId;
+        farmerEntity2.isActive = true;
+        farmerEntityRepository.persist(farmerEntity2);
+    }
+
+    @AfterEach
+    @Transactional
+    void teardown() {
+        // Remove farmer rows first to avoid FK violations in other test-class setups
+        // that call userRepository.deleteAll() without knowing about farmers.
+        farmerEntityRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private OrderResponseDto sampleOrderResponse() {
@@ -326,7 +363,7 @@ class OrderResourceIntegrationTest {
     @Test
     void shareOrder_WhenSeller_Returns200() throws Exception {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN)).thenReturn("uuid-or-seller");
-        
+
         OrderResponseDto mockRes = sampleOrderResponse();
         mockRes.providerShared = true;
         when(shareOrderUseCase.execute(1L)).thenReturn(mockRes);
@@ -343,15 +380,77 @@ class OrderResourceIntegrationTest {
     }
 
     @Test
-    void shareOrder_WhenNonSeller_Returns403() throws Exception {
-        when(firebaseTokenVerifier.verifyTokenAndGetUid("farmer-token")).thenReturn("uuid-or-farmer");
+    void shareOrder_WhenAdmin_Returns200() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(ADMIN_TOKEN)).thenReturn("uuid-or-admin");
+
+        OrderResponseDto mockRes = sampleOrderResponse();
+        mockRes.providerShared = true;
+        when(shareOrderUseCase.execute(1L)).thenReturn(mockRes);
 
         given()
-            .header("Authorization", "Bearer farmer-token")
+            .header("Authorization", "Bearer " + ADMIN_TOKEN)
             .contentType(ContentType.JSON)
         .when()
             .post("/api/orders/1/share")
         .then()
-            .statusCode(403);
+            .statusCode(200)
+            .body("orderId", equalTo(1))
+            .body("providerShared", equalTo(true));
+    }
+
+    @Test
+    void shareOrder_WhenFarmerOwner_Returns200() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-or-farmer");
+
+        // getOrderByIdUseCase returns an order whose farmerId matches ownerFarmerId
+        OrderResponseDto orderDto = new OrderResponseDto(1L, ownerFarmerId, "Farmer Owner", sellerId, "Seller A",
+                LocalDateTime.now(), 1L, "Pendiente", BigDecimal.valueOf(500), false,
+                List.of(new OrderDetailResponseDto(1L, 1001L, "Producto X", 2, 250.0f)));
+        when(getOrderByIdUseCase.execute(1L)).thenReturn(orderDto);
+
+        OrderResponseDto sharedRes = new OrderResponseDto(1L, ownerFarmerId, "Farmer Owner", sellerId, "Seller A",
+                LocalDateTime.now(), 1L, "Pendiente", BigDecimal.valueOf(500), true,
+                List.of(new OrderDetailResponseDto(1L, 1001L, "Producto X", 2, 250.0f)));
+        when(shareOrderUseCase.execute(1L)).thenReturn(sharedRes);
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/orders/1/share")
+        .then()
+            .statusCode(200)
+            .body("orderId", equalTo(1))
+            .body("providerShared", equalTo(true));
+    }
+
+    @Test
+    void shareOrder_WhenFarmerNonOwner_Returns403() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER2_TOKEN)).thenReturn("uuid-or-farmer2");
+
+        // getOrderByIdUseCase returns an order owned by ownerFarmerId (different farmer)
+        OrderResponseDto orderDto = new OrderResponseDto(1L, ownerFarmerId, "Farmer Owner", sellerId, "Seller A",
+                LocalDateTime.now(), 1L, "Pendiente", BigDecimal.valueOf(500), false,
+                List.of(new OrderDetailResponseDto(1L, 1001L, "Producto X", 2, 250.0f)));
+        when(getOrderByIdUseCase.execute(1L)).thenReturn(orderDto);
+
+        given()
+            .header("Authorization", "Bearer " + FARMER2_TOKEN)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/orders/1/share")
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("Solo el agricultor dueño del pedido puede compartirlo con el proveedor"));
+    }
+
+    @Test
+    void shareOrder_WhenUnauthenticated_Returns401() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/orders/1/share")
+        .then()
+            .statusCode(401);
     }
 }
