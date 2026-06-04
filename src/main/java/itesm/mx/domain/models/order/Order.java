@@ -15,6 +15,7 @@ public class Order {
     private OrderStatus orderStatus;
     private BigDecimal totalAmount;
     private List<OrderDetail> details;
+    private Boolean providerShared;
 
     public Order() {}
 
@@ -49,4 +50,7 @@ public class Order {
 
     public List<OrderDetail> getDetails() { return details; }
     public void setDetails(List<OrderDetail> details) { this.details = details; }
+
+    public Boolean getProviderShared() { return providerShared; }
+    public void setProviderShared(Boolean providerShared) { this.providerShared = providerShared; }
 }

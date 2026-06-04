@@ -47,6 +47,7 @@ class OrderResourceIntegrationTest {
     @InjectMock GetOrdersBySellerUseCase getOrdersBySellerUseCase;
     @InjectMock GetFarmerLocationsBySellerUseCase getFarmerLocationsBySellerUseCase;
     @InjectMock UpdateOrderStatusUseCase updateOrderStatusUseCase;
+    @InjectMock itesm.mx.application.usecase.order.ShareOrderUseCase shareOrderUseCase;
 
     @Inject UserRepositoryImpl userRepository;
 
@@ -80,7 +81,7 @@ class OrderResourceIntegrationTest {
 
     private OrderResponseDto sampleOrderResponse() {
         return new OrderResponseDto(1L, 1L, "Farmer A", sellerId, "Seller A",
-                LocalDateTime.now(), 1L, "Pendiente", BigDecimal.valueOf(500),
+                LocalDateTime.now(), 1L, "Pendiente", BigDecimal.valueOf(500), false,
                 List.of(new OrderDetailResponseDto(1L, 1001L, "Producto X", 2, 250.0f)));
     }
 
@@ -310,5 +311,48 @@ class OrderResourceIntegrationTest {
             .patch("/api/orders/1/status")
         .then()
             .statusCode(401);
+    }
+
+    // --- POST /api/orders/{orderId}/share ---
+
+    @Test
+    void shareOrder_WhenSeller_Returns200() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(SELLER_TOKEN)).thenReturn("uuid-or-seller");
+        
+        OrderResponseDto mockRes = sampleOrderResponse();
+        mockRes.providerShared = true;
+        when(shareOrderUseCase.execute(1L)).thenReturn(mockRes);
+
+        given()
+            .header("Authorization", "Bearer " + SELLER_TOKEN)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/orders/1/share")
+        .then()
+            .statusCode(200)
+            .body("orderId", equalTo(1))
+            .body("providerShared", equalTo(true));
+    }
+
+    @Test
+    @Transactional
+    void shareOrder_WhenNonSeller_Returns403() throws Exception {
+        UserEntity farmer = new UserEntity();
+        farmer.firebaseUuid = "uuid-or-farmer";
+        farmer.name = "Farmer";
+        farmer.email = "orfarmer@itesm.mx";
+        farmer.roleId = 2; // Farmer role
+        farmer.isActive = true;
+        userRepository.persist(farmer);
+
+        when(firebaseTokenVerifier.verifyTokenAndGetUid("farmer-token")).thenReturn("uuid-or-farmer");
+
+        given()
+            .header("Authorization", "Bearer farmer-token")
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/orders/1/share")
+        .then()
+            .statusCode(403);
     }
 }

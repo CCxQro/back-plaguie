@@ -13,6 +13,7 @@ import itesm.mx.application.usecase.order.CreateOrderUseCase;
 import itesm.mx.application.usecase.order.GetFarmerLocationsBySellerUseCase;
 import itesm.mx.application.usecase.order.GetOrderByIdUseCase;
 import itesm.mx.application.usecase.order.GetOrdersBySellerUseCase;
+import itesm.mx.application.usecase.order.ShareOrderUseCase;
 import itesm.mx.application.usecase.order.UpdateOrderStatusUseCase;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -40,6 +41,7 @@ public class OrderResource {
     @Inject GetOrdersBySellerUseCase getOrdersBySellerUseCase;
     @Inject GetFarmerLocationsBySellerUseCase getFarmerLocationsBySellerUseCase;
     @Inject UpdateOrderStatusUseCase updateOrderStatusUseCase;
+    @Inject ShareOrderUseCase shareOrderUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
 
     @POST
@@ -187,6 +189,38 @@ public class OrderResource {
         }
         try {
             return Response.ok(updateOrderStatusUseCase.execute(orderId, body.orderStatusId)).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @POST
+    @Path("/{orderId}/share")
+    @Operation(summary = "Share order with provider", description = "Marks the order as shared and notifies the provider. Seller or Admin endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Order shared successfully",
+                    content = @Content(schema = @Schema(implementation = OrderResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid order id"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Seller or Admin role required"),
+            @APIResponse(responseCode = "404", description = "Order not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response shareOrder(@Parameter(description = "Order id") @PathParam("orderId") Long orderId) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        Integer role = authenticatedUserContext.getCurrentUser().getRoleId();
+        if (!SELLER_ROLE_ID.equals(role) && !ADMIN_ROLE_ID.equals(role)) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo un técnico vendedor o administrador puede compartir un pedido con el proveedor");
+        }
+        try {
+            return Response.ok(shareOrderUseCase.execute(orderId)).build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (IllegalStateException e) {

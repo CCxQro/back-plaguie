@@ -71,6 +71,9 @@ public class OrderEntity {
     @Column(name = "monto_total")
     public BigDecimal totalAmount;
 
+    @Column(name = "compartido_proveedor")
+    public Boolean providerShared = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agricultor", referencedColumnName = "id_agricultor",
                 insertable = false, updatable = false)

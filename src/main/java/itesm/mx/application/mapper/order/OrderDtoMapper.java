@@ -28,6 +28,7 @@ public class OrderDtoMapper {
                 order.getOrderStatus().getOrderStatusId(),
                 order.getOrderStatus().getEstado(),
                 order.getTotalAmount(),
+                order.getProviderShared(),
                 detailDtos
         );
     }
