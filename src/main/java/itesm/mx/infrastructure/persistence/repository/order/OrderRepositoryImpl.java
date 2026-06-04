@@ -73,4 +73,13 @@ public class OrderRepositoryImpl
         flush();
         return OrderMapper.toDomain(entity);
     }
+
+    @Override
+    public Order updateProviderShared(Long orderId, Boolean providerShared) {
+        OrderEntity entity = findByIdOptional(orderId)
+                .orElseThrow(() -> new IllegalStateException("Pedido no encontrado con id: " + orderId));
+        entity.providerShared = providerShared;
+        flush();
+        return OrderMapper.toDomain(entity);
+    }
 }

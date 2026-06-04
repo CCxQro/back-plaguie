@@ -20,6 +20,7 @@ public class OrderMapper {
         entity.orderDate = order.getOrderDate();
         entity.orderStatusId = order.getOrderStatus().getOrderStatusId();
         entity.totalAmount = order.getTotalAmount();
+        entity.providerShared = order.getProviderShared() != null ? order.getProviderShared() : false;
         return entity;
     }
 
@@ -32,6 +33,7 @@ public class OrderMapper {
         order.setOrderStatus(mapOrderStatus(entity));
         order.setTotalAmount(entity.totalAmount);
         order.setDetails(mapDetails(entity));
+        order.setProviderShared(entity.providerShared);
         return order;
     }
 
