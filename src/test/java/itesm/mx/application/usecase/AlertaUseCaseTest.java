@@ -3,6 +3,7 @@ package itesm.mx.application.usecase;
 import itesm.mx.application.dto.CreateAlertaDto;
 import itesm.mx.application.dto.GetAlertaResponseDto;
 import itesm.mx.application.usecase.alerta.CreateAlertaUseCase;
+import itesm.mx.application.usecase.alerta.GenerateParcelaSuggestionsUseCase;
 import itesm.mx.application.usecase.alerta.GetAlertaByIdUseCase;
 import itesm.mx.application.usecase.alerta.GetAllAlertasUseCase;
 import itesm.mx.application.usecase.alerta.ValidateAlertaUseCase;
@@ -30,6 +31,9 @@ class AlertaUseCaseTest {
 
     @Mock
     AlertaRepository alertaRepository;
+
+    @Mock
+    GenerateParcelaSuggestionsUseCase generateParcelaSuggestionsUseCase;
 
     @InjectMocks
     GetAllAlertasUseCase getAllAlertasUseCase;

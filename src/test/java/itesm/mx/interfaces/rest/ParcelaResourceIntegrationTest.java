@@ -117,7 +117,7 @@ class ParcelaResourceIntegrationTest {
         dto.healthPercentage = 100.0;
         dto.suggestions = Collections.emptyList();
 
-        when(getParcelaDetailUseCase.execute(anyLong(), anyLong())).thenReturn(dto);
+        when(getParcelaDetailUseCase.execute(anyLong(), isNull())).thenReturn(dto);
 
         given()
             .header("Authorization", "Bearer " + FARMER_UUID)
