@@ -77,6 +77,14 @@ class OrderResourceIntegrationTest {
         seller.isActive = true;
         userRepository.persist(seller);
         sellerId = seller.userId;
+
+        UserEntity farmer = new UserEntity();
+        farmer.firebaseUuid = "uuid-or-farmer";
+        farmer.name = "Farmer";
+        farmer.email = "orfarmer@itesm.mx";
+        farmer.roleId = 2;
+        farmer.isActive = true;
+        userRepository.persist(farmer);
     }
 
     private OrderResponseDto sampleOrderResponse() {
@@ -335,16 +343,7 @@ class OrderResourceIntegrationTest {
     }
 
     @Test
-    @Transactional
     void shareOrder_WhenNonSeller_Returns403() throws Exception {
-        UserEntity farmer = new UserEntity();
-        farmer.firebaseUuid = "uuid-or-farmer";
-        farmer.name = "Farmer";
-        farmer.email = "orfarmer@itesm.mx";
-        farmer.roleId = 2; // Farmer role
-        farmer.isActive = true;
-        userRepository.persist(farmer);
-
         when(firebaseTokenVerifier.verifyTokenAndGetUid("farmer-token")).thenReturn("uuid-or-farmer");
 
         given()
