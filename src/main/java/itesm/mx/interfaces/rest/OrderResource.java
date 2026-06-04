@@ -5,15 +5,20 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import itesm.mx.application.dto.BuyOrderDto;
 import itesm.mx.application.dto.FarmerLocationDto;
 import itesm.mx.application.dto.OrderResponseDto;
 import itesm.mx.application.dto.RegisterOrderDto;
+import itesm.mx.application.dto.ShareOrderResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
+import itesm.mx.application.usecase.order.BuyOrderUseCase;
 import itesm.mx.application.usecase.order.CreateOrderUseCase;
 import itesm.mx.application.usecase.order.GetFarmerLocationsBySellerUseCase;
 import itesm.mx.application.usecase.order.GetOrderByIdUseCase;
+import itesm.mx.application.usecase.order.GetOrdersByFarmerUseCase;
 import itesm.mx.application.usecase.order.GetOrdersBySellerUseCase;
 import itesm.mx.application.usecase.order.ShareOrderUseCase;
+import itesm.mx.application.usecase.order.ShareOrderWithProviderUseCase;
 import itesm.mx.application.usecase.order.UpdateOrderStatusUseCase;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -34,14 +39,18 @@ import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 public class OrderResource {
 
     private static final Integer ADMIN_ROLE_ID = 1;
+    private static final Integer FARMER_ROLE_ID = 2;
     private static final Integer SELLER_ROLE_ID = 3;
 
     @Inject CreateOrderUseCase createOrderUseCase;
     @Inject GetOrderByIdUseCase getOrderByIdUseCase;
     @Inject GetOrdersBySellerUseCase getOrdersBySellerUseCase;
+    @Inject GetOrdersByFarmerUseCase getOrdersByFarmerUseCase;
     @Inject GetFarmerLocationsBySellerUseCase getFarmerLocationsBySellerUseCase;
     @Inject UpdateOrderStatusUseCase updateOrderStatusUseCase;
     @Inject ShareOrderUseCase shareOrderUseCase;
+    @Inject BuyOrderUseCase buyOrderUseCase;
+    @Inject ShareOrderWithProviderUseCase shareOrderWithProviderUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
 
     @POST
@@ -73,6 +82,69 @@ public class OrderResource {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (IllegalStateException e) {
             return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @POST
+    @Path("/buy")
+    @Operation(summary = "Buy order (farmer)", description = "Creates a new purchase order from the authenticated farmer.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BuyOrderDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "201", description = "Orden de compra creada",
+                    content = @Content(schema = @Schema(implementation = OrderResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Solicitud inválida o stock insuficiente"),
+            @APIResponse(responseCode = "401", description = "Se requiere autenticación"),
+            @APIResponse(responseCode = "403", description = "Solo agricultores pueden realizar compras"),
+            @APIResponse(responseCode = "404", description = "Producto no encontrado"),
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public Response buyOrder(@Valid BuyOrderDto dto) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!FARMER_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un agricultor puede realizar una compra");
+        }
+        if (dto == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+        try {
+            OrderResponseDto result = buyOrderUseCase.execute(
+                    authenticatedUserContext.getCurrentUser().getUserId(), dto);
+            return Response.status(Response.Status.CREATED).entity(result).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/farmer")
+    @Operation(summary = "List orders for current farmer", description = "Returns all orders belonging to the logged-in farmer, ordered by date desc.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Órdenes del agricultor",
+                    content = @Content(schema = @Schema(implementation = OrderResponseDto[].class))),
+            @APIResponse(responseCode = "401", description = "Se requiere autenticación"),
+            @APIResponse(responseCode = "403", description = "Solo agricultores pueden consultar sus pedidos"),
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public Response getFarmerOrders() {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!FARMER_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un agricultor puede consultar sus pedidos");
+        }
+        try {
+            return Response.ok(getOrdersByFarmerUseCase.execute(
+                    authenticatedUserContext.getCurrentUser().getUserId())).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }
@@ -200,7 +272,7 @@ public class OrderResource {
 
     @POST
     @Path("/{orderId}/share")
-    @Operation(summary = "Share order with provider", description = "Marks the order as shared and notifies the provider. Seller or Admin endpoint.")
+    @Operation(summary = "Share order with provider (seller)", description = "Marks the order as shared and notifies the provider. Seller or Admin endpoint.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Order shared successfully",
                     content = @Content(schema = @Schema(implementation = OrderResponseDto.class))),
@@ -221,6 +293,42 @@ public class OrderResource {
         }
         try {
             return Response.ok(shareOrderUseCase.execute(orderId)).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @POST
+    @Path("/{orderId}/share-provider")
+    @Operation(summary = "Share order with provider (farmer)", description = "Shares farmer data and order with the product provider. Farmer-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Datos compartidos con el proveedor",
+                    content = @Content(schema = @Schema(implementation = ShareOrderResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Solicitud inválida"),
+            @APIResponse(responseCode = "401", description = "Se requiere autenticación"),
+            @APIResponse(responseCode = "403", description = "Solo el agricultor dueño del pedido puede compartirlo"),
+            @APIResponse(responseCode = "404", description = "Pedido no encontrado"),
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public Response shareOrderWithProvider(
+            @Parameter(description = "Order id") @PathParam("orderId") Long orderId) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!FARMER_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo un agricultor puede compartir su pedido con el proveedor");
+        }
+        try {
+            ShareOrderResponseDto result = shareOrderWithProviderUseCase.execute(
+                    orderId, authenticatedUserContext.getCurrentUser().getUserId());
+            return Response.ok(result).build();
+        } catch (SecurityException e) {
+            return errorResponse(Response.Status.FORBIDDEN, e.getMessage());
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
         } catch (IllegalStateException e) {

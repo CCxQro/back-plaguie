@@ -66,6 +66,14 @@ public class OrderRepositoryImpl
     }
 
     @Override
+    public List<Order> findAllByFarmerId(Long farmerId) {
+        return find("farmerId order by orderDate desc", farmerId)
+                .stream()
+                .map(OrderMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Order updateStatus(Long orderId, Long orderStatusId) {
         OrderEntity entity = findByIdOptional(orderId)
                 .orElseThrow(() -> new IllegalStateException("Pedido no encontrado con id: " + orderId));
