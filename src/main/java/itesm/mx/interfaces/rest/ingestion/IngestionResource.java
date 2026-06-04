@@ -5,12 +5,14 @@ import itesm.mx.application.dto.ingestion.IngestionFileResponseDto;
 import itesm.mx.application.dto.ingestion.IngestionProgressEvent;
 import itesm.mx.application.dto.ingestion.IngestionRunResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
-import itesm.mx.application.usecase.ingestion.CheckIngestionUseCase;
 import itesm.mx.application.usecase.ingestion.GetIngestionRunsUseCase;
+import itesm.mx.application.usecase.ingestion.UploadIngestionUseCase;
 import itesm.mx.domain.models.ingestion.IngestionFile;
 import itesm.mx.domain.models.ingestion.IngestionRun;
 import itesm.mx.domain.models.user.RoleConstants;
+import itesm.mx.infrastructure.ingestion.FileDetectionService;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -22,28 +24,41 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.RestStreamElementType;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
 /**
- * SCRUM-315, SCRUM-317: Admin-only ingestion pipeline endpoints.
+ * EP-05 Admin-only ingestion endpoints (upload variant).
  *
- * POST /api/ingestion/check           — trigger discovery + produce Kafka messages
- * GET  /api/ingestion/runs            — history of ingestion runs
- * GET  /api/ingestion/progress/stream — SSE stream of live progress events
+ * POST /api/ingestion/upload           — admin uploads a SENASICA CSV
+ * GET  /api/ingestion/runs             — history of ingestion runs
+ * GET  /api/ingestion/progress/stream  — SSE stream of live progress events
  */
 @Path("/api/ingestion")
 @Tag(name = "Ingestion", description = "SENASICA phytosanitary data ingestion pipeline (Admin only)")
 public class IngestionResource {
 
+    private static final Logger LOG = Logger.getLogger(IngestionResource.class);
+
+    /** 50 MB upload cap (bytes). */
+    private static final long MAX_UPLOAD_BYTES = 50L * 1024 * 1024;
+
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
 
     @Inject
-    CheckIngestionUseCase checkIngestionUseCase;
+    UploadIngestionUseCase uploadIngestionUseCase;
 
     @Inject
     GetIngestionRunsUseCase getIngestionRunsUseCase;
@@ -52,32 +67,111 @@ public class IngestionResource {
     @Channel("ingestion-progress-in")
     Multi<IngestionProgressEvent> progressStream;
 
-    // ---- POST /api/ingestion/check ----
+    // ---- POST /api/ingestion/upload ----
 
     @POST
-    @Path("/check")
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Trigger SENASICA ingestion check",
-               description = "Admin only. Discovers new/changed CSV files and queues them for processing.")
+    @Operation(summary = "Upload SENASICA CSV for ingestion",
+               description = "Admin only. Accepts a CSV file (≤50 MB), deduplicates by SHA-256 checksum, "
+                       + "and queues it for processing. Original filename stored in source_url column.")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Check initiated, returns run summary"),
-            @APIResponse(responseCode = "401", description = "Authentication required"),
-            @APIResponse(responseCode = "403", description = "Admin role required"),
-            @APIResponse(responseCode = "500", description = "Discovery or Kafka error")
+            @APIResponse(responseCode = "200",  description = "File accepted and queued (or already ingested)"),
+            @APIResponse(responseCode = "400",  description = "Invalid file: not CSV, empty, or too large"),
+            @APIResponse(responseCode = "401",  description = "Authentication required"),
+            @APIResponse(responseCode = "403",  description = "Admin role required"),
+            @APIResponse(responseCode = "500",  description = "Internal server error")
     })
-    public Response triggerCheck() {
+    public Response upload(@RestForm("file") FileUpload fileUpload) {
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticacion");
         }
         if (!RoleConstants.ADMIN.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
-            return errorResponse(Response.Status.FORBIDDEN, "Solo administradores pueden disparar la ingesta");
+            return errorResponse(Response.Status.FORBIDDEN, "Solo administradores pueden cargar archivos de ingesta");
         }
+
+        // Validate: must have a file
+        if (fileUpload == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "Se requiere el campo 'file' en el formulario multipart");
+        }
+
+        String originalName = fileUpload.fileName();
+        if (originalName == null || originalName.isBlank()) {
+            originalName = "upload.csv";
+        }
+        // Normalize to basename only (prevent path traversal in the name itself)
+        originalName = Paths.get(originalName).getFileName().toString();
+
+        // Validate CSV extension/content-type
+        String contentType = fileUpload.contentType();
+        boolean validExt  = originalName.toLowerCase().endsWith(".csv");
+        boolean validMime = contentType == null
+                || contentType.contains("text/csv")
+                || contentType.contains("text/plain")
+                || contentType.contains("application/csv")
+                || contentType.contains("application/octet-stream");
+        if (!validExt) {
+            return errorResponse(Response.Status.BAD_REQUEST,
+                    "Solo se aceptan archivos CSV (extensión .csv). Tipo recibido: " + contentType);
+        }
+
+        // Size check
+        long fileSize = fileUpload.size();
+        if (fileSize <= 0) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El archivo está vacío");
+        }
+        if (fileSize > MAX_UPLOAD_BYTES) {
+            return errorResponse(Response.Status.BAD_REQUEST,
+                    "El archivo excede el límite de 50 MB (tamaño recibido: " + fileSize + " bytes)");
+        }
+
+        // Read bytes, compute SHA-256
+        byte[] csvBytes;
+        String checksum;
         try {
-            IngestionRun run = checkIngestionUseCase.execute();
+            csvBytes = Files.readAllBytes(fileUpload.uploadedFile());
+            checksum = FileDetectionService.sha256(
+                    new java.io.ByteArrayInputStream(csvBytes));
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to read/hash uploaded file");
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR,
+                    "Error al leer el archivo: " + e.getMessage());
+        }
+
+        // Write to a path-safe temp file
+        String tempFilePath;
+        try {
+            java.nio.file.Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"), "plaguie-ingestion");
+            Files.createDirectories(tmpDir);
+            // Safe filename: uuid + sanitized original name (no path separators)
+            String safeName = UUID.randomUUID() + "_" + originalName.replaceAll("[^a-zA-Z0-9._-]", "_");
+            java.nio.file.Path dest = tmpDir.resolve(safeName).normalize().toAbsolutePath();
+            // Ensure dest is inside tmpDir (path traversal guard)
+            if (!dest.startsWith(tmpDir.normalize().toAbsolutePath())) {
+                return errorResponse(Response.Status.BAD_REQUEST, "Nombre de archivo inválido");
+            }
+            try (InputStream in = new java.io.ByteArrayInputStream(csvBytes)) {
+                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
+            }
+            tempFilePath = dest.toString();
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to write temp file");
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR,
+                    "Error al guardar el archivo temporal: " + e.getMessage());
+        }
+
+        try {
+            IngestionRun run = uploadIngestionUseCase.execute(originalName, csvBytes, checksum, tempFilePath);
+            if ("SKIPPED".equals(run.getStatus())) {
+                return Response.ok(java.util.Map.of(
+                        "status", "skipped/already ingested",
+                        "message", "Este archivo ya fue procesado anteriormente (mismo checksum SHA-256)"
+                )).build();
+            }
             return Response.ok(toRunDto(run)).build();
-        } catch (SecurityException e) {
-            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            LOG.errorf(e, "Upload ingestion failed");
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -119,17 +213,13 @@ public class IngestionResource {
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.APPLICATION_JSON)
     @Operation(summary = "Live ingestion progress (SSE)",
-               description = "Admin only. Returns a Server-Sent Events stream of progress updates from the Kafka topic ingestion.progress.")
+               description = "Admin only. SSE stream of IngestionProgressEvents from topic ingestion.progress.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "SSE stream of IngestionProgressEvent"),
             @APIResponse(responseCode = "401", description = "Authentication required"),
             @APIResponse(responseCode = "403", description = "Admin role required")
     })
     public Multi<IngestionProgressEvent> progressStream() {
-        // Note: SSE endpoints cannot return JAX-RS Response with auth checks in the normal way.
-        // Auth is enforced by FirebaseAuthFilter upstream (all protected paths require Bearer token).
-        // Admin role check handled here — if user not admin we return empty Multi
-        // (the filter already blocks unauthenticated requests before reaching here).
         if (authenticatedUserContext.getCurrentUser() == null
                 || !RoleConstants.ADMIN.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
             return Multi.createFrom().empty();
