@@ -45,6 +45,12 @@ public class IngestionFileRepositoryImpl
     }
 
     @Override
+    public Optional<IngestionFile> findByChecksum(String checksum) {
+        return find("checksum = ?1 ORDER BY id DESC", checksum).firstResultOptional()
+                .map(this::toDomain);
+    }
+
+    @Override
     public List<IngestionFile> findByRunId(Long runId) {
         return find("runId = ?1", runId).list().stream()
                 .map(this::toDomain)
