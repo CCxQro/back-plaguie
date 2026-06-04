@@ -54,6 +54,7 @@ class ProductResourceIntegrationTest {
     @InjectMock GetProductsBySellerUseCase getProductsBySellerUseCase;
     @InjectMock GetProductsByProviderUseCase getProductsByProviderUseCase;
     @InjectMock GetProductsByStatusUseCase getProductsByStatusUseCase;
+    @InjectMock ValidateProductUseCase validateProductUseCase;
 
     @Inject UserRepositoryImpl userRepository;
 
@@ -820,5 +821,76 @@ class ProductResourceIntegrationTest {
 
         // Resource still hands off to the use case; the no-op rule is inside the use case.
         verify(updateProductUseCase).execute(eq(1001L), any(Product.class));
+    }
+
+    // -------------------------------------------------------------------------
+    // PATCH /api/products/{skuSellerId}/validate
+    // -------------------------------------------------------------------------
+
+    @Test
+    void validateProduct_asAdmin_returns200() throws Exception {
+        String token = "admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(ADMIN_UID);
+
+        Long sellerId = sellerUserId();
+        Product validated = buildProduct(1001L, sellerId);
+        validated.getStatus().setStatusId(2L);
+        validated.getStatus().setName("Revision");
+        when(validateProductUseCase.execute(1001L, 2L)).thenReturn(validated);
+
+        itesm.mx.application.dto.ValidateProductDto dto = new itesm.mx.application.dto.ValidateProductDto();
+        dto.statusId = 2L;
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .patch("/api/products/1001/validate")
+        .then()
+            .statusCode(200)
+            .body("skuSellerId", equalTo(1001))
+            .body("statusId", equalTo(2))
+            .body("statusName", equalTo("Revision"));
+    }
+
+    @Test
+    void validateProduct_asSeller_returns403() throws Exception {
+        String token = "seller-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(SELLER_UID);
+
+        itesm.mx.application.dto.ValidateProductDto dto = new itesm.mx.application.dto.ValidateProductDto();
+        dto.statusId = 2L;
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .patch("/api/products/1001/validate")
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("Solo un administrador puede validar productos"));
+    }
+
+    @Test
+    void validateProduct_notFound_returns404() throws Exception {
+        String token = "admin-token";
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(token)).thenReturn(ADMIN_UID);
+
+        when(validateProductUseCase.execute(9999L, 2L)).thenThrow(new IllegalStateException("Producto no encontrado"));
+
+        itesm.mx.application.dto.ValidateProductDto dto = new itesm.mx.application.dto.ValidateProductDto();
+        dto.statusId = 2L;
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .patch("/api/products/9999/validate")
+        .then()
+            .statusCode(404)
+            .body("error", equalTo("Producto no encontrado"));
     }
 }
