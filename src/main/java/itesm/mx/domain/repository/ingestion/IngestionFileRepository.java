@@ -9,5 +9,6 @@ public interface IngestionFileRepository {
     IngestionFile save(IngestionFile file);
     IngestionFile update(IngestionFile file);
     Optional<IngestionFile> findBySourceUrl(String sourceUrl);
+    Optional<IngestionFile> findByChecksum(String checksum);
     List<IngestionFile> findByRunId(Long runId);
 }
