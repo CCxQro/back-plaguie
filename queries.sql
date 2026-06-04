@@ -221,3 +221,32 @@ LEFT JOIN Ubicacion u ON a.id_ubicacion = u.id_ubicacion
 LEFT JOIN Estados e ON u.id_estado = e.id_estado
 WHERE a.id_status = 1 AND a.created_at >= ?
 ORDER BY a.created_at DESC;
+
+
+-- =====================================================================
+-- PestMapRepositoryImpl (HU-27)
+-- =====================================================================
+
+-- findValidatedMapPoints() -- observaciones validadas con coordenadas, enriquecidas
+-- con estado y municipio, para el mapa interactivo de plagas (CA-04).
+SELECT v.id_vigilancia_fitosanitaria,
+       v.lat,
+       v.`long`,
+       p.nombre  AS plaga,
+       h.nombre  AS hospedante,
+       e.nombre  AS especie,
+       est.nombre AS estado,
+       mun.nombre AS municipio,
+       v.ahosp,
+       v.validated_at
+FROM vigilancia_fitosanitaria v
+LEFT JOIN Plaga p       ON v.id_plaga = p.id_plaga
+LEFT JOIN Hospedante h  ON v.id_hospedante = h.id_hospedante
+LEFT JOIN Especie e     ON v.id_especie = e.id_especie
+LEFT JOIN Ubicacion u   ON v.id_ubicacion = u.id_ubicacion
+LEFT JOIN Estados est   ON u.id_estado = est.id_estado
+LEFT JOIN Municipios mun ON u.id_municipio = mun.id_municipio
+WHERE v.id_status = 1
+  AND v.lat IS NOT NULL
+  AND v.`long` IS NOT NULL
+ORDER BY v.validated_at DESC;
