@@ -40,6 +40,12 @@ INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (3, ST_GeomFromText('POINT(-107.3941 24.8053)'), 3, 3, 3, 3);
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (4, ST_GeomFromText('POINT(-110.9559 29.0729)'), 4, 4, 4, 4);
 INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (5, ST_GeomFromText('POINT(-96.9101 19.5437)'), 5, 5, 5, 5);
+-- HU-26: ubicación en Jalisco a ~52 km de la ubicación del vendedor tec1 (ubic 1), para que la distancia de las alertas cercanas no sea siempre 0.
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (6, ST_GeomFromText('POINT(-102.9500 20.7500)'), 1, 1, 1, 1);
+-- HU-26: ubicaciones en Michoacán a ~8/18/28 km del agricultor agri2 (ubic 2: lat 19.4138, lng -102.0558) para probar radios de 10/20/30 km.
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (7, ST_GeomFromText('POINT(-102.0558 19.4859)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (8, ST_GeomFromText('POINT(-101.8839 19.4138)'), 2, 2, 2, 2);
+INSERT INTO Ubicacion (id_ubicacion, coordenadas, id_localidad, id_municipio, id_predio, id_estado) VALUES (9, ST_GeomFromText('POINT(-102.0558 19.6661)'), 2, 2, 2, 2);
 
 
 -- ==========================================
@@ -114,11 +120,12 @@ INSERT INTO Administrador (id_administrador, isActive, id_usuario) VALUES (4, 1,
 INSERT INTO Administrador (id_administrador, isActive, id_usuario) VALUES (5, 1, 5);
 
 -- 4.2 Agricultores (vinculados a usuarios 6 al 10; la ubicación vive en Usuario)
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (1, 1, 6);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (2, 1, 7);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (3, 1, 8);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (4, 1, 9);
-INSERT INTO Agricultor (id_agricultor, isActive, id_usuario) VALUES (5, 1, 10);
+-- id_status = 1 (Accepted): agricultores sembrados quedan aprobados.
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (1, 1, 1, 6);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (2, 1, 1, 7);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (3, 1, 1, 8);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (4, 1, 1, 9);
+INSERT INTO Agricultor (id_agricultor, isActive, id_status, id_usuario) VALUES (5, 1, 1, 10);
 
 -- 4.3 Técnicos Vendedores (vinculados a usuarios 11 al 15; la ubicación vive en Usuario)
 INSERT INTO Tecnico_Vendedor (id_tecnico_vendedor, isActive, id_usuario) VALUES (1, 1, 11);
@@ -242,6 +249,25 @@ INSERT INTO vigilancia_fitosanitaria (
 	validated_at
 ) VALUES (5, 1, 2, 19.54370000, -96.91010000, 5, 2, 2, 2, 2, 18.40, 3, 3, '2026-05-12 09:20:00');
 
+-- HU-27: vigilancias validadas adicionales (id_status=1) para alimentar el mapa de plagas por zona.
+-- Zona Zapopan (Jalisco, ubic 1): 3 observaciones (Mosca de la fruta x2, Araña roja x1)
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (6, 1, 1, 20.76000000, -103.47000000, 1, 1, 1, 1, 1, 11.00, 1, 1, '2026-05-28 10:00:00');
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (7, 2, 3, 20.74000000, -103.49000000, 1, 3, 3, 3, 3, 6.50, 1, 1, '2026-05-20 11:30:00');
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (8, 1, 1, 20.75000000, -103.50000000, 1, 1, 1, 1, 1, 13.20, 1, 1, '2026-04-15 09:15:00');
+
+-- Zona Uruapan (Michoacán, ubic 2): 2 observaciones (Roya asiatica x2)
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (9, 3, 2, 19.42000000, -102.06000000, 2, 2, 2, 2, 2, 9.00, 1, 1, '2026-05-25 08:45:00');
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (10, 1, 2, 19.41000000, -102.05000000, 2, 2, 2, 2, 2, 10.50, 1, 1, '2026-05-05 12:00:00');
+
+-- Zona Culiacán (Sinaloa, ubic 3): observación adicional (Mosca de la fruta) junto a la existente (Araña roja)
+INSERT INTO vigilancia_fitosanitaria (id_vigilancia_fitosanitaria, id_sistema_monitoreo, id_cid, lat, `long`, id_ubicacion, id_plaga, id_hospedante, id_variedad, id_especie, ahosp, id_status, id_validated_by, validated_at)
+VALUES (11, 2, 1, 24.81000000, -107.40000000, 3, 1, 1, 1, 1, 8.00, 1, 1, '2026-05-18 10:20:00');
+
 -- ==========================================
 -- 6. ALERTAS Y RECOMENDACIONES PARA VALIDACIÓN
 -- ==========================================
@@ -305,6 +331,99 @@ INSERT INTO alertas (
 	id_validated_by,
 	validated_at
 ) VALUES (4, 'Reporte duplicado de mosca de la fruta', 'El reporte repite la misma evidencia de la alerta 1 y debe corregirse.', 4, 'Mosca de la fruta', 5.75, 'advertencia', 9, '2026-05-09 17:45:00', 3, 2, '2026-05-11 13:20:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (5, 'Deteccion de Roya en El Milagro', 'Riesgo critico de infeccion por roya detectado cerca del predio El Milagro. Se recomienda inspeccion inmediata de hojas maduras y monitoreo de humedad.', 1, 'Roya', 6.40, 'critico', 6, '2026-06-01 09:20:00', 1, 1, '2026-06-01 09:35:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (6, 'Alerta de Pulgon en Cultivo Cercano', 'Se detecto presencia alta de pulgon en brotes tiernos dentro de la zona de Tesistan. Revisar bordes del cultivo y preparar manejo preventivo.', 1, 'Pulgon', 4.15, 'advertencia', 6, '2026-06-01 08:45:00', 1, 1, '2026-06-01 09:05:00');
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (7, 'Posible Trips en Parcela El Milagro', 'Reporte pendiente de revision por posible presencia de trips en hojas jovenes. Requiere validacion administrativa antes de mostrarse al agricultor.', 1, 'Trips', 2.80, 'advertencia', 6, '2026-06-01 10:10:00', 2, NULL, NULL);
+
+INSERT INTO alertas (
+	id_alerta,
+	titulo,
+	descripcion,
+	id_ubicacion,
+	tipo_plaga,
+	hectareas,
+	severidad,
+	id_reported_by,
+	created_at,
+	id_status,
+	id_validated_by,
+	validated_at
+) VALUES (8, 'Revision de Mancha Foliar en Tesistan', 'Observacion enviada para confirmar mancha foliar en cultivo cercano. La alerta queda pendiente de aprobacion.', 1, 'Mancha foliar', 3.25, 'informacion', 6, '2026-06-01 10:25:00', 2, NULL, NULL);
+
+-- ── HU-26: alertas validadas (id_status=1) para alimentar las alertas tempranas por región ──
+-- Distribuidas en varios estados; las de los últimos 3 meses aparecen en el feed del vendedor.
+-- id_ubicacion → id_estado: 1=jalisco, 2=michoacán, 3=sinaloa, 4=sonora, 5=veracruz
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (9, 'Brote de gusano cogollero en maíz', 'Daño foliar confirmado en lotes de maíz; se recomienda monitoreo intensivo en Michoacán.', 2, 'Gusano cogollero', 18.00, 'critico', 6, '2026-05-20 08:30:00', 1, 1, '2026-05-20 12:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (10, 'Mosca blanca en hortalizas', 'Poblaciones elevadas de mosca blanca detectadas en Sonora; riesgo de virosis.', 4, 'Mosca blanca', 9.50, 'advertencia', 6, '2026-04-15 10:00:00', 1, 1, '2026-04-15 14:30:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (11, 'Picudo del chile en Veracruz', 'Capturas en trampas indican presencia activa del picudo; iniciar manejo preventivo.', 5, 'Picudo del chile', 7.20, 'advertencia', 6, '2026-03-28 09:15:00', 1, 1, '2026-03-29 11:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (12, 'Trips en cultivo de aguacate', 'Daño incipiente por trips en Jalisco; oportunidad de venta de control selectivo.', 1, 'Trips', 5.00, 'informacion', 6, '2026-06-02 07:50:00', 1, 1, '2026-06-02 10:20:00');
+
+-- Alerta validada pero ANTERIOR a 3 meses: NO debe aparecer en el feed (demuestra la ventana temporal).
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (13, 'Roya vieja (fuera de ventana)', 'Alerta validada de hace varios meses; queda fuera del feed de alertas tempranas.', 2, 'Roya', 4.00, 'informacion', 6, '2026-01-10 09:00:00', 1, 1, '2026-01-10 12:00:00');
+
+-- Alerta en Jalisco a ~52 km del vendedor tec1: aparece dentro de 100 km con distancia > 0.
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (14, 'Cochinilla en cítricos cercanos', 'Presencia de cochinilla en huertas de cítricos a las afueras de la zona; monitoreo recomendado.', 6, 'Cochinilla', 6.30, 'advertencia', 6, '2026-05-25 09:00:00', 1, 1, '2026-05-25 13:00:00');
+
+-- HU-26: alertas validadas y recientes a ~8/18/28 km del agricultor agri2 (ubic 2) para probar radios 10/20/30 km.
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (15, 'Pulgón a ~8 km de tu parcela', 'Brote de pulgón detectado en huertas vecinas; revisar bordes del cultivo.', 7, 'Pulgón', 3.50, 'critico', 7, '2026-05-22 08:00:00', 1, 1, '2026-05-22 12:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (16, 'Trips a ~18 km de tu parcela', 'Presencia de trips en cultivos de la zona; monitoreo recomendado.', 8, 'Trips', 5.10, 'advertencia', 7, '2026-05-18 09:30:00', 1, 1, '2026-05-18 14:00:00');
+
+INSERT INTO alertas (id_alerta, titulo, descripcion, id_ubicacion, tipo_plaga, hectareas, severidad, id_reported_by, created_at, id_status, id_validated_by, validated_at)
+VALUES (17, 'Mosca blanca a ~28 km de tu parcela', 'Poblaciones de mosca blanca reportadas en la región; riesgo de virosis.', 9, 'Mosca blanca', 4.20, 'informacion', 7, '2026-05-15 10:15:00', 1, 1, '2026-05-15 15:00:00');
 
 INSERT INTO recomendaciones (
 	id_recomendacion,
@@ -390,22 +509,27 @@ INSERT INTO Proveedores (id_proveedor, id_usuario, nombre) VALUES (5, 15, 'Semil
 -- ==========================================
 -- Productos 1-5: coinciden con los IDs del mock de la app mobile (SCRUM-207)
 -- Agricultor 1 (id_usuario=6) tiene un pedido entregado con estos productos (ver sección 10/11)
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1, 1, 'Insecticida Ultra',   'PLG-M01', 3, 1,  80.0, 2, 'Insecticida de amplio espectro',      1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (2, 1, 'Fungicida Mancozeb',  'PLG-M02', 4, 1, 120.0, 1, 'Fungicida protector preventivo',      1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (3, 1, 'Fertilizante Bio',    'PLG-M03', 1, 1,  50.0, 1, 'Fertilizante organico enriquecido',   1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (4, 1, 'Plaguicida Pro',      'PLG-M04', 3, 1, 150.0, 2, 'Plaguicida de alto rendimiento',      1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (5, 1, 'Herbicida 2,4-D',     'PLG-M05', 2, 1,  90.0, 2, 'Herbicida sistemico selectivo',       1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1, 1, 'Insecticida Ultra',   'PLG-M01', 3, 1,  80.0, 2, 'Insecticida de amplio espectro',      1, '/marketplace-images/insecticida-ultra.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (2, 1, 'Fungicida Mancozeb',  'PLG-M02', 4, 1, 120.0, 1, 'Fungicida protector preventivo',      1, '/marketplace-images/fungicida-mancozeb.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (3, 1, 'Fertilizante Bio',    'PLG-M03', 1, 1,  50.0, 1, 'Fertilizante organico enriquecido',   1, '/marketplace-images/fertilizante-bio.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (4, 1, 'Plaguicida Pro',      'PLG-M04', 3, 1, 150.0, 2, 'Plaguicida de alto rendimiento',      1, '/marketplace-images/plaguicida-pro.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (5, 1, 'Herbicida 2,4-D',     'PLG-M05', 2, 1,  90.0, 2, 'Herbicida sistemico selectivo',       1, '/marketplace-images/herbicida-24d.svg');
 -- Productos 1001-1010: catálogo del marketplace web (2 por vendedor)
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1001, 1, 'Fertilizante NPK 20-20-20',  'PLG-001', 1, 1, 250.0, 1, 'Fertilizante balanceado para cultivos', 1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1002, 1, 'Herbicida Glifosato 36%',    'PLG-002', 2, 1, 180.0, 2, 'Control de malezas de hoja ancha',     1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1003, 2, 'Insecticida Clorpirifos 48E','PLG-003', 3, 2, 320.0, 2, 'Control de plagas del suelo',          1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1004, 2, 'Fungicida Mancozeb 80%',    'PLG-004', 4, 2, 145.0, 1, 'Proteccion contra hongos foliares',    1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1005, 3, 'Semilla Maiz Hibrido H-318','PLG-005', 5, 3, 890.0, 1, 'Semilla certificada alto rendimiento', 1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1006, 3, 'Semilla Sorgo Hibrido H-50','PLG-006', 5, 3, 650.0, 1, 'Semilla sorgo resistente a sequia',    1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1007, 4, 'Bioestimulante Auxinas',    'PLG-007', 1, 4,  95.0, 2, 'Promotor de enraizamiento',            1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1008, 4, 'Sulfato de Magnesio',       'PLG-008', 2, 4,  60.0, 1, 'Corrector de deficiencias de Mg',     1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1009, 5, 'Abono Organico Compostado', 'PLG-009', 8, 5,  45.0, 1, 'Mejora estructura del suelo',          1);
-INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1);
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1001, 1, 'Fertilizante NPK 20-20-20',  'PLG-001', 1, 1, 250.0, 1, 'Fertilizante balanceado para cultivos', 1, '/marketplace-images/fertilizante-bio.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1002, 1, 'Herbicida Glifosato 36%',    'PLG-002', 2, 1, 180.0, 2, 'Control de malezas de hoja ancha',     1, '/marketplace-images/herbicida-24d.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1003, 2, 'Insecticida Clorpirifos 48E','PLG-003', 3, 2, 320.0, 2, 'Control de plagas del suelo',          1, '/marketplace-images/insecticida-ultra.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1004, 2, 'Fungicida Mancozeb 80%',    'PLG-004', 4, 2, 145.0, 1, 'Proteccion contra hongos foliares',    1, '/marketplace-images/fungicida-mancozeb.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1005, 3, 'Semilla Maiz Hibrido H-318','PLG-005', 5, 3, 890.0, 1, 'Semilla certificada alto rendimiento', 1, '/marketplace-images/semilla-maiz.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1006, 3, 'Semilla Sorgo Hibrido H-50','PLG-006', 5, 3, 650.0, 1, 'Semilla sorgo resistente a sequia',    1, '/marketplace-images/semilla-maiz.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1007, 4, 'Bioestimulante Auxinas',    'PLG-007', 1, 4,  95.0, 2, 'Promotor de enraizamiento',            1, '/marketplace-images/fertilizante-bio.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1008, 4, 'Sulfato de Magnesio',       'PLG-008', 2, 4,  60.0, 1, 'Corrector de deficiencias de Mg',     1, '/marketplace-images/cal-agricola.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1009, 5, 'Abono Organico Compostado', 'PLG-009', 8, 5,  45.0, 1, 'Mejora estructura del suelo',          1, '/marketplace-images/abono-organico.svg');
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (1010, 5, 'Cal Agricola 90%',          'PLG-010', 2, 5,  30.0, 1, 'Corrector de pH acido',               1, '/marketplace-images/cal-agricola.svg');
+
+-- HU-24: producto de ejemplo claramente fitosanitario, comprable, para las recomendaciones de la IA.
+INSERT INTO Productos (sku_id_vendedor, id_vendedor, nombre, sku, id_categoria, id_proveedor, valor_unidad, id_unidad, descripcion, id_status, imagen_firebase_id) VALUES (6, 1, 'Insecticida Malathion 1000E', 'PLG-M06', 3, 1, 110.0, 2, 'Control de mosca de la fruta y plagas de huerto', 1, '/marketplace-images/insecticida-ultra.svg');
+INSERT INTO Precios (id_precio, sku_id_vendedor, precio, fecha_precio) VALUES (9001, 6, 110.00000, '2026-05-20 09:00:00');
+INSERT INTO Inventario (id_inventario, sku_id_vendedor, cantidad, id_accion_inventario) VALUES (9001, 6, 80, 1);
 
 -- ==========================================
 -- 8.B PRECIOS (historico por producto; el mas reciente = valor_unidad del producto)

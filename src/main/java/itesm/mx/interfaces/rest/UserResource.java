@@ -8,6 +8,7 @@ import itesm.mx.application.dto.GetUserResponseDto;
 import itesm.mx.application.dto.UpdateUserDto;
 import itesm.mx.application.dto.UserPageResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
+import itesm.mx.application.security.CurrentUser;
 import itesm.mx.application.usecase.users.DeactivateUserUseCase;
 import itesm.mx.application.usecase.users.GetAllUsersUseCase;
 import itesm.mx.application.usecase.users.GetUserByIdUseCase;
@@ -117,25 +118,39 @@ public class UserResource {
 
     @PUT
     @Path("/{id}")
-    @Operation(summary = "Update user", description = "Updates a user record. Admin-only endpoint.")
+    @Operation(summary = "Update user", description = "Updates a user record. Admins can update any user; authenticated users can update their own profile fields.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UpdateUserDto.class)))
     @APIResponses({
             @APIResponse(responseCode = "200", description = "User updated", content = @Content(schema = @Schema(implementation = GetUserResponseDto.class))),
             @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
             @APIResponse(responseCode = "401", description = "Authentication required"),
-            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "403", description = "Not allowed to update this user or field"),
             @APIResponse(responseCode = "404", description = "User not found"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     public Response updateUser(@PathParam("id") Long id, UpdateUserDto updateUserDto) {
-        if (authenticatedUserContext.getCurrentUser() == null) {
+        CurrentUser currentUser = authenticatedUserContext.getCurrentUser();
+
+        if (currentUser == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
-        }
-        if (!ADMIN_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
-            return errorResponse(Response.Status.FORBIDDEN, "Solo un administrador puede actualizar usuarios");
         }
         if (updateUserDto == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+
+        boolean isAdmin = ADMIN_ROLE_ID.equals(currentUser.getRoleId());
+        boolean isSelf = currentUser.getUserId().equals(id);
+
+        if (!isAdmin && !isSelf) {
+            return errorResponse(Response.Status.FORBIDDEN, "No tienes permiso para actualizar este usuario");
+        }
+
+        if (!isAdmin && updateUserDto.roleId != null) {
+            return errorResponse(Response.Status.FORBIDDEN, "No puedes cambiar tu rol desde el perfil");
+        }
+
+        if (!isAdmin && updateUserDto.isActive != null) {
+            return errorResponse(Response.Status.FORBIDDEN, "No puedes cambiar el estado de tu cuenta desde el perfil");
         }
 
         try {

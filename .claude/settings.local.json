@@ -53,7 +53,10 @@
       "Bash(./mvnw -q verify -DskipITs=false -Dtest='*' -Dit.test='ProductResourceIntegrationTest,PriceResourceIntegrationTest')",
       "Bash(./mvnw -q test -Dtest='ProductResourceIntegrationTest,PriceResourceIntegrationTest,UpdateProductUseCaseTest')",
       "Bash(xargs -I{} sh -c 'jq -r \"select\\(.message.role==\\\\\"assistant\\\\\"\\) | .message.content[]? | select\\(.type==\\\\\"tool_use\\\\\"\\) | select\\(.name==\\\\\"Bash\\\\\"\\) | .input.command\" \"{}\" 2>/dev/null')",
-      "Bash(awk \"{print \\\\$1, \\\\$2}\")"
+      "Bash(awk \"{print \\\\$1, \\\\$2}\")",
+      "Bash(ls -1 *.log)",
+      "Bash(ls -1 target/*.log)",
+      "Bash(find . -maxdepth 2 -name '*.log' -newermt '-10 minutes')"
     ],
     "deny": [
       "Bash(rm:*)",

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Abono organico">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fefce8"/>
+      <stop offset="1" stop-color="#d9f99d"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="42" fill="url(#bg)"/>
+  <circle cx="136" cy="98" r="76" fill="#ffffff" opacity=".45"/>
+  <path d="M218 118h204l34 201H184z" fill="#84cc16"/>
+  <path d="M250 151h140l21 129H229z" fill="#ffffff"/>
+  <path d="M320 245v-83" stroke="#65a30d" stroke-width="17" stroke-linecap="round"/>
+  <path d="M318 183c-45-8-72-36-76-75 51 2 82 30 76 75zm4 7c48-5 80-31 88-70-52-5-85 21-88 70z" fill="#65a30d"/>
+  <text x="320" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="31" font-weight="800" fill="#365314">ABONO</text>
+</svg>

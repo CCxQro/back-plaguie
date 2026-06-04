@@ -11,6 +11,7 @@ import itesm.mx.application.usecase.location.location.RegisterLocationUseCase;
 import itesm.mx.application.usecase.location.location.UpdateLocationUseCase;
 import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.location.LocationData;
+import itesm.mx.domain.models.user.AccountStatusConstants;
 import itesm.mx.domain.models.user.Administrator;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
@@ -72,6 +73,19 @@ public class UpdateUserUseCase {
 
         User existing = userRepository.findUserById(userId)
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado con id: " + userId));
+
+        // Guard: a rejected farmer cannot be reactivated via the generic user update.
+        // The admin must first reset the farmer's approval status through the dedicated
+        // farmer-status endpoint before the account can be made active again.
+        if (Boolean.TRUE.equals(updateUserDto.isActive) && RoleConstants.FARMER.equals(existing.getRoleId())) {
+            farmerRepository.findByIdUser(userId).ifPresent(farmer -> {
+                if (AccountStatusConstants.REJECTED.equals(farmer.getStatusId())) {
+                    throw new IllegalArgumentException(
+                            "No se puede reactivar una cuenta de agricultor rechazada. " +
+                            "Cambie primero el estado de revisión del agricultor.");
+                }
+            });
+        }
 
         Integer currentRoleId = existing.getRoleId();
         Integer newRoleId = updateUserDto.roleId;

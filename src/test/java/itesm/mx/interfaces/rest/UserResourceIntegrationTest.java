@@ -254,7 +254,29 @@ class UserResourceIntegrationTest {
     }
 
     @Test
-    void updateUser_WhenNonAdmin_Returns403() throws Exception {
+    void updateUser_WhenSelfUpdatesAllowedFields_Returns200() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
+
+        UpdateUserDto dto = new UpdateUserDto();
+        dto.name = "New Name";
+
+        when(updateUserUseCase.execute(eq(farmerId), any(UpdateUserDto.class))).thenReturn(
+                new GetUserResponseDto(farmerId, "uuid-farmer-user", "New Name", "farmer@itesm.mx", 2, true)
+        );
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .put("/api/users/" + farmerId)
+        .then()
+            .statusCode(200)
+            .body("name", equalTo("New Name"));
+    }
+
+    @Test
+    void updateUser_WhenNonAdminUpdatesOtherUser_Returns403() throws Exception {
         when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
 
         UpdateUserDto dto = new UpdateUserDto();
@@ -265,10 +287,48 @@ class UserResourceIntegrationTest {
             .contentType(ContentType.JSON)
             .body(dto)
         .when()
+            .put("/api/users/" + adminId)
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("No tienes permiso para actualizar este usuario"));
+    }
+
+    @Test
+    void updateUser_WhenSelfAttemptsRoleUpdate_Returns403() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
+
+        UpdateUserDto dto = new UpdateUserDto();
+        dto.name = "New Name";
+        dto.roleId = 1;
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
             .put("/api/users/" + farmerId)
         .then()
             .statusCode(403)
-            .body("error", equalTo("Solo un administrador puede actualizar usuarios"));
+            .body("error", equalTo("No puedes cambiar tu rol desde el perfil"));
+    }
+
+    @Test
+    void updateUser_WhenSelfAttemptsStatusUpdate_Returns403() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
+
+        UpdateUserDto dto = new UpdateUserDto();
+        dto.name = "New Name";
+        dto.isActive = false;
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .put("/api/users/" + farmerId)
+        .then()
+            .statusCode(403)
+            .body("error", equalTo("No puedes cambiar el estado de tu cuenta desde el perfil"));
     }
 
     @Test

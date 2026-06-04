@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Cal agricola">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#cbd5e1"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="42" fill="url(#bg)"/>
+  <circle cx="500" cy="94" r="78" fill="#ffffff" opacity=".5"/>
+  <path d="M222 120h196l32 199H190z" fill="#64748b"/>
+  <path d="M253 153h134l20 126H233z" fill="#ffffff"/>
+  <circle cx="320" cy="215" r="50" fill="#94a3b8"/>
+  <text x="320" y="229" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="900" fill="#ffffff">pH</text>
+  <text x="320" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="31" font-weight="800" fill="#334155">CAL AGRICOLA</text>
+</svg>

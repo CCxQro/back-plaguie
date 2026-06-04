@@ -6,13 +6,17 @@ import itesm.mx.application.usecase.users.subUsers.GetAllAdministratorsUseCase;
 import itesm.mx.application.usecase.users.subUsers.GetAllFarmersUseCase;
 import itesm.mx.application.usecase.users.subUsers.GetAllTechnicalSellersUseCase;
 import itesm.mx.application.usecase.users.subUsers.GetFarmerByUserIdUseCase;
+import itesm.mx.application.usecase.users.subUsers.GetPendingFarmersUseCase;
 import itesm.mx.application.usecase.users.subUsers.GetTechnicalSellerByUserIdUseCase;
+import itesm.mx.application.usecase.users.subUsers.SetFarmerAccountStatusUseCase;
+import itesm.mx.domain.models.user.AccountStatusConstants;
 import itesm.mx.domain.models.user.Administrator;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.models.user.TechnicalSeller;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -39,6 +43,12 @@ public class SubUsersResource {
 
     @Inject
     GetAllFarmersUseCase getAllFarmersUseCase;
+
+    @Inject
+    GetPendingFarmersUseCase getPendingFarmersUseCase;
+
+    @Inject
+    SetFarmerAccountStatusUseCase setFarmerAccountStatusUseCase;
 
     @Inject
     GetAllTechnicalSellersUseCase getAllTechnicalSellersUseCase;
@@ -78,6 +88,79 @@ public class SubUsersResource {
         try {
             List<Farmer> farmers = getAllFarmersUseCase.execute();
             return Response.ok(farmers).build();
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/farmers/pending")
+    @Operation(summary = "List pending farmer accounts", description = "Returns farmer accounts awaiting administrator approval (status = Revision). Admin-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Pending farmers returned", content = @Content(schema = @Schema(implementation = Farmer[].class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getPendingFarmers() {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!ADMIN_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un administrador puede listar cuentas pendientes");
+        }
+
+        try {
+            List<Farmer> pending = getPendingFarmersUseCase.execute();
+            return Response.ok(pending).build();
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @POST
+    @Path("/farmers/{userId}/approve")
+    @Operation(summary = "Approve farmer account", description = "Sets a farmer account status to Accepted so the user can log in. Admin-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Farmer approved", content = @Content(schema = @Schema(implementation = Farmer.class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "404", description = "Farmer not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response approveFarmer(@PathParam("userId") Long userId) {
+        return changeFarmerStatus(userId, AccountStatusConstants.ACCEPTED, "aprobar");
+    }
+
+    @POST
+    @Path("/farmers/{userId}/reject")
+    @Operation(summary = "Reject farmer account", description = "Sets a farmer account status to Rejected so the user is denied access. Admin-only endpoint.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Farmer rejected", content = @Content(schema = @Schema(implementation = Farmer.class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Admin role required"),
+            @APIResponse(responseCode = "404", description = "Farmer not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response rejectFarmer(@PathParam("userId") Long userId) {
+        return changeFarmerStatus(userId, AccountStatusConstants.REJECTED, "rechazar");
+    }
+
+    private Response changeFarmerStatus(Long userId, Long statusId, String action) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!ADMIN_ROLE_ID.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un administrador puede " + action + " cuentas");
+        }
+
+        try {
+            Farmer farmer = setFarmerAccountStatusUseCase.execute(userId, statusId);
+            return Response.ok(farmer).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
         } catch (RuntimeException e) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
         }

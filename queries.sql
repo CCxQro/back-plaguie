@@ -146,6 +146,30 @@ INSERT INTO Parcela (nombre_parcela, tamano_hectareas, fecha_siembra, fecha_cose
                      id_tipo_cultivo, id_sistema_riego, activo)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- =====================================================================
+-- ParcelaCatalogRepositoryImpl
+-- Existence checks for the catalog IDs referenced when registering a parcela
+-- (FKs use NO_CONSTRAINT, so these are validated in the use case).
+-- =====================================================================
+
+-- estadoParcelaExists(Long)
+SELECT * FROM Estados_Parcelas WHERE id_estado_parcela = ?;
+
+-- tipoCultivoExists(Long)
+SELECT * FROM Tipos_Cultivos WHERE id_tipo_cultivo = ?;
+
+-- sistemaRiegoExists(Long)
+SELECT * FROM Sistemas_Riego WHERE id_sistema_riego = ?;
+
+-- findAllEstadosParcela()
+SELECT id_estado_parcela, nombre FROM Estados_Parcelas ORDER BY id_estado_parcela;
+
+-- findAllTiposCultivo()
+SELECT id_tipo_cultivo, nombre, fecha_siembra, fecha_cosecha FROM Tipos_Cultivos ORDER BY id_tipo_cultivo;
+
+-- findAllSistemasRiego()
+SELECT id_sistema_riego, nombre FROM Sistemas_Riego ORDER BY id_sistema_riego;
+
 -- update(Parcela)
 UPDATE Parcela
 SET nombre_parcela     = ?,
@@ -182,3 +206,47 @@ SET coordenadas = ?,
     id_localidad = ?,
     id_predio = ?
 WHERE id_ubicacion = ?;
+
+-- =====================================================================
+-- AlertaRepositoryImpl (HU-26 addition)
+-- =====================================================================
+
+-- findValidatedSince(LocalDateTime since)
+-- todas las alertas validadas de los últimos 3 meses, enriquecidas con estado y
+-- coordenadas (join a Ubicacion/Estados). La distancia al vendedor y el filtro por
+-- radio (default 100 km) se calculan en el use case GetNearbyEarlyAlertsUseCase (CA-02).
+SELECT a.*
+FROM alertas a
+LEFT JOIN Ubicacion u ON a.id_ubicacion = u.id_ubicacion
+LEFT JOIN Estados e ON u.id_estado = e.id_estado
+WHERE a.id_status = 1 AND a.created_at >= ?
+ORDER BY a.created_at DESC;
+
+
+-- =====================================================================
+-- PestMapRepositoryImpl (HU-27)
+-- =====================================================================
+
+-- findValidatedMapPoints() -- observaciones validadas con coordenadas, enriquecidas
+-- con estado y municipio, para el mapa interactivo de plagas (CA-04).
+SELECT v.id_vigilancia_fitosanitaria,
+       v.lat,
+       v.`long`,
+       p.nombre  AS plaga,
+       h.nombre  AS hospedante,
+       e.nombre  AS especie,
+       est.nombre AS estado,
+       mun.nombre AS municipio,
+       v.ahosp,
+       v.validated_at
+FROM vigilancia_fitosanitaria v
+LEFT JOIN Plaga p       ON v.id_plaga = p.id_plaga
+LEFT JOIN Hospedante h  ON v.id_hospedante = h.id_hospedante
+LEFT JOIN Especie e     ON v.id_especie = e.id_especie
+LEFT JOIN Ubicacion u   ON v.id_ubicacion = u.id_ubicacion
+LEFT JOIN Estados est   ON u.id_estado = est.id_estado
+LEFT JOIN Municipios mun ON u.id_municipio = mun.id_municipio
+WHERE v.id_status = 1
+  AND v.lat IS NOT NULL
+  AND v.`long` IS NOT NULL
+ORDER BY v.validated_at DESC;

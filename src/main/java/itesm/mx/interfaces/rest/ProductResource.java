@@ -335,7 +335,7 @@ public class ProductResource {
             dto.statusName = product.getStatus().getName();
         }
 
-        dto.firebaseImageId = product.getFirebaseImageId();
+        dto.firebaseImageId = resolveProductImageId(product);
         dto.latestPrice = product.getLatestPrice();
         dto.latestPriceDate = product.getLatestPriceDate();
         dto.stock = product.getStock();
@@ -343,4 +343,51 @@ public class ProductResource {
 
         return dto;
     }
+
+    private String resolveProductImageId(Product product) {
+        if (product.getFirebaseImageId() != null && !product.getFirebaseImageId().isBlank()) {
+            return product.getFirebaseImageId();
+        }
+
+        String seededImageId = getSeededMarketplaceImageId(product.getSkuSellerId());
+        if (seededImageId != null) {
+            return seededImageId;
+        }
+
+        return null;
+    }
+
+    private String getSeededMarketplaceImageId(Long skuSellerId) {
+        if (skuSellerId == null) {
+            return null;
+        }
+
+        if (skuSellerId == 1L || skuSellerId == 1003L) {
+            return "/marketplace-images/insecticida-ultra.svg";
+        }
+        if (skuSellerId == 2L || skuSellerId == 1004L) {
+            return "/marketplace-images/fungicida-mancozeb.svg";
+        }
+        if (skuSellerId == 3L || skuSellerId == 1001L || skuSellerId == 1007L) {
+            return "/marketplace-images/fertilizante-bio.svg";
+        }
+        if (skuSellerId == 4L) {
+            return "/marketplace-images/plaguicida-pro.svg";
+        }
+        if (skuSellerId == 5L || skuSellerId == 1002L) {
+            return "/marketplace-images/herbicida-24d.svg";
+        }
+        if (skuSellerId == 1005L || skuSellerId == 1006L) {
+            return "/marketplace-images/semilla-maiz.svg";
+        }
+        if (skuSellerId == 1009L) {
+            return "/marketplace-images/abono-organico.svg";
+        }
+        if (skuSellerId == 1008L || skuSellerId == 1010L) {
+            return "/marketplace-images/cal-agricola.svg";
+        }
+
+        return null;
+    }
+
 }

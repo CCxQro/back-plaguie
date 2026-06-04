@@ -35,6 +35,19 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
     }
 
     @Override
+    public List<Alerta> findValidatedSince(java.time.LocalDateTime since) {
+        // Accepted = 1 (Status catalog). All validated alerts created on/after `since`,
+        // across every state; region filtering is applied client-side (HU-26 CA-02).
+        return findDetailedQuery(
+                "where a.statusId = 1 and a.createdAt >= ?1 order by a.createdAt desc",
+                since)
+                .list()
+                .stream()
+                .map(AlertaMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Alerta save(Alerta alerta) {
         AlertaEntity entity = AlertaMapper.toEntity(alerta);
         persistAndFlush(entity);
@@ -101,7 +114,8 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
         String query = """
                 select a
                 from AlertaEntity a
-                left join fetch a.ubicacion
+                left join fetch a.ubicacion ubi
+                left join fetch ubi.state
                 left join fetch a.reportedBy
                 left join fetch a.status
                 left join fetch a.validatedBy

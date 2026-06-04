@@ -65,7 +65,12 @@ public class ParcelaRepositoryImpl implements PanacheRepositoryBase<ParcelaEntit
         ParcelaEntity entity = ParcelaMapper.toEntity(parcela);
         getEntityManager().persist(entity);
         getEntityManager().flush();
-        return findParcelaById(entity.parcelaId)
+        // Detach so the JOIN FETCH re-fetch loads a clean graph from the DB.
+        // Otherwise the managed instance (with null to-one associations but set
+        // FK columns) makes Hibernate raise FetchNotFoundException on re-read.
+        Long newId = entity.parcelaId;
+        getEntityManager().detach(entity);
+        return findParcelaById(newId)
                 .orElseThrow(() -> new IllegalStateException("No se pudo recuperar la parcela recién registrada"));
     }
 
