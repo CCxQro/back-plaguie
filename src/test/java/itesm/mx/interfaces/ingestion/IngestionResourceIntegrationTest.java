@@ -2,7 +2,6 @@ package itesm.mx.interfaces.ingestion;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import io.quarkus.test.InjectMock;
-import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import itesm.mx.application.usecase.ingestion.GetIngestionRunsUseCase;
@@ -33,7 +32,6 @@ import static org.mockito.Mockito.when;
  */
 @QuarkusTest
 @TestProfile(H2TestProfile.class)
-@QuarkusTestResource(KafkaTestResource.class)
 class IngestionResourceIntegrationTest {
 
     @InjectMock FirebaseTokenVerifier firebaseTokenVerifier;

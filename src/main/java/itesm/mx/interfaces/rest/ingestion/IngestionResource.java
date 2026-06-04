@@ -51,8 +51,8 @@ public class IngestionResource {
 
     private static final Logger LOG = Logger.getLogger(IngestionResource.class);
 
-    /** 50 MB upload cap (bytes). */
-    private static final long MAX_UPLOAD_BYTES = 50L * 1024 * 1024;
+    /** 300 MB upload cap (bytes). */
+    private static final long MAX_UPLOAD_BYTES = 300L * 1024 * 1024;
 
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
@@ -64,7 +64,7 @@ public class IngestionResource {
     GetIngestionRunsUseCase getIngestionRunsUseCase;
 
     @Inject
-    @Channel("ingestion-progress-in")
+    @Channel("ingestion-progress")
     Multi<IngestionProgressEvent> progressStream;
 
     // ---- POST /api/ingestion/upload ----
@@ -74,7 +74,7 @@ public class IngestionResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Upload SENASICA CSV for ingestion",
-               description = "Admin only. Accepts a CSV file (≤50 MB), deduplicates by SHA-256 checksum, "
+               description = "Admin only. Accepts a CSV file (≤300 MB), deduplicates by SHA-256 checksum, "
                        + "and queues it for processing. Original filename stored in source_url column.")
     @APIResponses({
             @APIResponse(responseCode = "200",  description = "File accepted and queued (or already ingested)"),
@@ -123,7 +123,7 @@ public class IngestionResource {
         }
         if (fileSize > MAX_UPLOAD_BYTES) {
             return errorResponse(Response.Status.BAD_REQUEST,
-                    "El archivo excede el límite de 50 MB (tamaño recibido: " + fileSize + " bytes)");
+                    "El archivo excede el límite de 300 MB (tamaño recibido: " + fileSize + " bytes)");
         }
 
         // Read bytes, compute SHA-256
