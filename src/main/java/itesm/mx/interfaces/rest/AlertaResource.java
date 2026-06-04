@@ -7,6 +7,7 @@ import itesm.mx.application.dto.ValidateVigilanciaDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.alerta.CreateAlertaUseCase;
 import itesm.mx.application.usecase.alerta.GetAlertaByIdUseCase;
+import itesm.mx.application.usecase.alerta.GetAlertasCercanasParcelaUseCase;
 import itesm.mx.application.usecase.alerta.GetAllAlertasUseCase;
 import itesm.mx.application.usecase.alerta.ValidateAlertaUseCase;
 import itesm.mx.application.usecase.region.GetNearbyEarlyAlertsUseCase;
@@ -55,6 +56,9 @@ public class AlertaResource {
 
     @Inject
     GetNearbyEarlyAlertsUseCase getNearbyEarlyAlertsUseCase;
+
+    @Inject
+    GetAlertasCercanasParcelaUseCase getAlertasCercanasParcelaUseCase;
 
     @Inject
     GetAlertaByIdUseCase getAlertaByIdUseCase;
@@ -155,41 +159,35 @@ public class AlertaResource {
     }
 
     /**
-     * HU-28 (SCRUM-309): Returns pest alerts near a specific parcela's coordinates,
-     * instead of the user's profile location.
-     * Accessible by authenticated farmers and sellers.
+     * HU-28 (SCRUM-326): Devuelve alertas validadas cercanas a las coordenadas GPS
+     * de una parcela específica. Disponible para cualquier usuario autenticado.
      */
     @GET
     @Path("/cercanas/parcela")
     @Operation(summary = "Alertas cercanas a parcela",
-            description = "Devuelve alertas validadas de los últimos 3 meses dentro de un radio (por defecto 100 km) "
-                    + "de las coordenadas GPS de la parcela indicada (HU-28 / SCRUM-309).")
+            description = "Devuelve alertas validadas de los últimos 3 meses dentro de un radio "
+                    + "(por defecto 50 km) de las coordenadas GPS de la parcela indicada (HU-28 / SCRUM-326).")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Alertas cercanas a la parcela",
-                    content = @Content(schema = @Schema(implementation = GetEarlyAlertaResponseDto[].class))),
-            @APIResponse(responseCode = "400", description = "Lat/lon inválidos"),
+                    content = @Content(schema = @Schema(implementation = GetAlertaResponseDto[].class))),
+            @APIResponse(responseCode = "400", description = "Los parámetros lat y lon son requeridos"),
             @APIResponse(responseCode = "401", description = "Autenticación requerida"),
-            @APIResponse(responseCode = "403", description = "Rol no autorizado")
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
     })
     public Response getAlertasCercanasAParcela(
             @QueryParam("lat") Double lat,
             @QueryParam("lon") Double lon,
-            @QueryParam("radioKm") @DefaultValue("100") double radioKm) {
+            @QueryParam("radioKm") @DefaultValue("50.0") double radioKm) {
 
         if (authenticatedUserContext.getCurrentUser() == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
-        }
-        Integer roleId = authenticatedUserContext.getCurrentUser().getRoleId();
-        if (roleId == null || (!RoleConstants.FARMER.equals(roleId) && !RoleConstants.SELLER.equals(roleId) && !RoleConstants.ADMIN.equals(roleId))) {
-            return errorResponse(Response.Status.FORBIDDEN,
-                    "Solo agricultores, vendedores y administradores pueden consultar alertas de parcela");
         }
         if (lat == null || lon == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "Los parámetros lat y lon son requeridos");
         }
 
         try {
-            List<GetEarlyAlertaResponseDto> alertas = getNearbyEarlyAlertsUseCase.executeForCoordinates(lat, lon, radioKm);
+            List<GetAlertaResponseDto> alertas = getAlertasCercanasParcelaUseCase.execute(lat, lon, radioKm);
             return Response.ok(alertas).build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
