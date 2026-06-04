@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "result": {
+    "name": "programas_vigilancia_epidemiologica_fitosanitaria",
+    "title": "Programas de Vigilancia Epidemiológica Fitosanitaria",
+    "resources": [
+      {
+        "id": "abc123",
+        "name": "Vigilancia_fitosanitara_4o_Trimestre",
+        "url": "https://repodatos.atdt.gob.mx/api_update/senasica/programas_vigilancia_epidemiologica_fitosanitaria/Vigilancia_fitosanitara_4o_Trimestre.csv",
+        "format": "CSV",
+        "last_modified": "2025-12-01T00:00:00"
+      },
+      {
+        "id": "def456",
+        "name": "Vigilancia_fitosanitara_3er_Trimestre",
+        "url": "https://repodatos.atdt.gob.mx/api_update/senasica/programas_vigilancia_epidemiologica_fitosanitaria/Vigilancia_fitosanitara_3er_Trimestre.csv",
+        "format": "CSV",
+        "last_modified": "2025-09-01T00:00:00"
+      },
+      {
+        "id": "ghi789",
+        "name": "Some PDF doc",
+        "url": "https://repodatos.atdt.gob.mx/docs/some.pdf",
+        "format": "PDF",
+        "last_modified": "2025-01-01T00:00:00"
+      }
+    ]
+  }
+}
