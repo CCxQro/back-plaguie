@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import itesm.mx.application.dto.ParcelaResponseDto;
+import itesm.mx.domain.models.marketplace.Product;
 import itesm.mx.domain.models.recomendacion.RecomendacionProducto;
 import itesm.mx.domain.models.reporte.HistoricoVigilanciaSummary;
 import itesm.mx.domain.models.reporte.Temporada;
@@ -67,14 +68,17 @@ public class GeminiProductRecommendationProvider {
 
     public RecomendacionResult recommend(String region, Temporada temporada,
                                           List<ParcelaResponseDto> parcelas,
-                                          List<HistoricoVigilanciaSummary> historico) {
+                                          List<HistoricoVigilanciaSummary> historico,
+                                          List<Product> availableProducts) {
+        List<Product> catalog = availableProducts != null ? availableProducts : List.of();
+
         if (apiKey == null || apiKey.isBlank()) {
             LOG.warn("GEMINI_API_KEY no configurada: generando recomendaciones heurísticas");
-            return fallback(region, temporada, parcelas, historico);
+            return fallback(region, temporada, parcelas, historico, catalog);
         }
 
         try {
-            String prompt = buildPrompt(region, temporada, parcelas, historico);
+            String prompt = buildPrompt(region, temporada, parcelas, historico, catalog);
             String body = buildRequestBody(prompt);
             String endpoint = baseUrl + "/v1beta/models/"
                     + URLEncoder.encode(model, StandardCharsets.UTF_8)
@@ -82,13 +86,13 @@ public class GeminiProductRecommendationProvider {
                     + URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
 
             String response = geminiHttpClient.generateContent(endpoint, body, timeoutSeconds);
-            return parseResponse(response, region, temporada, parcelas, historico);
+            return parseResponse(response, region, temporada, parcelas, historico, catalog);
         } catch (Exception e) {
             // Expected, handled condition (quota/connectivity): log a single WARN line,
             // not a full ERROR stack trace, since we degrade gracefully (HU-24 CA-03).
             LOG.warnf("Gemini no disponible para recomendaciones (region=%s); usando fallback heurístico. Causa: %s",
                     region, e.getMessage());
-            return fallback(region, temporada, parcelas, historico);
+            return fallback(region, temporada, parcelas, historico, catalog);
         }
     }
 
@@ -96,7 +100,8 @@ public class GeminiProductRecommendationProvider {
 
     private String buildPrompt(String region, Temporada temporada,
                                 List<ParcelaResponseDto> parcelas,
-                                List<HistoricoVigilanciaSummary> historico) {
+                                List<HistoricoVigilanciaSummary> historico,
+                                List<Product> catalog) {
         StringBuilder sb = new StringBuilder();
         sb.append("Eres un agrónomo experto en sanidad vegetal en México. ")
           .append("Tu tarea es generar recomendaciones de productos fitosanitarios personalizadas ")
@@ -134,6 +139,18 @@ public class GeminiProductRecommendationProvider {
             }
         }
 
+        sb.append("\nPRODUCTOS DISPONIBLES EN EL MERCADO (nombre | categoría | precio MXN):\n");
+        if (catalog.isEmpty()) {
+            sb.append("(sin productos en el catálogo)\n");
+        } else {
+            for (Product p : catalog) {
+                sb.append("- ").append(nullSafe(p.getName()))
+                  .append(" | ").append(p.getCategory() != null ? nullSafe(p.getCategory().getName()) : "-")
+                  .append(" | ").append(p.getLatestPrice() != null ? p.getLatestPrice().toPlainString() : "-")
+                  .append('\n');
+            }
+        }
+
         sb.append("\nResponde EXCLUSIVAMENTE con un JSON válido (sin texto adicional ni bloques de código) ")
           .append("con la siguiente estructura:\n")
           .append("{\n")
@@ -152,9 +169,12 @@ public class GeminiProductRecommendationProvider {
           .append("Reglas:\n")
           .append("- 'resumenSituacion': párrafo breve (2-3 oraciones) describiendo la situación fitosanitaria ")
           .append("actual del agricultor basada en sus cultivos y la región.\n")
-          .append("- 'recomendaciones': 3 a 6 productos fitosanitarios concretos y comercialmente disponibles ")
-          .append("en México, ordenados por nivelUrgencia descendente.\n")
-          .append("- Usa los nombres comerciales reales de productos cuando sea posible.\n")
+          .append("- 'recomendaciones': 3 a 6 productos fitosanitarios concretos, ordenados por nivelUrgencia descendente.\n")
+          .append("- PRIORIZA recomendar productos de la lista 'PRODUCTOS DISPONIBLES EN EL MERCADO' cuando sean ")
+          .append("adecuados para las plagas/cultivos del agricultor. Cuando recomiendes uno del catálogo, copia ")
+          .append("EXACTAMENTE su nombre tal cual aparece en la lista en el campo 'productoSugerido' (así el agricultor ")
+          .append("podrá comprarlo directamente). Solo si ningún producto del catálogo aplica, sugiere un producto ")
+          .append("comercial genérico.\n")
           .append("- 'dosisEstimada': incluye unidad (ej. '2 ml/L', '1 kg/ha', '500 g/100L').\n")
           .append("- Si el agricultor no tiene parcelas, basa las recomendaciones en la región y temporada.");
 
@@ -179,16 +199,17 @@ public class GeminiProductRecommendationProvider {
 
     private RecomendacionResult parseResponse(String response, String region, Temporada temporada,
                                                List<ParcelaResponseDto> parcelas,
-                                               List<HistoricoVigilanciaSummary> historico) {
+                                               List<HistoricoVigilanciaSummary> historico,
+                                               List<Product> catalog) {
         try {
             JsonNode root = objectMapper.readTree(response);
             JsonNode candidates = root.path("candidates");
             if (!candidates.isArray() || candidates.isEmpty()) {
-                return fallback(region, temporada, parcelas, historico);
+                return fallback(region, temporada, parcelas, historico, catalog);
             }
             JsonNode parts = candidates.get(0).path("content").path("parts");
             if (!parts.isArray() || parts.isEmpty()) {
-                return fallback(region, temporada, parcelas, historico);
+                return fallback(region, temporada, parcelas, historico, catalog);
             }
             String text = stripCodeFences(parts.get(0).path("text").asText(""));
             JsonNode payload = objectMapper.readTree(text);
@@ -209,12 +230,12 @@ public class GeminiProductRecommendationProvider {
                 }
             }
             if (recs.isEmpty()) {
-                return fallback(region, temporada, parcelas, historico);
+                return fallback(region, temporada, parcelas, historico, catalog);
             }
             return new RecomendacionResult(resumen, recs);
         } catch (Exception e) {
             LOG.errorf(e, "No se pudo parsear respuesta de Gemini (recomendaciones): %s", response);
-            return fallback(region, temporada, parcelas, historico);
+            return fallback(region, temporada, parcelas, historico, catalog);
         }
     }
 
@@ -222,10 +243,12 @@ public class GeminiProductRecommendationProvider {
 
     private RecomendacionResult fallback(String region, Temporada temporada,
                                           List<ParcelaResponseDto> parcelas,
-                                          List<HistoricoVigilanciaSummary> historico) {
+                                          List<HistoricoVigilanciaSummary> historico,
+                                          List<Product> catalog) {
         List<RecomendacionProducto> recs = new ArrayList<>();
+        int catalogSize = catalog.size();
 
-        // Top plagas del historico → sugerir productos genéricos
+        // Top plagas del historico → emparejar con un producto real del catálogo cuando exista
         int limite = Math.min(historico.size(), 4);
         for (int i = 0; i < limite; i++) {
             HistoricoVigilanciaSummary h = historico.get(i);
@@ -234,20 +257,45 @@ public class GeminiProductRecommendationProvider {
             String nivel = h.getObservaciones() >= 10 ? "Alto"
                     : h.getObservaciones() >= 5 ? "Medio" : "Bajo";
 
+            Product prod = catalogSize > 0 ? catalog.get(i % catalogSize) : null;
+            String producto = prod != null
+                    ? prod.getName()
+                    : "Consultar con distribuidor para " + nullSafe(h.getPlagaNombre());
+
             recs.add(new RecomendacionProducto(
-                    "Consultar con distribuidor para " + nullSafe(h.getPlagaNombre()),
+                    producto,
                     h.getPlagaNombre(),
                     cultivo,
                     nivel,
                     "Se registraron " + h.getObservaciones()
                             + " observaciones de " + nullSafe(h.getPlagaNombre())
-                            + " en " + region + " durante " + temporada.getDisplayName()
-                            + ". Consulta a tu agrónomo o distribuidor local para el producto adecuado.",
+                            + " en " + region + " durante " + temporada.getDisplayName() + "."
+                            + (prod != null
+                                ? " Producto disponible en el mercado."
+                                : " Consulta a tu agrónomo o distribuidor local para el producto adecuado."),
                     "Según etiqueta del producto"
             ));
         }
 
-        // Si no hay historico pero sí parcelas, recomendar preventivos
+        // Sin historico pero con catálogo → recomendar productos disponibles como preventivo
+        if (recs.isEmpty() && catalogSize > 0) {
+            String cultivo = parcelas.isEmpty()
+                    ? "tus cultivos"
+                    : Optional.ofNullable(parcelas.get(0).tipoCultivo).orElse("tus cultivos");
+            int n = Math.min(catalogSize, 3);
+            for (int i = 0; i < n; i++) {
+                recs.add(new RecomendacionProducto(
+                        catalog.get(i).getName(),
+                        "Prevención general",
+                        cultivo,
+                        "Bajo",
+                        "Producto disponible en el mercado para manejo preventivo en " + cultivo + ".",
+                        "Según etiqueta del producto"
+                ));
+            }
+        }
+
+        // Sin historico y sin catálogo, pero con parcelas → preventivo genérico
         if (recs.isEmpty() && !parcelas.isEmpty()) {
             String cultivo = Optional.ofNullable(parcelas.get(0).tipoCultivo).orElse("cultivo");
             recs.add(new RecomendacionProducto(
