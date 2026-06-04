@@ -91,8 +91,41 @@ public class GetNearbyEarlyAlertsUseCase {
                 .toList();
     }
 
+    /**
+     * HU-28 (SCRUM-309): Returns early alerts near a specific parcela's GPS coordinates
+     * instead of the user's profile location. Intended for authenticated farmers/sellers
+     * who know the parcela's lat/lon.
+     *
+     * @param lat      parcela latitude
+     * @param lon      parcela longitude
+     * @param radiusKm search radius (defaults to {@link #DEFAULT_RADIUS_KM} when null/≤0)
+     */
+    public List<GetEarlyAlertaResponseDto> executeForCoordinates(double lat, double lon, Double radiusKm) {
+        double radius = (radiusKm == null || radiusKm <= 0) ? DEFAULT_RADIUS_KM : radiusKm;
+        LocalDateTime since = LocalDateTime.now().minusMonths(EARLY_ALERT_WINDOW_MONTHS);
+
+        List<Alerta> withinRadius = new ArrayList<>();
+        for (Alerta alerta : alertaRepository.findValidatedSince(since)) {
+            if (alerta.getLatitude() == null || alerta.getLongitude() == null) {
+                continue;
+            }
+            double distance = haversineKm(lat, lon, alerta.getLatitude(), alerta.getLongitude());
+            if (distance <= radius) {
+                alerta.setDistanceKm(Math.round(distance * 10.0) / 10.0);
+                withinRadius.add(alerta);
+            }
+        }
+
+        withinRadius.sort(Comparator.comparingDouble(
+                a -> a.getDistanceKm() != null ? a.getDistanceKm() : Double.MAX_VALUE));
+
+        return withinRadius.stream()
+                .map(EarlyAlertaDtoMapper::toResponseDto)
+                .toList();
+    }
+
     /** Great-circle distance between two lat/lng points, in kilometers. */
-    static double haversineKm(double lat1, double lng1, double lat2, double lng2) {
+    public static double haversineKm(double lat1, double lng1, double lat2, double lng2) {
         double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2 - lng1);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)

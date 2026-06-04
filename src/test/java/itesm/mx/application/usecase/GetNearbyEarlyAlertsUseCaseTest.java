@@ -122,4 +122,58 @@ class GetNearbyEarlyAlertsUseCaseTest {
     void execute_InvalidUserId_ThrowsIllegalArgument() {
         assertThrows(IllegalArgumentException.class, () -> useCase.execute(0L, 100.0));
     }
+
+    // ── HU-28: executeForCoordinates ─────────────────────────────────────────
+
+    @Test
+    void executeForCoordinates_ReturnsAlertsWithinRadius() {
+        // Center: Guadalajara (20.66, -103.35)
+        double originLat = 20.66, originLon = -103.35;
+
+        Alerta close  = alertaAt(10L, 20.70, -103.38); // ~6 km away
+        Alerta farAway = alertaAt(11L, 25.00, -100.00); // very far
+
+        when(alertaRepository.findValidatedSince(any())).thenReturn(List.of(close, farAway));
+
+        List<GetEarlyAlertaResponseDto> result = useCase.executeForCoordinates(originLat, originLon, 50.0);
+
+        assertEquals(1, result.size());
+        assertEquals(10L, result.get(0).alertaId);
+    }
+
+    @Test
+    void executeForCoordinates_EmptyWhenNothingInRadius() {
+        Alerta farAway = alertaAt(12L, 25.00, -100.00);
+        when(alertaRepository.findValidatedSince(any())).thenReturn(List.of(farAway));
+
+        List<GetEarlyAlertaResponseDto> result = useCase.executeForCoordinates(20.66, -103.35, 50.0);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void executeForCoordinates_SortsByDistanceAscending() {
+        double originLat = 20.66, originLon = -103.35;
+
+        Alerta farish  = alertaAt(20L, 20.80, -103.35); // ~16 km
+        Alerta closer  = alertaAt(21L, 20.70, -103.38); // ~6 km
+
+        when(alertaRepository.findValidatedSince(any())).thenReturn(List.of(farish, closer));
+
+        List<GetEarlyAlertaResponseDto> result = useCase.executeForCoordinates(originLat, originLon, 50.0);
+
+        assertEquals(2, result.size());
+        assertEquals(21L, result.get(0).alertaId); // closer first
+    }
+
+    @Test
+    void executeForCoordinates_UsesDefaultRadiusWhenZero() {
+        // Passing 0 radius should default to 100 km
+        Alerta alert = alertaAt(30L, 20.70, -103.38); // ~6 km from origin
+        when(alertaRepository.findValidatedSince(any())).thenReturn(List.of(alert));
+
+        List<GetEarlyAlertaResponseDto> result = useCase.executeForCoordinates(20.66, -103.35, 0.0);
+
+        assertEquals(1, result.size());
+    }
 }

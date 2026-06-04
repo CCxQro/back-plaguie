@@ -154,6 +154,51 @@ public class AlertaResource {
         }
     }
 
+    /**
+     * HU-28 (SCRUM-309): Returns pest alerts near a specific parcela's coordinates,
+     * instead of the user's profile location.
+     * Accessible by authenticated farmers and sellers.
+     */
+    @GET
+    @Path("/cercanas/parcela")
+    @Operation(summary = "Alertas cercanas a parcela",
+            description = "Devuelve alertas validadas de los últimos 3 meses dentro de un radio (por defecto 100 km) "
+                    + "de las coordenadas GPS de la parcela indicada (HU-28 / SCRUM-309).")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Alertas cercanas a la parcela",
+                    content = @Content(schema = @Schema(implementation = GetEarlyAlertaResponseDto[].class))),
+            @APIResponse(responseCode = "400", description = "Lat/lon inválidos"),
+            @APIResponse(responseCode = "401", description = "Autenticación requerida"),
+            @APIResponse(responseCode = "403", description = "Rol no autorizado")
+    })
+    public Response getAlertasCercanasAParcela(
+            @QueryParam("lat") Double lat,
+            @QueryParam("lon") Double lon,
+            @QueryParam("radioKm") @DefaultValue("100") double radioKm) {
+
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        Integer roleId = authenticatedUserContext.getCurrentUser().getRoleId();
+        if (roleId == null || (!RoleConstants.FARMER.equals(roleId) && !RoleConstants.SELLER.equals(roleId) && !RoleConstants.ADMIN.equals(roleId))) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo agricultores, vendedores y administradores pueden consultar alertas de parcela");
+        }
+        if (lat == null || lon == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "Los parámetros lat y lon son requeridos");
+        }
+
+        try {
+            List<GetEarlyAlertaResponseDto> alertas = getNearbyEarlyAlertsUseCase.executeForCoordinates(lat, lon, radioKm);
+            return Response.ok(alertas).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (RuntimeException e) {
+            LOG.errorf(e, "Error obteniendo alertas cercanas a parcela");
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
     @POST
     @Operation(summary = "Create alerta", description = "Creates a new pest alert. Admin-only endpoint.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreateAlertaDto.class)))
