@@ -5,6 +5,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import itesm.mx.application.dto.GetUserResponseDto;
+import itesm.mx.application.dto.UpdateSelfUserDto;
 import itesm.mx.application.dto.UpdateUserDto;
 import itesm.mx.application.dto.UserPageResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
@@ -12,6 +13,7 @@ import itesm.mx.application.security.CurrentUser;
 import itesm.mx.application.usecase.users.DeactivateUserUseCase;
 import itesm.mx.application.usecase.users.GetAllUsersUseCase;
 import itesm.mx.application.usecase.users.GetUserByIdUseCase;
+import itesm.mx.application.usecase.users.UpdateSelfUserUseCase;
 import itesm.mx.application.usecase.users.UpdateUserUseCase;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -44,6 +46,9 @@ public class UserResource {
 
     @Inject
     DeactivateUserUseCase deactivateUserUseCase;
+
+    @Inject
+    UpdateSelfUserUseCase updateSelfUserUseCase;
 
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
@@ -155,6 +160,39 @@ public class UserResource {
 
         try {
             GetUserResponseDto updated = updateUserUseCase.execute(id, updateUserDto);
+            return Response.ok(updated).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @PATCH
+    @Path("/me")
+    @Operation(summary = "Self-edit profile", description = "Allows the authenticated user to update their own name and/or location. roleId and isActive cannot be changed through this endpoint.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UpdateSelfUserDto.class)))
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Profile updated", content = @Content(schema = @Schema(implementation = GetUserResponseDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid or missing request body"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "404", description = "User not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response updateSelf(UpdateSelfUserDto updateSelfUserDto) {
+        CurrentUser currentUser = authenticatedUserContext.getCurrentUser();
+
+        if (currentUser == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (updateSelfUserDto == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+
+        try {
+            GetUserResponseDto updated = updateSelfUserUseCase.execute(currentUser.getUserId(), updateSelfUserDto);
             return Response.ok(updated).build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());

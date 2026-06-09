@@ -187,19 +187,22 @@ public class AuthResource {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
         }
 
-        if (!RoleConstants.FARMER.equals(signupDto.roleId)) {
-            return errorResponse(Response.Status.BAD_REQUEST, "El registro público solo permite usuarios de tipo agricultor");
+        boolean isAllowedRole = RoleConstants.FARMER.equals(signupDto.roleId)
+                || RoleConstants.SELLER.equals(signupDto.roleId);
+        if (!isAllowedRole) {
+            return errorResponse(Response.Status.BAD_REQUEST,
+                    "El registro público solo permite los roles agricultor (2) o técnico vendedor (3)");
         }
 
         if (signupDto.location == null) {
-            return errorResponse(Response.Status.BAD_REQUEST, "Se requiere la ubicación del agricultor");
+            return errorResponse(Response.Status.BAD_REQUEST, "Se requiere la ubicación del usuario");
         }
 
         RegisterUserDto registerUserDto = new RegisterUserDto();
         registerUserDto.name = signupDto.name;
         registerUserDto.email = signupDto.email;
         registerUserDto.password = signupDto.password;
-        registerUserDto.roleId = RoleConstants.FARMER;
+        registerUserDto.roleId = signupDto.roleId;
         registerUserDto.location = signupDto.location;
 
         try {
@@ -218,9 +221,13 @@ public class AuthResource {
             locationUpdate.setLocation(locationRef);
             userRepository.update(locationUpdate);
 
-            // Public signup leaves the farmer account PENDING (status = Revision).
-            // An administrator must approve it before the farmer can log in (HU-23, SRS §1.4.1).
-            registerFarmerUseCase.execute(new Farmer(null, createdUser, true, AccountStatusConstants.REVISION));
+            if (RoleConstants.FARMER.equals(signupDto.roleId)) {
+                // Public signup leaves the farmer account PENDING (status = Revision).
+                // An administrator must approve it before the farmer can log in (HU-23, SRS §1.4.1).
+                registerFarmerUseCase.execute(new Farmer(null, createdUser, true, AccountStatusConstants.REVISION));
+            } else {
+                registerTechnicalSellerUseCase.execute(new TechnicalSeller(null, createdUser, true));
+            }
 
             response.isActive = true;
             response.location = locationResponse;
