@@ -30,7 +30,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+<<<<<<< HEAD
+ * SCRUM-316 (refactored EP-05): In-memory consumer for topic ingestion.files.
+=======
  * SCRUM-316 (refactored EP-05): Kafka consumer for topic ingestion.files.
+>>>>>>> origin/main
  *
  * For each message:
  * 1. Read the CSV from the local temp file path (no HTTP download).
@@ -68,10 +72,18 @@ public class IngestionWorker {
     CatalogResolver catalogResolver;
 
     @Inject
+<<<<<<< HEAD
+    @Channel("ingestion-progress")
+    @io.smallrye.reactive.messaging.annotations.Broadcast
+    Emitter<IngestionProgressEvent> progressEmitter;
+
+    @Incoming("ingestion-files")
+=======
     @Channel("ingestion-progress-out")
     Emitter<IngestionProgressEvent> progressEmitter;
 
     @Incoming("ingestion-files-in")
+>>>>>>> origin/main
     public void processFile(IngestionFileMessage msg) {
         LOG.infof("Worker received file: runId=%d path=%s", msg.runId, msg.sourceUrl);
 

@@ -19,6 +19,9 @@ public class ValidateAlertaUseCase {
     @Inject
     AlertaRepository alertaRepository;
 
+    @Inject
+    GenerateParcelaSuggestionsUseCase generateParcelaSuggestionsUseCase;
+
     @Transactional
     public GetAlertaResponseDto execute(Long alertaId, Long statusId, Long adminUserId) {
         if (alertaId == null || alertaId <= 0) {
@@ -41,6 +44,11 @@ public class ValidateAlertaUseCase {
         alertaToUpdate.setValidatedAt(LocalDateTime.now());
 
         Alerta updated = alertaRepository.update(alertaToUpdate);
+
+        if (statusId == 1L) {
+            generateParcelaSuggestionsUseCase.execute(updated);
+        }
+
         return AlertaDtoMapper.toResponseDto(updated);
     }
 }

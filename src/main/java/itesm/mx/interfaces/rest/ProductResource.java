@@ -7,7 +7,9 @@ import jakarta.ws.rs.core.Response;
 import itesm.mx.application.dto.ProductResponseDto;
 import itesm.mx.application.dto.RegisterProductDto;
 import itesm.mx.application.dto.UpdateProductDto;
+import itesm.mx.application.dto.ValidateProductDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
+import jakarta.validation.Valid;
 import itesm.mx.application.usecase.marketplace.product.*;
 import itesm.mx.domain.models.marketplace.Category;
 import itesm.mx.domain.models.marketplace.Product;
@@ -39,6 +41,7 @@ public class ProductResource {
     @Inject CountNormalStockProductsUseCase countNormalStockProductsUseCase;
     @Inject CountLowStockProductsUseCase countLowStockProductsUseCase;
     @Inject CountCriticStockProductsUseCase countCriticStockProductsUseCase;
+    @Inject ValidateProductUseCase validateProductUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
 
     @GET
@@ -257,6 +260,31 @@ public class ProductResource {
         }
     }
 
+    @PATCH
+    @Path("/{skuSellerId}/validate")
+    public Response validateProduct(@PathParam("skuSellerId") Long skuSellerId, @Valid ValidateProductDto dto) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticacion");
+        }
+        if (!RoleConstants.ADMIN.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN, "Solo un administrador puede validar productos");
+        }
+        if (dto == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
+        }
+
+        try {
+            Product validated = validateProductUseCase.execute(skuSellerId, dto.statusId);
+            return Response.ok(toResponseDto(validated)).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
     private Product buildProductFromRegisterDto(RegisterProductDto dto, long skuSellerId) {
         TechnicalSeller seller = new TechnicalSeller();
         seller.setTechnicalSellerId(dto.sellerId);
@@ -339,7 +367,8 @@ public class ProductResource {
         dto.latestPrice = product.getLatestPrice();
         dto.latestPriceDate = product.getLatestPriceDate();
         dto.stock = product.getStock();
-        dto.isActive = product.getIsActive();
+        // isActive es derivado del statusId: true si el producto tiene estado "Accepted" (id=1)
+        dto.isActive = product.getStatus() != null && Long.valueOf(1L).equals(product.getStatus().getStatusId());
 
         return dto;
     }

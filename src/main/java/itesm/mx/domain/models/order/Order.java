@@ -15,6 +15,12 @@ public class Order {
     private OrderStatus orderStatus;
     private BigDecimal totalAmount;
     private List<OrderDetail> details;
+    private Boolean providerShared;
+    private String shippingStreet;
+    private String shippingCity;
+    private String shippingState;
+    private Double shippingLat;
+    private Double shippingLon;
 
     public Order() {}
 
@@ -49,4 +55,22 @@ public class Order {
 
     public List<OrderDetail> getDetails() { return details; }
     public void setDetails(List<OrderDetail> details) { this.details = details; }
+
+    public Boolean getProviderShared() { return providerShared; }
+    public void setProviderShared(Boolean providerShared) { this.providerShared = providerShared; }
+
+    public String getShippingStreet() { return shippingStreet; }
+    public void setShippingStreet(String shippingStreet) { this.shippingStreet = shippingStreet; }
+
+    public String getShippingCity() { return shippingCity; }
+    public void setShippingCity(String shippingCity) { this.shippingCity = shippingCity; }
+
+    public String getShippingState() { return shippingState; }
+    public void setShippingState(String shippingState) { this.shippingState = shippingState; }
+
+    public Double getShippingLat() { return shippingLat; }
+    public void setShippingLat(Double shippingLat) { this.shippingLat = shippingLat; }
+
+    public Double getShippingLon() { return shippingLon; }
+    public void setShippingLon(Double shippingLon) { this.shippingLon = shippingLon; }
 }

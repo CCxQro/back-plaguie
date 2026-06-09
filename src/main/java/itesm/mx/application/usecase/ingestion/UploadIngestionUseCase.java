@@ -27,8 +27,13 @@ public class UploadIngestionUseCase {
 
     private static final Logger LOG = Logger.getLogger(UploadIngestionUseCase.class);
 
+<<<<<<< HEAD
+    /** 300 MB upload cap enforced by the resource layer too; worker reads from local temp file. */
+    public static final long MAX_UPLOAD_BYTES = 300L * 1024 * 1024;
+=======
     /** 50 MB upload cap enforced by the resource layer too; worker reads from local temp file. */
     public static final long MAX_UPLOAD_BYTES = 50L * 1024 * 1024;
+>>>>>>> origin/main
 
     @Inject
     FileDetectionService fileDetectionService;
@@ -40,7 +45,11 @@ public class UploadIngestionUseCase {
     IngestionFileRepository ingestionFileRepository;
 
     @Inject
+<<<<<<< HEAD
+    @Channel("ingestion-files")
+=======
     @Channel("ingestion-files-out")
+>>>>>>> origin/main
     Emitter<IngestionFileMessage> fileEmitter;
 
     /**

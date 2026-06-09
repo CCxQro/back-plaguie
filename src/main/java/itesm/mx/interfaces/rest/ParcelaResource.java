@@ -11,6 +11,8 @@ import itesm.mx.application.usecase.parcela.RegisterParcelaUseCase;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.models.user.RoleConstants;
 import itesm.mx.domain.repository.user.FarmerRepository;
+import itesm.mx.application.dto.ParcelaDetailDto;
+import itesm.mx.application.usecase.parcela.GetParcelaDetailUseCase;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -56,6 +58,9 @@ public class ParcelaResource {
     @Inject
     AuthenticatedUserContext authenticatedUserContext;
 
+    @Inject
+    GetParcelaDetailUseCase getParcelaDetailUseCase;
+
     @GET
     @Path("/farmer/{userId}")
     @Operation(
@@ -90,6 +95,42 @@ public class ParcelaResource {
         }
     }
 
+<<<<<<< HEAD
+    @GET
+    @Path("/{parcelaId}")
+    @Operation(summary = "Get parcela details", description = "Returns detail of a parcela including health % and suggestions.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Parcela returned",
+                    content = @Content(schema = @Schema(implementation = ParcelaDetailDto.class))),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Forbidden"),
+            @APIResponse(responseCode = "404", description = "Parcela not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getParcela(@PathParam("parcelaId") Long parcelaId) {
+        CurrentUser currentUser = authenticatedUserContext.getCurrentUser();
+        if (currentUser == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        try {
+            Long farmerId = null;
+            if (RoleConstants.FARMER.equals(currentUser.getRoleId())) {
+                Optional<Farmer> farmerOpt = farmerRepository.findByIdUser(currentUser.getUserId());
+                if (farmerOpt.isPresent()) {
+                    farmerId = farmerOpt.get().getFarmerId();
+                }
+            }
+            ParcelaDetailDto dto = getParcelaDetailUseCase.execute(parcelaId, farmerId);
+            return Response.ok(dto).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+=======
+>>>>>>> origin/main
     @POST
     @Operation(
             summary = "Register parcela",

@@ -4,6 +4,7 @@ import itesm.mx.application.dto.ClientDetailDto;
 import itesm.mx.application.dto.ClientMapDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.sales.GetClientDetailBySellerUseCase;
+import itesm.mx.application.usecase.sales.GetClientStatusBySellerUseCase;
 import itesm.mx.application.usecase.sales.GetClientsMapBySellerUseCase;
 import itesm.mx.domain.models.user.RoleConstants;
 import jakarta.inject.Inject;
@@ -31,6 +32,7 @@ public class SalesClientsResource {
 
     @Inject GetClientsMapBySellerUseCase getClientsMapBySellerUseCase;
     @Inject GetClientDetailBySellerUseCase getClientDetailBySellerUseCase;
+    @Inject GetClientStatusBySellerUseCase getClientStatusBySellerUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
 
     @GET
@@ -105,6 +107,43 @@ public class SalesClientsResource {
         }
         try {
             return Response.ok(getClientDetailBySellerUseCase.execute(
+                    authenticatedUserContext.getCurrentUser().getUserId(), farmerId)).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (IllegalStateException e) {
+            return errorResponse(Response.Status.NOT_FOUND, e.getMessage());
+        } catch (RuntimeException e) {
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+    @GET
+    @Path("/{farmerId}/status")
+    @Operation(
+            summary = "Get the status (parcela health and active alerts) for a client",
+            description = "Returns the parcela health and active alerts filtered to the last 15 days. "
+                    + "The farmer must be a client of the authenticated seller, otherwise returns 404."
+    )
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Client status returned",
+                    content = @Content(schema = @Schema(implementation = itesm.mx.application.dto.ClientStatusDto.class))),
+            @APIResponse(responseCode = "400", description = "Invalid farmer id"),
+            @APIResponse(responseCode = "401", description = "Authentication required"),
+            @APIResponse(responseCode = "403", description = "Seller role required"),
+            @APIResponse(responseCode = "404", description = "Farmer is not a client of the current seller"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getClientStatus(
+            @Parameter(description = "Farmer id") @PathParam("farmerId") Long farmerId) {
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (!RoleConstants.SELLER.equals(authenticatedUserContext.getCurrentUser().getRoleId())) {
+            return errorResponse(Response.Status.FORBIDDEN,
+                    "Solo un técnico vendedor puede consultar el estatus de sus clientes");
+        }
+        try {
+            return Response.ok(getClientStatusBySellerUseCase.execute(
                     authenticatedUserContext.getCurrentUser().getUserId(), farmerId)).build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());

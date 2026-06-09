@@ -71,6 +71,24 @@ public class OrderEntity {
     @Column(name = "monto_total")
     public BigDecimal totalAmount;
 
+    @Column(name = "compartido_proveedor")
+    public Boolean providerShared = false;
+
+    @Column(name = "shipping_street", length = 255)
+    public String shippingStreet;
+
+    @Column(name = "shipping_city", length = 100)
+    public String shippingCity;
+
+    @Column(name = "shipping_state", length = 100)
+    public String shippingState;
+
+    @Column(name = "shipping_lat")
+    public Double shippingLat;
+
+    @Column(name = "shipping_lon")
+    public Double shippingLon;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agricultor", referencedColumnName = "id_agricultor",
                 insertable = false, updatable = false)

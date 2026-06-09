@@ -7,9 +7,11 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 import itesm.mx.application.dto.GetUserResponseDto;
 import itesm.mx.application.dto.UpdateUserDto;
+import itesm.mx.application.dto.UpdateSelfUserDto;
 import itesm.mx.application.usecase.users.DeactivateUserUseCase;
 import itesm.mx.application.usecase.users.GetAllUsersUseCase;
 import itesm.mx.application.usecase.users.GetUserByIdUseCase;
+import itesm.mx.application.usecase.users.UpdateSelfUserUseCase;
 import itesm.mx.application.usecase.users.UpdateUserUseCase;
 import itesm.mx.infrastructure.firebase.FirebaseTokenVerifier;
 import itesm.mx.infrastructure.firebase.FirebaseUserManager;
@@ -51,6 +53,9 @@ class UserResourceIntegrationTest {
 
     @InjectMock
     DeactivateUserUseCase deactivateUserUseCase;
+
+    @InjectMock
+    UpdateSelfUserUseCase updateSelfUserUseCase;
 
     @Inject
     UserRepositoryImpl userRepository;
@@ -464,5 +469,78 @@ class UserResourceIntegrationTest {
             .delete("/api/users/" + farmerId)
         .then()
             .statusCode(401);
+    }
+
+    // --- PATCH /api/users/me ---
+
+    @Test
+    void updateSelf_WhenNoAuthHeader_Returns401() {
+        UpdateSelfUserDto dto = new UpdateSelfUserDto();
+        dto.name = "Nuevo Nombre";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .patch("/api/users/me")
+        .then()
+            .statusCode(401);
+    }
+
+    @Test
+    void updateSelf_WhenAuthenticatedAndValidBody_Returns200() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
+
+        UpdateSelfUserDto dto = new UpdateSelfUserDto();
+        dto.name = "Nombre Actualizado";
+
+        when(updateSelfUserUseCase.execute(eq(farmerId), any(UpdateSelfUserDto.class))).thenReturn(
+                new GetUserResponseDto(farmerId, "uuid-farmer-user", "Nombre Actualizado", "farmer@itesm.mx", 2, true)
+        );
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .patch("/api/users/me")
+        .then()
+            .statusCode(200)
+            .body("name", equalTo("Nombre Actualizado"));
+    }
+
+    @Test
+    void updateSelf_WhenMissingBody_Returns400() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+        .when()
+            .patch("/api/users/me")
+        .then()
+            .statusCode(400)
+            .body("error", equalTo("El cuerpo de la solicitud es requerido"));
+    }
+
+    @Test
+    void updateSelf_WhenUseCaseThrowsBadRequest_Returns400() throws Exception {
+        when(firebaseTokenVerifier.verifyTokenAndGetUid(FARMER_TOKEN)).thenReturn("uuid-farmer-user");
+
+        UpdateSelfUserDto dto = new UpdateSelfUserDto();
+        dto.name = "  ";
+
+        when(updateSelfUserUseCase.execute(eq(farmerId), any(UpdateSelfUserDto.class)))
+                .thenThrow(new IllegalArgumentException("El nombre no puede estar vacío"));
+
+        given()
+            .header("Authorization", "Bearer " + FARMER_TOKEN)
+            .contentType(ContentType.JSON)
+            .body(dto)
+        .when()
+            .patch("/api/users/me")
+        .then()
+            .statusCode(400)
+            .body("error", equalTo("El nombre no puede estar vacío"));
     }
 }

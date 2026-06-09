@@ -20,6 +20,12 @@ public class OrderMapper {
         entity.orderDate = order.getOrderDate();
         entity.orderStatusId = order.getOrderStatus().getOrderStatusId();
         entity.totalAmount = order.getTotalAmount();
+        entity.providerShared = order.getProviderShared() != null ? order.getProviderShared() : false;
+        entity.shippingStreet = order.getShippingStreet();
+        entity.shippingCity = order.getShippingCity();
+        entity.shippingState = order.getShippingState();
+        entity.shippingLat = order.getShippingLat();
+        entity.shippingLon = order.getShippingLon();
         return entity;
     }
 
@@ -32,6 +38,12 @@ public class OrderMapper {
         order.setOrderStatus(mapOrderStatus(entity));
         order.setTotalAmount(entity.totalAmount);
         order.setDetails(mapDetails(entity));
+        order.setProviderShared(entity.providerShared);
+        order.setShippingStreet(entity.shippingStreet);
+        order.setShippingCity(entity.shippingCity);
+        order.setShippingState(entity.shippingState);
+        order.setShippingLat(entity.shippingLat);
+        order.setShippingLon(entity.shippingLon);
         return order;
     }
 

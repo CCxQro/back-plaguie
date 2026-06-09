@@ -7,6 +7,7 @@ import itesm.mx.application.dto.ValidateVigilanciaDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.alerta.CreateAlertaUseCase;
 import itesm.mx.application.usecase.alerta.GetAlertaByIdUseCase;
+import itesm.mx.application.usecase.alerta.GetAlertasCercanasParcelaUseCase;
 import itesm.mx.application.usecase.alerta.GetAllAlertasUseCase;
 import itesm.mx.application.usecase.alerta.ValidateAlertaUseCase;
 import itesm.mx.application.usecase.region.GetNearbyEarlyAlertsUseCase;
@@ -57,6 +58,12 @@ public class AlertaResource {
     GetNearbyEarlyAlertsUseCase getNearbyEarlyAlertsUseCase;
 
     @Inject
+<<<<<<< HEAD
+    GetAlertasCercanasParcelaUseCase getAlertasCercanasParcelaUseCase;
+
+    @Inject
+=======
+>>>>>>> origin/main
     GetAlertaByIdUseCase getAlertaByIdUseCase;
 
     @Inject
@@ -154,6 +161,48 @@ public class AlertaResource {
         }
     }
 
+<<<<<<< HEAD
+    /**
+     * HU-28 (SCRUM-326): Devuelve alertas validadas cercanas a las coordenadas GPS
+     * de una parcela específica. Disponible para cualquier usuario autenticado.
+     */
+    @GET
+    @Path("/cercanas/parcela")
+    @Operation(summary = "Alertas cercanas a parcela",
+            description = "Devuelve alertas validadas de los últimos 3 meses dentro de un radio "
+                    + "(por defecto 50 km) de las coordenadas GPS de la parcela indicada (HU-28 / SCRUM-326).")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Alertas cercanas a la parcela",
+                    content = @Content(schema = @Schema(implementation = GetAlertaResponseDto[].class))),
+            @APIResponse(responseCode = "400", description = "Los parámetros lat y lon son requeridos"),
+            @APIResponse(responseCode = "401", description = "Autenticación requerida"),
+            @APIResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public Response getAlertasCercanasAParcela(
+            @QueryParam("lat") Double lat,
+            @QueryParam("lon") Double lon,
+            @QueryParam("radioKm") @DefaultValue("50.0") double radioKm) {
+
+        if (authenticatedUserContext.getCurrentUser() == null) {
+            return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
+        }
+        if (lat == null || lon == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "Los parámetros lat y lon son requeridos");
+        }
+
+        try {
+            List<GetAlertaResponseDto> alertas = getAlertasCercanasParcelaUseCase.execute(lat, lon, radioKm);
+            return Response.ok(alertas).build();
+        } catch (IllegalArgumentException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+        } catch (RuntimeException e) {
+            LOG.errorf(e, "Error obteniendo alertas cercanas a parcela");
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+        }
+    }
+
+=======
+>>>>>>> origin/main
     @POST
     @Operation(summary = "Create alerta", description = "Creates a new pest alert. Admin-only endpoint.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreateAlertaDto.class)))
