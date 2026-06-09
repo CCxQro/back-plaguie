@@ -12,6 +12,7 @@ import itesm.mx.application.dto.RegisterOrderDto;
 import itesm.mx.application.dto.ShareOrderResponseDto;
 import itesm.mx.application.security.AuthenticatedUserContext;
 import itesm.mx.application.usecase.order.BuyOrderUseCase;
+import itesm.mx.application.security.CurrentUser;
 import itesm.mx.application.usecase.order.CreateOrderUseCase;
 import itesm.mx.application.usecase.order.GetFarmerLocationsBySellerUseCase;
 import itesm.mx.application.usecase.order.GetOrderByIdUseCase;
@@ -20,6 +21,9 @@ import itesm.mx.application.usecase.order.GetOrdersBySellerUseCase;
 import itesm.mx.application.usecase.order.ShareOrderUseCase;
 import itesm.mx.application.usecase.order.ShareOrderWithProviderUseCase;
 import itesm.mx.application.usecase.order.UpdateOrderStatusUseCase;
+import itesm.mx.domain.models.user.Farmer;
+import itesm.mx.domain.models.user.RoleConstants;
+import itesm.mx.domain.repository.user.FarmerRepository;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -29,6 +33,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
+import java.util.Optional;
 
 import static itesm.mx.interfaces.rest.utils.ErrorResponseUtils.errorResponse;
 
@@ -52,6 +58,7 @@ public class OrderResource {
     @Inject BuyOrderUseCase buyOrderUseCase;
     @Inject ShareOrderWithProviderUseCase shareOrderWithProviderUseCase;
     @Inject AuthenticatedUserContext authenticatedUserContext;
+    @Inject FarmerRepository farmerRepository;
 
     @POST
     @Operation(summary = "Create order", description = "Creates a new order with line items. Seller-only endpoint.")
@@ -272,26 +279,46 @@ public class OrderResource {
 
     @POST
     @Path("/{orderId}/share")
-    @Operation(summary = "Share order with provider (seller)", description = "Marks the order as shared and notifies the provider. Seller or Admin endpoint.")
+    @Operation(summary = "Share order with provider",
+            description = "Marks the order as shared and notifies the provider. "
+                    + "Accessible to: seller, admin, or the farmer who owns the order.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Order shared successfully",
                     content = @Content(schema = @Schema(implementation = OrderResponseDto.class))),
             @APIResponse(responseCode = "400", description = "Invalid order id"),
             @APIResponse(responseCode = "401", description = "Authentication required"),
-            @APIResponse(responseCode = "403", description = "Seller or Admin role required"),
+            @APIResponse(responseCode = "403", description = "Not authorized to share this order"),
             @APIResponse(responseCode = "404", description = "Order not found"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     public Response shareOrder(@Parameter(description = "Order id") @PathParam("orderId") Long orderId) {
-        if (authenticatedUserContext.getCurrentUser() == null) {
+        CurrentUser currentUser = authenticatedUserContext.getCurrentUser();
+        if (currentUser == null) {
             return errorResponse(Response.Status.UNAUTHORIZED, "Se requiere autenticación");
         }
-        Integer role = authenticatedUserContext.getCurrentUser().getRoleId();
-        if (!SELLER_ROLE_ID.equals(role) && !ADMIN_ROLE_ID.equals(role)) {
+        Integer role = currentUser.getRoleId();
+        boolean isSellerOrAdmin = SELLER_ROLE_ID.equals(role) || ADMIN_ROLE_ID.equals(role);
+
+        if (!isSellerOrAdmin && !RoleConstants.FARMER.equals(role)) {
             return errorResponse(Response.Status.FORBIDDEN,
-                    "Solo un técnico vendedor o administrador puede compartir un pedido con el proveedor");
+                    "Solo un técnico vendedor, administrador o el agricultor dueño puede compartir un pedido con el proveedor");
         }
+
         try {
+            // Farmers may only share their own orders
+            if (RoleConstants.FARMER.equals(role)) {
+                Optional<Farmer> farmerOpt = farmerRepository.findByIdUser(currentUser.getUserId());
+                if (farmerOpt.isEmpty()) {
+                    return errorResponse(Response.Status.FORBIDDEN,
+                            "Agricultor no encontrado para el usuario autenticado");
+                }
+                Long authenticatedFarmerId = farmerOpt.get().getFarmerId();
+                OrderResponseDto order = getOrderByIdUseCase.execute(orderId);
+                if (!authenticatedFarmerId.equals(order.farmerId)) {
+                    return errorResponse(Response.Status.FORBIDDEN,
+                            "Solo el agricultor dueño del pedido puede compartirlo con el proveedor");
+                }
+            }
             return Response.ok(shareOrderUseCase.execute(orderId)).build();
         } catch (IllegalArgumentException e) {
             return errorResponse(Response.Status.BAD_REQUEST, e.getMessage());
