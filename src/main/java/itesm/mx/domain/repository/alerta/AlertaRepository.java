@@ -13,8 +13,11 @@ public interface AlertaRepository {
 
     List<Alerta> findByReportedUserId(Long userId);
 
+<<<<<<< HEAD
     List<Alerta> findActiveByReportedUserIdSince(Long userId, LocalDateTime since);
 
+=======
+>>>>>>> origin/main
     /**
      * All validated (status = Accepted) alerts created on or after {@code since},
      * across every state, each enriched with its state id/name. Region and other

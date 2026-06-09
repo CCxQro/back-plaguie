@@ -35,6 +35,7 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
     }
 
     @Override
+<<<<<<< HEAD
     public List<Alerta> findActiveByReportedUserIdSince(Long userId, java.time.LocalDateTime since) {
         return findDetailedQuery("where a.reportedByUserId = ?1 and a.validatedAt is null and a.createdAt >= ?2 order by a.createdAt desc", userId, since)
                 .list()
@@ -44,6 +45,8 @@ public class AlertaRepositoryImpl implements PanacheRepositoryBase<AlertaEntity,
     }
 
     @Override
+=======
+>>>>>>> origin/main
     public List<Alerta> findValidatedSince(java.time.LocalDateTime since) {
         // Accepted = 1 (Status catalog). All validated alerts created on/after `since`,
         // across every state; region filtering is applied client-side (HU-26 CA-02).

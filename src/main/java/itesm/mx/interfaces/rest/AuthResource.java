@@ -187,6 +187,7 @@ public class AuthResource {
             return errorResponse(Response.Status.BAD_REQUEST, "El cuerpo de la solicitud es requerido");
         }
 
+<<<<<<< HEAD
         boolean isAllowedRole = RoleConstants.FARMER.equals(signupDto.roleId)
                 || RoleConstants.SELLER.equals(signupDto.roleId);
         if (!isAllowedRole) {
@@ -196,13 +197,25 @@ public class AuthResource {
 
         if (signupDto.location == null) {
             return errorResponse(Response.Status.BAD_REQUEST, "Se requiere la ubicación del usuario");
+=======
+        if (!RoleConstants.FARMER.equals(signupDto.roleId)) {
+            return errorResponse(Response.Status.BAD_REQUEST, "El registro público solo permite usuarios de tipo agricultor");
+        }
+
+        if (signupDto.location == null) {
+            return errorResponse(Response.Status.BAD_REQUEST, "Se requiere la ubicación del agricultor");
+>>>>>>> origin/main
         }
 
         RegisterUserDto registerUserDto = new RegisterUserDto();
         registerUserDto.name = signupDto.name;
         registerUserDto.email = signupDto.email;
         registerUserDto.password = signupDto.password;
+<<<<<<< HEAD
         registerUserDto.roleId = signupDto.roleId;
+=======
+        registerUserDto.roleId = RoleConstants.FARMER;
+>>>>>>> origin/main
         registerUserDto.location = signupDto.location;
 
         try {
@@ -221,6 +234,7 @@ public class AuthResource {
             locationUpdate.setLocation(locationRef);
             userRepository.update(locationUpdate);
 
+<<<<<<< HEAD
             if (RoleConstants.FARMER.equals(signupDto.roleId)) {
                 // Public signup leaves the farmer account PENDING (status = Revision).
                 // An administrator must approve it before the farmer can log in (HU-23, SRS §1.4.1).
@@ -228,6 +242,11 @@ public class AuthResource {
             } else {
                 registerTechnicalSellerUseCase.execute(new TechnicalSeller(null, createdUser, true));
             }
+=======
+            // Public signup leaves the farmer account PENDING (status = Revision).
+            // An administrator must approve it before the farmer can log in (HU-23, SRS §1.4.1).
+            registerFarmerUseCase.execute(new Farmer(null, createdUser, true, AccountStatusConstants.REVISION));
+>>>>>>> origin/main
 
             response.isActive = true;
             response.location = locationResponse;

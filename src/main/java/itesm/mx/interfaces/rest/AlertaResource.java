@@ -58,9 +58,12 @@ public class AlertaResource {
     GetNearbyEarlyAlertsUseCase getNearbyEarlyAlertsUseCase;
 
     @Inject
+<<<<<<< HEAD
     GetAlertasCercanasParcelaUseCase getAlertasCercanasParcelaUseCase;
 
     @Inject
+=======
+>>>>>>> origin/main
     GetAlertaByIdUseCase getAlertaByIdUseCase;
 
     @Inject
@@ -158,6 +161,7 @@ public class AlertaResource {
         }
     }
 
+<<<<<<< HEAD
     /**
      * HU-28 (SCRUM-326): Devuelve alertas validadas cercanas a las coordenadas GPS
      * de una parcela específica. Disponible para cualquier usuario autenticado.
@@ -197,6 +201,8 @@ public class AlertaResource {
         }
     }
 
+=======
+>>>>>>> origin/main
     @POST
     @Operation(summary = "Create alerta", description = "Creates a new pest alert. Admin-only endpoint.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CreateAlertaDto.class)))
