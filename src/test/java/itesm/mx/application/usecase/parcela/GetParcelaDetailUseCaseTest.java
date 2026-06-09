@@ -2,15 +2,19 @@ package itesm.mx.application.usecase.parcela;
 
 import itesm.mx.application.dto.ParcelaDetailDto;
 import itesm.mx.application.dto.ParcelaResponseDto;
+import itesm.mx.domain.models.location.Location;
 import itesm.mx.domain.models.parcela.EstadoParcela;
 import itesm.mx.domain.models.parcela.Parcela;
 import itesm.mx.domain.models.parcela.ParcelaSuggestion;
+import itesm.mx.domain.models.parcela.SistemaRiego;
 import itesm.mx.domain.models.parcela.TipoCultivo;
 import itesm.mx.domain.models.user.Farmer;
 import itesm.mx.domain.repository.parcela.ParcelaRepository;
 import itesm.mx.domain.repository.parcela.ParcelaSuggestionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +30,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GetParcelaDetailUseCaseTest {
+
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     @Mock
     ParcelaRepository parcelaRepository;
@@ -48,15 +54,26 @@ class GetParcelaDetailUseCaseTest {
         cultivo.setTipoCultivoId(1L);
         cultivo.setNombre("Maíz");
 
+        SistemaRiego riego = new SistemaRiego();
+        riego.setSistemaRiegoId(1L);
+        riego.setNombre("Goteo");
+
+        Location location = new Location();
+        location.setLocationId(1L);
+        location.setCoordinates(GEOMETRY_FACTORY.createPoint(new Coordinate(-103.35, 20.67)));
+
         Parcela p = new Parcela();
         p.setParcelaId(parcelaId);
         p.setNombreParcela("Lote Norte");
         p.setFarmer(farmer);
         p.setTamanoHectareas(5.0);
-        p.setFechaSiembra(LocalDate.now().minusMonths(2));
-        p.setFechaCosecha(LocalDate.now().plusMonths(1));
+        p.setPhSuelo(6.8);
+        p.setFechaSiembra(LocalDate.of(2024, 3, 1));
+        p.setFechaCosecha(LocalDate.of(2024, 8, 1));
         p.setEstadoParcela(estado);
         p.setTipoCultivo(cultivo);
+        p.setSistemaRiego(riego);
+        p.setLocation(location);
         p.setIsActive(true);
         return p;
     }
@@ -130,5 +147,32 @@ class GetParcelaDetailUseCaseTest {
         ParcelaDetailDto dto = useCase.execute(4L, null);
 
         assertEquals(0.0, dto.healthPercentage);
+        assertEquals(0.0, dto.saludPorcentaje);
+    }
+
+    @Test
+    void execute_WithEnrichedFields_PopulatesCoordinatesAndAgronomicData() {
+        Parcela parcela = makeParcela(5L, 10L);
+        when(parcelaRepository.findParcelaById(5L)).thenReturn(Optional.of(parcela));
+        when(parcelaSuggestionRepository.findByParcelaId(5L)).thenReturn(Collections.emptyList());
+
+        ParcelaDetailDto dto = useCase.execute(5L, null);
+
+        assertNotNull(dto);
+        // Coordenadas
+        assertEquals(20.67, dto.latitud, 0.001);
+        assertEquals(-103.35, dto.longitud, 0.001);
+        // Datos agronómicos
+        assertEquals("Goteo", dto.sistemaRiego);
+        assertEquals(6.8, dto.phSuelo);
+        assertEquals("2024-03-01", dto.fechaSiembra);
+        assertEquals("2024-08-01", dto.fechaCosecha);
+        // Historial siempre vacío hasta que exista la tabla
+        assertNotNull(dto.historial);
+        assertTrue(dto.historial.isEmpty());
+        // saludPorcentaje y sugerencias
+        assertEquals(100.0, dto.saludPorcentaje);
+        assertNotNull(dto.sugerencias);
+        assertTrue(dto.sugerencias.isEmpty());
     }
 }
