@@ -122,7 +122,6 @@ class GetNearbyEarlyAlertsUseCaseTest {
     void execute_InvalidUserId_ThrowsIllegalArgument() {
         assertThrows(IllegalArgumentException.class, () -> useCase.execute(0L, 100.0));
     }
-<<<<<<< HEAD
 
     // ── HU-28: executeForCoordinates ─────────────────────────────────────────
 
@@ -177,6 +176,4 @@ class GetNearbyEarlyAlertsUseCaseTest {
 
         assertEquals(1, result.size());
     }
-=======
->>>>>>> origin/main
 }
