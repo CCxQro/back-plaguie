@@ -367,7 +367,8 @@ public class ProductResource {
         dto.latestPrice = product.getLatestPrice();
         dto.latestPriceDate = product.getLatestPriceDate();
         dto.stock = product.getStock();
-        dto.isActive = product.getIsActive();
+        // isActive es derivado del statusId: true si el producto tiene estado "Accepted" (id=1)
+        dto.isActive = product.getStatus() != null && Long.valueOf(1L).equals(product.getStatus().getStatusId());
 
         return dto;
     }
