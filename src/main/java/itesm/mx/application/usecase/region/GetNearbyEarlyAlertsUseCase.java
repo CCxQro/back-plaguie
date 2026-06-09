@@ -91,7 +91,6 @@ public class GetNearbyEarlyAlertsUseCase {
                 .toList();
     }
 
-<<<<<<< HEAD
     /**
      * HU-28 (SCRUM-309): Returns early alerts near a specific parcela's GPS coordinates
      * instead of the user's profile location. Intended for authenticated farmers/sellers
@@ -127,10 +126,6 @@ public class GetNearbyEarlyAlertsUseCase {
 
     /** Great-circle distance between two lat/lng points, in kilometers. */
     public static double haversineKm(double lat1, double lng1, double lat2, double lng2) {
-=======
-    /** Great-circle distance between two lat/lng points, in kilometers. */
-    static double haversineKm(double lat1, double lng1, double lat2, double lng2) {
->>>>>>> origin/main
         double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2 - lng1);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)

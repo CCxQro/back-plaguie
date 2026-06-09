@@ -95,7 +95,6 @@ public class ParcelaResource {
         }
     }
 
-<<<<<<< HEAD
     @GET
     @Path("/{parcelaId}")
     @Operation(summary = "Get parcela details", description = "Returns detail of a parcela including health % and suggestions.")
@@ -129,8 +128,6 @@ public class ParcelaResource {
         }
     }
 
-=======
->>>>>>> origin/main
     @POST
     @Operation(
             summary = "Register parcela",
